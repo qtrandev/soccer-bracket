@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-pitch-950 text-emerald-50 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    @apply bg-grass-500/30 text-grass-400;
+  }
+}
+
+@layer components {
+  /* ── Bracket line connectors ── */
+  .bracket-col {
+    @apply flex flex-col;
+  }
+
+  .bracket-section {
+    @apply flex flex-col flex-1 justify-around;
+  }
+
+  .match-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Right connector arm from match to next round */
+  .match-wrapper::after {
+    content: '';
+    position: absolute;
+    right: -1.5rem;
+    top: 50%;
+    width: 1.5rem;
+    height: 2px;
+    background: rgba(34, 197, 94, 0.35);
+  }
+
+  /* Vertical bar connecting sibling matches */
+  .match-pair-top::before {
+    content: '';
+    position: absolute;
+    right: -1.5rem;
+    top: 50%;
+    bottom: calc(-50% - 1rem);
+    width: 2px;
+    background: rgba(34, 197, 94, 0.35);
+  }
+
+  .match-pair-bottom::before {
+    content: '';
+    position: absolute;
+    right: -1.5rem;
+    top: calc(-50% - 1rem);
+    bottom: 50%;
+    width: 2px;
+    background: rgba(34, 197, 94, 0.35);
+  }
+
+  /* ── Glass card ── */
+  .glass-card {
+    @apply rounded-xl border border-emerald-900/40 bg-pitch-800/60 backdrop-blur-sm;
+  }
+
+  /* ── Team pill ── */
+  .team-pill {
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer select-none;
+    @apply border border-transparent;
+  }
+
+  .team-pill:hover {
+    @apply border-grass-500/50 bg-grass-500/10;
+  }
+
+  .team-pill.selected-1st {
+    @apply border-gold-500/60 bg-gold-500/15 text-gold-400;
+  }
+
+  .team-pill.selected-2nd {
+    @apply border-slate-400/60 bg-slate-400/10 text-slate-300;
+  }
+
+  .team-pill.eliminated {
+    @apply opacity-40 cursor-default;
+  }
+
+  /* ── Bracket match card ── */
+  .bracket-card {
+    @apply glass-card overflow-hidden w-44;
+  }
+
+  .bracket-team-row {
+    @apply flex items-center gap-2 px-3 py-2 cursor-pointer transition-all duration-150;
+    @apply border-b border-emerald-900/30 last:border-b-0;
+  }
+
+  .bracket-team-row:hover:not(.winner):not(.tbd) {
+    @apply bg-grass-500/10;
+  }
+
+  .bracket-team-row.winner {
+    @apply bg-grass-500/20 text-grass-400 font-semibold;
+  }
+
+  .bracket-team-row.tbd {
+    @apply text-emerald-700 italic cursor-default;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-pitch-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-emerald-800 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-grass-600;
+  }
+
+  /* ── Step indicator ── */
+  .step-dot {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300;
+  }
+
+  .step-dot.active {
+    @apply bg-grass-500 text-pitch-950 shadow-lg;
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.5);
+  }
+
+  .step-dot.done {
+    @apply bg-grass-600/40 text-grass-400 border border-grass-600/60;
+  }
+
+  .step-dot.pending {
+    @apply bg-pitch-700 text-emerald-600 border border-emerald-800;
+  }
+}
+
+@layer utilities {
+  .text-shadow-green {
+    text-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+  }
+
+  .gradient-pitch {
+    background: radial-gradient(ellipse at top, #091a0f 0%, #020a05 60%);
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(34,197,94,0.08), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
