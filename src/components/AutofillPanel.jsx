@@ -36,8 +36,8 @@ export default function AutofillPanel({ onAutofill, applied }) {
           {/* Backdrop */}
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
 
-          {/* Dropdown */}
-          <div className="absolute right-0 top-full mt-2 z-20 w-72 rounded-xl border border-emerald-900/60 bg-pitch-800 shadow-2xl overflow-hidden animate-fade-in">
+          {/* Dropdown — viewport-fixed on mobile, right-aligned on sm+ */}
+          <div className="z-50 rounded-xl border border-emerald-900/60 bg-pitch-800 shadow-2xl overflow-hidden animate-fade-in fixed right-2 top-36 w-[min(18rem,calc(100vw-1rem))] sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-72">
             <div className="px-4 py-3 border-b border-emerald-900/40">
               <p className="text-sm font-bold text-emerald-100">Quick-fill your bracket</p>
               <p className="text-xs text-emerald-600 mt-0.5">

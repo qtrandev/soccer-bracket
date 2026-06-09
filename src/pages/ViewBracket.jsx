@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useBracket } from '../hooks/useBracket.js';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
 import TeamFlag from '../components/TeamFlag.jsx';
@@ -33,8 +32,6 @@ export default function ViewBracket() {
     }
     load();
   }, [slug]);
-
-  const bracket = useBracket(bracketData);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(window.location.href);
@@ -69,8 +66,13 @@ export default function ViewBracket() {
     );
   }
 
-  const champion = bracketData?.knockoutPicks?.final;
-  const createdAt = bracketData?.createdAt
+  // Use bracketData directly — routing through useBracket caused state to
+  // initialize from null on first render and never update when the fetch resolved.
+  const groupPicks    = bracketData?.groupPicks    ?? {};
+  const wildcards     = bracketData?.wildcards     ?? [];
+  const knockoutPicks = bracketData?.knockoutPicks ?? {};
+  const champion      = knockoutPicks?.final;
+  const createdAt     = bracketData?.createdAt
     ? new Date(bracketData.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null;
 
@@ -132,14 +134,14 @@ export default function ViewBracket() {
       </div>
 
       {tab === 'groups' && (
-        <GroupStage groupPicks={bracket.groupPicks} onPick={() => {}} readOnly />
+        <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly />
       )}
 
       {tab === 'knockout' && (
         <KnockoutBracket
-          groupPicks={bracket.groupPicks}
-          wildcards={bracket.wildcards}
-          knockoutPicks={bracket.knockoutPicks}
+          groupPicks={groupPicks}
+          wildcards={wildcards}
+          knockoutPicks={knockoutPicks}
           onPick={() => {}}
           readOnly
         />

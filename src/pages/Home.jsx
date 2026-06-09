@@ -44,6 +44,13 @@ export default function Home() {
   return (
     <div className="bg-white text-neutral-900 min-h-screen">
 
+      {/* ── Dedication ── */}
+      <div className="bg-green-50 border-b border-green-200 py-3 px-6 text-center">
+        <p className="text-sm text-green-800">
+          Dedicated to <strong className="font-bold">Matt Webb</strong> — thanks for the idea! ⚽
+        </p>
+      </div>
+
       {/* ── Hero ── */}
       <section className="max-w-3xl mx-auto px-6 pt-16 pb-14 border-b border-neutral-200">
         <p className="text-sm font-medium text-green-600 mb-3">

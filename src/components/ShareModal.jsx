@@ -96,7 +96,7 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
         {error && (
           <div className="mb-4 px-3 py-2 rounded-lg bg-red-900/30 border border-red-500/30 text-sm text-red-400">
             {error === 'taken'
-              ? '⚠ That slug is taken — try the reroll button for a new one.'
+              ? '⚠ That name is taken — try the reroll button for a new one.'
               : error}
           </div>
         )}
