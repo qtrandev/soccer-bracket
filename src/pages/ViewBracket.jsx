@@ -18,8 +18,14 @@ export default function ViewBracket() {
         const res = await fetch(`/.netlify/functions/get-bracket?slug=${encodeURIComponent(slug)}`);
         if (res.status === 404) { setNotFound(true); return; }
         const data = await res.json();
+        if (!res.ok) {
+          console.error('get-bracket failed:', res.status, data);
+          setNotFound(true);
+          return;
+        }
         setBracketData(data);
-      } catch {
+      } catch (err) {
+        console.error('get-bracket fetch error:', err);
         setNotFound(true);
       } finally {
         setLoading(false);

@@ -1,81 +1,48 @@
 import { getStore } from '@netlify/blobs';
 
+const json = (data, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+
 export default async (req) => {
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'method_not_allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
 
   let body;
   try {
     body = await req.json();
   } catch {
-    return new Response(JSON.stringify({ error: 'invalid_json' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: 'invalid_json' }, 400);
   }
 
   const { slug, bracket } = body ?? {};
 
-  if (!slug || typeof slug !== 'string') {
-    return new Response(JSON.stringify({ error: 'missing_slug' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  // Validate slug format: only lowercase letters, digits, hyphens, max 60 chars
-  if (!/^[a-z0-9-]{2,60}$/.test(slug)) {
-    return new Response(JSON.stringify({ error: 'invalid_slug' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  if (!bracket || typeof bracket !== 'object') {
-    return new Response(JSON.stringify({ error: 'missing_bracket' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  if (!slug || typeof slug !== 'string') return json({ error: 'missing_slug' }, 400);
+  if (!/^[a-z0-9-]{2,60}$/.test(slug))  return json({ error: 'invalid_slug' }, 400);
+  if (!bracket || typeof bracket !== 'object') return json({ error: 'missing_bracket' }, 400);
 
   try {
-    const store = getStore('brackets');
+    // strong consistency ensures the read-after-write check is accurate across regions
+    const store = getStore({ name: 'brackets', consistency: 'strong' });
 
-    // Check if slug is already taken
-    const existing = await store.get(slug, { type: 'json' }).catch(() => null);
-    if (existing !== null) {
-      return new Response(JSON.stringify({ error: 'taken' }), {
-        status: 409,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const existing = await store.get(slug, { type: 'json' });
+    if (existing !== null) return json({ error: 'taken' }, 409);
 
-    // Save bracket (strip any injected fields, re-attach slug + timestamp)
     const payload = {
       version: 1,
       slug,
       createdAt: new Date().toISOString(),
-      groupPicks: bracket.groupPicks ?? {},
-      wildcards: bracket.wildcards ?? [],
+      groupPicks:    bracket.groupPicks    ?? {},
+      wildcards:     bracket.wildcards     ?? [],
       knockoutPicks: bracket.knockoutPicks ?? {},
     };
 
     await store.setJSON(slug, payload);
 
-    return new Response(JSON.stringify({ ok: true, slug }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ ok: true, slug });
   } catch (err) {
-    console.error('save-bracket error:', err);
-    return new Response(JSON.stringify({ error: 'server_error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('save-bracket error:', err?.message ?? err);
+    return json({ error: 'server_error', detail: err?.message }, 500);
   }
 };
-
