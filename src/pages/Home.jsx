@@ -78,7 +78,7 @@ export default function Home() {
           {BIG_TEAMS.map(t => (
             <div key={t.iso2} className="flex items-center gap-1.5 text-sm text-neutral-600">
               <img
-                src={`https://flagcdn.com/w32/${t.iso2}.png`}
+                src={`https://flagcdn.com/${t.iso2}.svg`}
                 alt={t.name}
                 className="w-6 h-4 object-cover rounded-sm"
               />

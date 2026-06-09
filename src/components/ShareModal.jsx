@@ -65,7 +65,7 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
         <div className="flex items-center gap-2 mb-2">
           <div className="flex-1 flex items-center rounded-lg border border-emerald-800/60 bg-pitch-900 overflow-hidden">
             <span className="px-3 py-2 text-xs text-emerald-700 border-r border-emerald-900/60 flex-shrink-0">
-              /b/
+              /
             </span>
             <input
               type="text"

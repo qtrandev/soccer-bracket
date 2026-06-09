@@ -18,12 +18,12 @@ export default function TeamFlag({ code, size = 'sm', showName = true, className
   return (
     <span className={`inline-flex items-center gap-1.5 ${className}`}>
       <img
-        src={`https://flagcdn.com/w${w}/${team.iso2}.png`}
+        src={`https://flagcdn.com/${team.iso2}.svg`}
         alt={team.name}
         width={w}
         height={flagSize}
         className="rounded-sm object-cover flex-shrink-0"
-        style={{ height: flagSize }}
+        style={{ width: w, height: flagSize }}
         onError={e => { e.target.style.display = 'none'; }}
       />
       {showName && (

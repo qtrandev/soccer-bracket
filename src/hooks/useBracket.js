@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { GROUPS, GROUP_LETTERS } from '../data/tournamentData.js';
 import { deriveWildcards } from '../utils/bracket.js';
 import { generateSlug } from '../data/slugWords.js';
 
-const STORAGE_KEY = 'goalbracket_draft';
+const STORAGE_KEY = 'bracketwebb_draft';
 
 function defaultGroupPicks() {
   const picks = {};
@@ -53,18 +53,25 @@ export function useBracket(initialData = null) {
 
   const readOnly = Boolean(initialData);
 
-  // Persist draft whenever state changes
+  // When autofilling, we batch-set all state at once and don't want the
+  // groupPicks effect to wipe out the knockout picks we just computed.
+  const skipKnockoutClear = useRef(false);
+
+  // Persist draft
   useEffect(() => {
     if (!readOnly) {
       saveDraft({ groupPicks, wildcards, knockoutPicks, slug });
     }
   }, [groupPicks, wildcards, knockoutPicks, slug, readOnly]);
 
-  // Re-derive wildcards when group picks change
+  // Re-derive wildcards and clear knockout picks when groups change manually
   useEffect(() => {
     if (!readOnly) {
+      if (skipKnockoutClear.current) {
+        skipKnockoutClear.current = false;
+        return;
+      }
       setWildcards(deriveWildcards(groupPicks));
-      // Clear knockout picks that are now invalid
       setKnockoutPicks({});
     }
   }, [groupPicks, readOnly]);
@@ -73,19 +80,13 @@ export function useBracket(initialData = null) {
     if (readOnly) return;
     setGroupPicks(prev => {
       const current = prev[groupLetter] ?? [];
-      const groupTeams = GROUPS[groupLetter].teams;
 
       if (current.includes(teamCode)) {
-        // Deselect – remove from picks
         return { ...prev, [groupLetter]: current.filter(t => t !== teamCode) };
       }
-
       if (current.length < 2) {
-        // Add to picks
         return { ...prev, [groupLetter]: [...current, teamCode] };
       }
-
-      // Already have 2 picked – replace the second with new pick
       return { ...prev, [groupLetter]: [current[0], teamCode] };
     });
   }, [readOnly]);
@@ -103,12 +104,18 @@ export function useBracket(initialData = null) {
   const pickKnockoutWinner = useCallback((matchId, teamCode) => {
     if (readOnly) return;
     setKnockoutPicks(prev => {
-      // If re-clicking the current winner, deselect
-      if (prev[matchId] === teamCode) {
-        return { ...prev, [matchId]: null };
-      }
+      if (prev[matchId] === teamCode) return { ...prev, [matchId]: null };
       return { ...prev, [matchId]: teamCode };
     });
+  }, [readOnly]);
+
+  // Bulk-apply a full autofill result without triggering the knockout clear effect
+  const applyAutofill = useCallback(({ groupPicks: gp, wildcards: wc, knockoutPicks: kp }) => {
+    if (readOnly) return;
+    skipKnockoutClear.current = true;
+    setGroupPicks(gp);
+    setWildcards(wc);
+    setKnockoutPicks(kp);
   }, [readOnly]);
 
   const resetBracket = useCallback(() => {
@@ -139,6 +146,7 @@ export function useBracket(initialData = null) {
     setGroupOrder,
     setWildcardOrder,
     pickKnockoutWinner,
+    applyAutofill,
     resetBracket,
     exportBracket,
   };
