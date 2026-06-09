@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
 import TeamFlag from '../components/TeamFlag.jsx';
@@ -33,8 +33,21 @@ export default function ViewBracket() {
     load();
   }, [slug]);
 
+  const navigate = useNavigate();
+
   async function handleCopy() {
     await navigator.clipboard.writeText(window.location.href);
+  }
+
+  function handleMakeMine() {
+    try {
+      localStorage.setItem('bracketwebb_draft', JSON.stringify({
+        groupPicks:    bracketData.groupPicks    ?? {},
+        wildcards:     bracketData.wildcards     ?? [],
+        knockoutPicks: bracketData.knockoutPicks ?? {},
+      }));
+    } catch {}
+    navigate('/new');
   }
 
   if (loading) {
@@ -107,12 +120,12 @@ export default function ViewBracket() {
           >
             📋 Copy Link
           </button>
-          <Link
-            to="/new"
+          <button
+            onClick={handleMakeMine}
             className="px-4 py-2 rounded-lg bg-grass-500 text-pitch-950 font-bold text-sm hover:bg-grass-400 transition-colors"
           >
             Make Mine
-          </Link>
+          </button>
         </div>
       </div>
 
