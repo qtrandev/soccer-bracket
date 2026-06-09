@@ -47,7 +47,7 @@ export default function Home() {
       {/* ── Dedication ── */}
       <div className="bg-green-50 border-b border-green-200 py-3 px-6 text-center">
         <p className="text-sm text-green-800">
-          Dedicated to <strong className="font-bold">Matt Webb</strong> — thanks for the idea! ⚽
+          Dedicated to <strong className="font-bold">Matt Webb</strong> — thanks for the idea! 🏆
         </p>
       </div>
 
@@ -150,7 +150,7 @@ export default function Home() {
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
         <h2 className="text-xl font-bold text-neutral-900 mb-2">Your link looks like this</h2>
         <p className="text-sm text-neutral-500 mb-5">
-          Pick a slug or re-roll until you get one you like.
+          Pick a custom name or re-roll until you get one you like.
         </p>
         <div className="space-y-2">
           {EXAMPLE_SLUGS.map(slug => (
