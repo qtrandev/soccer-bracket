@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { generateSlug } from '../data/slugWords.js';
 
+// Slugs that conflict with app routes or would be unreachable
+const RESERVED_SLUGS = new Set([
+  'new', 'about', 'faq', 'help', 'contact', 'admin', 'login',
+  'signup', 'settings', 'profile', 'api', 'assets', 'static',
+]);
+
 export default function ShareModal({ onClose, onSave, slug, setSlug }) {
   const [customSlug, setCustomSlug] = useState(slug);
   const [saving, setSaving] = useState(false);
@@ -10,6 +16,14 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
   const shareUrl = `${window.location.origin}/${customSlug}`;
 
   async function handleSave() {
+    if (RESERVED_SLUGS.has(customSlug)) {
+      setError('reserved');
+      return;
+    }
+    if (!/^[a-z0-9-]{2,60}$/.test(customSlug)) {
+      setError('invalid');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -97,6 +111,10 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
           <div className="mb-4 px-3 py-2 rounded-lg bg-red-900/30 border border-red-500/30 text-sm text-red-400">
             {error === 'taken'
               ? '⚠ That name is taken — try the reroll button for a new one.'
+              : error === 'reserved'
+              ? '⚠ That name is reserved — pick something more creative!'
+              : error === 'invalid'
+              ? '⚠ Only letters, numbers, and hyphens allowed (2–60 chars).'
               : error}
           </div>
         )}

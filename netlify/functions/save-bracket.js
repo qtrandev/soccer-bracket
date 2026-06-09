@@ -20,6 +20,11 @@ export default async (req) => {
 
   if (!slug || typeof slug !== 'string') return json({ error: 'missing_slug' }, 400);
   if (!/^[a-z0-9-]{2,60}$/.test(slug))  return json({ error: 'invalid_slug' }, 400);
+  const RESERVED = new Set([
+    'new', 'about', 'faq', 'help', 'contact', 'admin', 'login',
+    'signup', 'settings', 'profile', 'api', 'assets', 'static',
+  ]);
+  if (RESERVED.has(slug)) return json({ error: 'reserved' }, 400);
   if (!bracket || typeof bracket !== 'object') return json({ error: 'missing_bracket' }, 400);
 
   try {
