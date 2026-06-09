@@ -47,8 +47,7 @@ export function useBracket(initialData = null) {
 
   const [slug, setSlug] = useState(() => {
     if (initialData) return initialData.slug ?? generateSlug();
-    const draft = loadDraft();
-    return draft?.slug ?? generateSlug();
+    return generateSlug(); // always fresh — don't load from draft
   });
 
   const readOnly = Boolean(initialData);

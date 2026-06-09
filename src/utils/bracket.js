@@ -1,6 +1,7 @@
 import {
   GROUPS, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH,
 } from '../data/tournamentData.js';
+import { getStrength } from '../data/teamStrengths.js';
 
 // Given group picks { A: ['MEX','KOR','CZE','RSA'], ... } (ordered 1st–4th)
 // resolve a bracket slot like 'A1', 'B2', '3W1' into a team code.
@@ -25,14 +26,24 @@ export function resolveSlot(slot, groupPicks, wildcards) {
 }
 
 // Derive the best 8 third-place teams from group picks.
-// Simple heuristic: take third-place team from first 8 groups (A–H),
-// user can reorder in the wildcard picker step.
+// Autofill stores all 4 teams sorted (index 2 = 3rd place).
+// Manual picks only store the 2 qualifiers, so we infer 3rd place as the
+// strongest non-qualifier in each group, then rank all 12 and take the best 8.
 export function deriveWildcards(groupPicks) {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
-  const thirds = letters
-    .map(l => groupPicks[l]?.[2])
-    .filter(Boolean);
-  return thirds.slice(0, 8);
+  const candidates = letters.map(l => {
+    const picks = groupPicks[l] ?? [];
+    if (picks.length >= 3) return picks[2]; // autofill: already sorted, index 2 = 3rd
+    // manual picks: infer 3rd place as the strongest non-qualifier
+    const nonQualifiers = (GROUPS[l]?.teams ?? []).filter(t => !picks.includes(t));
+    if (nonQualifiers.length === 0) return null;
+    return nonQualifiers.reduce((best, t) =>
+      getStrength(t, 'favorites') >= getStrength(best, 'favorites') ? t : best
+    );
+  }).filter(Boolean);
+  return candidates
+    .sort((a, b) => getStrength(b, 'favorites') - getStrength(a, 'favorites'))
+    .slice(0, 8);
 }
 
 // Build the full bracket state from picks.
