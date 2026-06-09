@@ -15,7 +15,7 @@ export default function ViewBracket() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/get-bracket?slug=${encodeURIComponent(slug)}`);
+        const res = await fetch(`/.netlify/functions/get-bracket?slug=${encodeURIComponent(slug)}`);
         if (res.status === 404) { setNotFound(true); return; }
         const data = await res.json();
         setBracketData(data);

@@ -4,16 +4,6 @@
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/api/save-bracket"
-  to = "/.netlify/functions/save-bracket"
-  status = 200
-
-[[redirects]]
-  from = "/api/get-bracket"
-  to = "/.netlify/functions/get-bracket"
-  status = 200
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
