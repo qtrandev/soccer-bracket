@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
 import ShareModal from '../components/ShareModal.jsx';
@@ -13,12 +14,19 @@ const STEPS = [
 ];
 
 export default function CreateBracket() {
+  const location = useLocation();
   const {
     groupPicks, wildcards, knockoutPicks, slug,
     pickGroupTeam, pickKnockoutWinner, applyAutofill, resetBracket, exportBracket,
   } = useBracket();
 
   const [step, setStep] = useState('groups');
+
+  // Apply "Make Mine" data passed via router state (reliable even if localStorage failed)
+  useEffect(() => {
+    const draft = location.state?.makeMine;
+    if (draft) applyAutofill(draft);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [showShare, setShowShare] = useState(false);
   const [appliedStrategy, setAppliedStrategy] = useState(null);
   const [autofillFlash, setAutofillFlash] = useState(false);

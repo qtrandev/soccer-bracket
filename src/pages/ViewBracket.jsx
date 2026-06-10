@@ -40,14 +40,17 @@ export default function ViewBracket() {
   }
 
   function handleMakeMine() {
+    const draft = {
+      groupPicks:    bracketData.groupPicks    ?? {},
+      wildcards:     bracketData.wildcards     ?? [],
+      knockoutPicks: bracketData.knockoutPicks ?? {},
+    };
     try {
-      localStorage.setItem('bracketwebb_draft', JSON.stringify({
-        groupPicks:    bracketData.groupPicks    ?? {},
-        wildcards:     bracketData.wildcards     ?? [],
-        knockoutPicks: bracketData.knockoutPicks ?? {},
-      }));
+      localStorage.setItem('bracketwebb_draft', JSON.stringify(draft));
     } catch {}
-    navigate('/new');
+    // Pass draft via router state as a reliable backup channel in case
+    // localStorage is unavailable (private mode, quota, etc.)
+    navigate('/new', { state: { makeMine: draft } });
   }
 
   if (loading) {
