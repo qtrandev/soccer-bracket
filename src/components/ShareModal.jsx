@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { generateSlug } from '../data/slugWords.js';
-
-// Slugs that conflict with app routes or would be unreachable
-const RESERVED_SLUGS = new Set([
-  'new', 'about', 'faq', 'help', 'contact', 'admin', 'login',
-  'signup', 'settings', 'profile', 'api', 'assets', 'static',
-]);
+import { RESERVED_SLUGS } from '../data/reservedSlugs.js';
 
 export default function ShareModal({ onClose, onSave, slug, setSlug }) {
   const [customSlug, setCustomSlug] = useState(slug);
