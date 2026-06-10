@@ -74,7 +74,7 @@ export default function Home() {
         </Link>
         <p className="mt-3 text-sm text-neutral-400">
           Free · Saves to a link like{' '}
-          <span className="font-mono text-neutral-500">bracketwebb.com/blazing-striker</span>
+          <Link to="/blazing-striker" className="font-mono text-neutral-500 hover:text-green-600 underline underline-offset-2 transition-colors">bracketwebb.com/blazing-striker</Link>
         </p>
       </section>
 
@@ -154,13 +154,13 @@ export default function Home() {
         </p>
         <div className="space-y-2">
           {EXAMPLE_SLUGS.map(slug => (
-            <div
+            <Link
               key={slug}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-sm text-neutral-600"
+              to={`/${slug}`}
+              className="flex px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-sm text-neutral-600 hover:border-green-300 hover:bg-green-50 transition-colors"
             >
-              <span className="text-neutral-400">bracketwebb.com/</span>
-              <span className="text-green-600 font-semibold">{slug}</span>
-            </div>
+              <span className="text-neutral-400">bracketwebb.com/</span><span className="text-green-600 font-semibold">{slug}</span>
+            </Link>
           ))}
         </div>
       </section>

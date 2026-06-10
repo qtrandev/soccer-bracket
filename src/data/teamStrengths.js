@@ -4,11 +4,9 @@
 
 export const STRENGTHS = {
   // Tier 1 – Championship contenders
-  ARG: 95, // Defending champions, Messi era legacy
-  FRA: 92, // Mbappé generation at peak
-
-  // Tier 2 – Strong contenders
-  ENG: 88, // Golden generation finally delivering
+  FRA: 93, // Mbappé generation at peak — actual 2026 betting favorite
+  ENG: 90, // Golden generation finally delivering
+  ARG: 88, // Defending champions — transitional era as Messi winds down
   BRA: 87, // Back to form after 2022 disappointment
   POR: 85, // Ronaldo era transitioning, deep squad
   ESP: 84, // Dominant tiki-taka revival
@@ -20,6 +18,7 @@ export const STRENGTHS = {
   URU: 77, // Always dangerous, disciplined
   JPN: 75, // Bundesliga exports, tactical masterclass
   CRO: 72, // 2018 finalists, battle-hardened
+  USA: 74, // Significant improvement — strong 2026 qualifying run
   CAN: 71, // 2022 debut improved, home-continent edge
   MEX: 70, // CONCACAF hosts, crowd advantage
   SUI: 70, // Consistent underperformers who keep advancing
@@ -68,12 +67,15 @@ export const STRATEGY_BOOSTS = {
     ARG: 12, BRA: 12, URU: 12, COL: 12, ECU: 12, PAR: 12,
   },
   europe: {
-    FRA: 10, ENG: 10, GER: 10, ESP: 10, POR: 10, NED: 10,
-    BEL: 10, CRO: 10, SUI: 10, NOR: 10, SWE: 10, AUT: 10,
-    CZE: 10, BIH: 10, TUR: 10, SCO: 10,
+    // England gets the biggest boost — "European Giants" narrative is their moment
+    ENG: 15, GER: 12,
+    FRA: 8, ESP: 10, POR: 10, NED: 10,
+    BEL: 10, CRO: 8, SUI: 8, NOR: 10, SWE: 8, AUT: 8,
+    CZE: 8, BIH: 8, TUR: 8, SCO: 8,
   },
   hosts: {
-    USA: 14, MEX: 14, CAN: 14,
+    // Boosted enough that a host can actually win on home soil
+    USA: 22, MEX: 22, CAN: 22,
   },
   chaos: {}, // handled separately with randomness
 };
