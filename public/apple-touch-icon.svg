@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <!-- Background -->
+  <rect width="180" height="180" fill="#091a0f"/>
+  <!-- Soccer ball centered -->
+  <circle cx="90" cy="90" r="62" fill="#111" stroke="#22c55e" stroke-width="2.5"/>
+  <polygon points="90,48 106,68 98,90 82,90 74,68" fill="#22c55e"/>
+  <polygon points="90,132 106,112 98,90 82,90 74,112" fill="#22c55e"/>
+  <polygon points="50,72 70,64 82,82 74,104 55,98" fill="#22c55e"/>
+  <polygon points="130,72 110,64 98,82 106,104 125,98" fill="#22c55e"/>
+</svg>

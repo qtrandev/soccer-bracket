@@ -22,6 +22,6 @@ export default async (req) => {
     return json(data, 200, { 'Cache-Control': 'public, max-age=30' });
   } catch (err) {
     console.error('get-bracket error:', err?.message ?? err);
-    return json({ error: 'server_error', detail: err?.message }, 500);
+    return json({ error: 'server_error' }, 500);
   }
 };

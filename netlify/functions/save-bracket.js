@@ -49,6 +49,6 @@ export default async (req) => {
     return json({ ok: true, slug });
   } catch (err) {
     console.error('save-bracket error:', err?.message ?? err);
-    return json({ error: 'server_error', detail: err?.message }, 500);
+    return json({ error: 'server_error' }, 500);
   }
 };
