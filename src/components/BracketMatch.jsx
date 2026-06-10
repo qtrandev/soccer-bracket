@@ -2,7 +2,7 @@ import TeamFlag from './TeamFlag.jsx';
 import { VENUES } from '../data/tournamentData.js';
 import { formatMatchDate, formatMatchTime } from '../utils/bracket.js';
 
-export default function BracketMatch({ match, onPick, readOnly, isCompact }) {
+export default function BracketMatch({ match, onPick, readOnly, isCompact, isFinal }) {
   const { id, team1, team2, winner, venue, date, time } = match;
   const venueInfo = venue ? VENUES[venue] : null;
 
@@ -14,7 +14,7 @@ export default function BracketMatch({ match, onPick, readOnly, isCompact }) {
   }
 
   return (
-    <div className="bracket-card group" title={venueInfo ? `${venueInfo.name} · ${venueInfo.city}` : undefined}>
+    <div className={isFinal ? 'bracket-card-final group' : 'bracket-card group'} title={venueInfo ? `${venueInfo.name} · ${venueInfo.city}` : undefined}>
       {/* Match info tooltip row */}
       {!isCompact && venueInfo && (
         <div className="px-3 pt-1.5 pb-0.5 flex items-center gap-1 text-[10px] text-emerald-700 border-b border-emerald-900/20">

@@ -19,7 +19,7 @@ export const TEAMS = {
   HAI: { name: 'Haiti',        iso2: 'ht', conf: 'CONCACAF' },
   // Group D
   USA: { name: 'USA',          iso2: 'us', conf: 'CONCACAF' },
-  TUR: { name: 'Turkey',       iso2: 'tr', conf: 'UEFA' },
+  TUR: { name: 'Türkiye',      iso2: 'tr', conf: 'UEFA' },
   AUS: { name: 'Australia',    iso2: 'au', conf: 'AFC' },
   PAR: { name: 'Paraguay',     iso2: 'py', conf: 'CONMEBOL' },
   // Group E
@@ -41,7 +41,7 @@ export const TEAMS = {
   ESP: { name: 'Spain',        iso2: 'es', conf: 'UEFA' },
   URU: { name: 'Uruguay',      iso2: 'uy', conf: 'CONMEBOL' },
   KSA: { name: 'Saudi Arabia', iso2: 'sa', conf: 'AFC' },
-  CPV: { name: 'Cape Verde',   iso2: 'cv', conf: 'CAF' },
+  CPV: { name: 'Cabo Verde',   iso2: 'cv', conf: 'CAF' },
   // Group I
   FRA: { name: 'France',       iso2: 'fr', conf: 'UEFA' },
   SEN: { name: 'Senegal',      iso2: 'sn', conf: 'CAF' },

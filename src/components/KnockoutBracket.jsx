@@ -14,9 +14,10 @@ const ROUND_ITEM_HEIGHT = {
   final: 704,
 };
 
-function RoundColumn({ label, matches, onPick, readOnly, round }) {
+function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }) {
   const itemH = ROUND_ITEM_HEIGHT[round] ?? 88;
   const isLast = round === 'final';
+  const matchArray = Array.isArray(matches) ? matches : [matches];
 
   return (
     <div className="flex flex-col flex-shrink-0" style={{ width: 192 }}>
@@ -27,32 +28,31 @@ function RoundColumn({ label, matches, onPick, readOnly, round }) {
       </div>
 
       <div className="relative flex flex-col">
-        {(Array.isArray(matches) ? matches : [matches]).map((match, i) => (
+        {matchArray.map((match, i) => (
           <div
             key={match.id}
             className="flex items-center"
             style={{ height: itemH, position: 'relative' }}
           >
-            {/* Connector lines */}
             {!isLast && (
               <>
-                {/* Horizontal arm right */}
+                {/* Horizontal arm toward next round */}
                 <div
                   style={{
                     position: 'absolute',
-                    right: -24,
+                    [mirror ? 'left' : 'right']: -24,
                     top: '50%',
                     width: 24,
                     height: 2,
                     background: 'rgba(34,197,94,0.25)',
                   }}
                 />
-                {/* Vertical bar (top half connects down, bottom half connects up) */}
-                {i % 2 === 0 && (
+                {/* Vertical bar pairs even+odd matches — only when there are 2+ matches */}
+                {i % 2 === 0 && matchArray.length > 1 && (
                   <div
                     style={{
                       position: 'absolute',
-                      right: -24,
+                      [mirror ? 'left' : 'right']: -24,
                       top: '50%',
                       height: itemH,
                       width: 2,
@@ -144,18 +144,26 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
           />
 
           {/* Final in center */}
-          <div className="flex flex-col flex-shrink-0" style={{ width: 192 }}>
+          <div
+            className="flex flex-col flex-shrink-0 rounded-2xl px-2 pt-2 pb-4"
+            style={{
+              width: 208,
+              background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.08) 0%, transparent 70%)',
+              boxShadow: '0 0 60px rgba(245,158,11,0.07)',
+            }}
+          >
             <div className="text-center mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-gold-500 px-2 py-1 rounded border border-gold-500/40">
+              <span className="text-xs font-bold uppercase tracking-widest text-gold-400 px-3 py-1 rounded-full border border-gold-500/60 bg-gold-500/10">
                 🏆 Final
               </span>
             </div>
-            <div className="flex items-center" style={{ height: 704 }}>
+            <div className="flex items-center justify-center" style={{ height: 704 }}>
               <BracketMatch
                 match={bracket.final}
                 onPick={onPick}
                 readOnly={readOnly}
                 isCompact={false}
+                isFinal
               />
             </div>
           </div>
@@ -167,6 +175,7 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             matches={[bracket.sf[1]]}
             onPick={onPick}
             readOnly={readOnly}
+            mirror
           />
           <RoundColumn
             label="Quarterfinals"
@@ -174,6 +183,7 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             matches={bracket.qf.slice(2, 4)}
             onPick={onPick}
             readOnly={readOnly}
+            mirror
           />
           <RoundColumn
             label="Round of 16"
@@ -181,6 +191,7 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             matches={bracket.r16.slice(4, 8)}
             onPick={onPick}
             readOnly={readOnly}
+            mirror
           />
           <RoundColumn
             label="Round of 32"
@@ -188,6 +199,7 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             matches={bracket.r32.slice(8, 16)}
             onPick={onPick}
             readOnly={readOnly}
+            mirror
           />
         </div>
       </div>

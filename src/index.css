@@ -102,6 +102,12 @@
     @apply glass-card overflow-hidden w-44;
   }
 
+  .bracket-card-final {
+    @apply rounded-xl border-2 border-gold-500/80 overflow-hidden w-44;
+    background: rgba(9, 26, 15, 0.85);
+    box-shadow: 0 0 24px rgba(245, 158, 11, 0.35), 0 0 48px rgba(245, 158, 11, 0.12), inset 0 1px 0 rgba(245, 158, 11, 0.15);
+  }
+
   .bracket-team-row {
     @apply flex items-center gap-2 px-3 py-2 cursor-pointer transition-all duration-150;
     @apply border-b border-emerald-900/30 last:border-b-0;

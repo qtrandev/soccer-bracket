@@ -130,7 +130,7 @@ export default function Home() {
             },
             {
               title: 'Save and share',
-              desc: 'Hit "Save & Share" and pick your slug. You get a short link instantly.',
+              desc: 'Hit "Save & Share" and pick your name. You get a short link instantly.',
             },
           ].map((step, i) => (
             <li key={i} className="flex gap-4 items-start">

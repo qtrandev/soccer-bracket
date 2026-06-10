@@ -26,6 +26,7 @@ export default async (req) => {
   ]);
   if (RESERVED.has(slug)) return json({ error: 'reserved' }, 400);
   if (!bracket || typeof bracket !== 'object') return json({ error: 'missing_bracket' }, 400);
+  if (JSON.stringify(bracket).length > 50_000) return json({ error: 'payload_too_large' }, 413);
 
   try {
     // strong consistency ensures the read-after-write check is accurate across regions
