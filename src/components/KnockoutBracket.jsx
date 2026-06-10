@@ -67,7 +67,7 @@ function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }
               match={match}
               onPick={onPick}
               readOnly={readOnly}
-              isCompact={round === 'r32' || round === 'r16'}
+              isCompact={false}
             />
           </div>
         ))}
