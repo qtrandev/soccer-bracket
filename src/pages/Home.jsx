@@ -1,4 +1,8 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { TEAMS } from '../data/tournamentData.js';
+import { STRENGTHS } from '../data/teamStrengths.js';
+import { autofillBracket } from '../utils/autofill.js';
 
 const FEATURES = [
   {
@@ -25,22 +29,22 @@ const FEATURES = [
 
 const EXAMPLE_SLUGS = ['blazing-striker', 'golden-wizard', 'phantom-keeper', 'turbo-eagle'];
 
-const BIG_TEAMS = [
-  { iso2: 'ar', name: 'Argentina' },
-  { iso2: 'fr', name: 'France' },
-  { iso2: 'br', name: 'Brazil' },
-  { iso2: 'es', name: 'Spain' },
-  { iso2: 'de', name: 'Germany' },
-  { iso2: 'pt', name: 'Portugal' },
-  { iso2: 'gb-eng', name: 'England' },
-  { iso2: 'us', name: 'USA' },
-  { iso2: 'mx', name: 'Mexico' },
-  { iso2: 'ca', name: 'Canada' },
-  { iso2: 'nl', name: 'Netherlands' },
-  { iso2: 'jp', name: 'Japan' },
-];
+const ALL_TEAMS = Object.keys(TEAMS)
+  .sort((a, b) => (STRENGTHS[b] ?? 50) - (STRENGTHS[a] ?? 50))
+  .map(code => ({ code, ...TEAMS[code] }));
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [showAll, setShowAll] = useState(false);
+
+  function handleTeamClick(code) {
+    const draft = autofillBracket('favorites', code);
+    try { localStorage.setItem('bracketwebb_draft', JSON.stringify(draft)); } catch {}
+    navigate('/new', { state: { makeMine: draft } });
+  }
+
+  const visibleTeams = showAll ? ALL_TEAMS : ALL_TEAMS.slice(0, 12);
+
   return (
     <div className="bg-white text-neutral-900 min-h-screen">
 
@@ -80,19 +84,32 @@ export default function Home() {
 
       {/* ── Team flags ── */}
       <section className="max-w-3xl mx-auto px-6 py-8 border-b border-neutral-200">
-        <p className="text-xs text-neutral-400 uppercase tracking-widest mb-4">48 Teams · All Confederations</p>
-        <div className="flex flex-wrap gap-3">
-          {BIG_TEAMS.map(t => (
-            <div key={t.iso2} className="flex items-center gap-1.5 text-sm text-neutral-600">
+        <p className="text-xs text-neutral-400 uppercase tracking-widest mb-1">48 Teams · All Confederations</p>
+        <p className="text-xs text-neutral-400 mb-4">Tap a flag to auto-generate a bracket with that team winning</p>
+        <div className="flex flex-wrap gap-2">
+          {visibleTeams.map(t => (
+            <button
+              key={t.code}
+              onClick={() => handleTeamClick(t.code)}
+              title={`Generate bracket: ${t.name} wins`}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-sm text-neutral-600 hover:border-green-400 hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer"
+            >
               <img
                 src={`https://flagcdn.com/${t.iso2}.svg`}
                 alt={t.name}
-                className="w-6 h-4 object-cover rounded-sm"
+                className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
               />
               {t.name}
-            </div>
+            </button>
           ))}
-          <span className="text-sm text-neutral-400">+ 36 more</span>
+          {!showAll && (
+            <button
+              onClick={() => setShowAll(true)}
+              className="flex items-center px-2.5 py-1.5 rounded-lg border border-dashed border-neutral-300 text-sm text-neutral-400 hover:border-green-400 hover:text-green-600 transition-colors cursor-pointer"
+            >
+              + {ALL_TEAMS.length - 12} more
+            </button>
+          )}
         </div>
       </section>
 

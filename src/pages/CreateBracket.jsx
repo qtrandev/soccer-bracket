@@ -20,7 +20,7 @@ export default function CreateBracket() {
     pickGroupTeam, pickKnockoutWinner, applyAutofill, resetBracket, exportBracket,
   } = useBracket();
 
-  const [step, setStep] = useState('groups');
+  const [step, setStep] = useState(() => location.state?.makeMine ? 'knockout' : 'groups');
 
   // Apply "Make Mine" data passed via router state (reliable even if localStorage failed)
   useEffect(() => {

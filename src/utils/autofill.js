@@ -2,9 +2,14 @@ import { GROUPS, GROUP_LETTERS, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES
 import { getStrength } from '../data/teamStrengths.js';
 import { buildBracket, deriveWildcards } from './bracket.js';
 
-function stronger(team1, team2, strategy, chaosRolls) {
+function stronger(team1, team2, strategy, chaosRolls, forcedChampion) {
   if (!team1) return team2;
   if (!team2) return team1;
+  // Forced champion beats everyone
+  if (forcedChampion) {
+    if (team1 === forcedChampion) return team1;
+    if (team2 === forcedChampion) return team2;
+  }
   if (strategy === 'chaos') {
     // use pre-rolled values so picks are stable (not re-randomized on render)
     const key = [team1, team2].sort().join('-');
@@ -25,7 +30,7 @@ function rollChaos(allTeams) {
   return rolls;
 }
 
-export function autofillBracket(strategy) {
+export function autofillBracket(strategy, forcedChampion = null) {
   const allTeamCodes = Object.keys(
     Object.fromEntries(GROUP_LETTERS.flatMap(l => GROUPS[l].teams.map(t => [t, 1])))
   );
@@ -36,6 +41,11 @@ export function autofillBracket(strategy) {
   for (const letter of GROUP_LETTERS) {
     const teams = [...GROUPS[letter].teams];
     teams.sort((a, b) => {
+      // Forced champion always ranks 1st in their group
+      if (forcedChampion) {
+        if (a === forcedChampion) return -1;
+        if (b === forcedChampion) return 1;
+      }
       const sa = strategy === 'chaos' ? (chaosRolls[[a, b].sort().join('-')] === a ? 1 : -1) : getStrength(b, strategy) - getStrength(a, strategy);
       return sa;
     });
@@ -69,7 +79,7 @@ export function autofillBracket(strategy) {
     for (const match of matches) {
       const resolved = allResolved[match.id];
       if (resolved?.team1 && resolved?.team2) {
-        knockoutPicks[match.id] = stronger(resolved.team1, resolved.team2, strategy, chaosRolls);
+        knockoutPicks[match.id] = stronger(resolved.team1, resolved.team2, strategy, chaosRolls, forcedChampion);
       }
     }
   }

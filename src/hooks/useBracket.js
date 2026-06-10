@@ -55,9 +55,9 @@ export function useBracket(initialData = null) {
   // When autofilling, we batch-set all state at once and don't want the
   // groupPicks effect to wipe out the knockout picks we just computed.
   const skipKnockoutClear = useRef(false);
-  // Skip the effect on first mount — groupPicks was just loaded from
-  // localStorage/initialData; treating it as a "change" would clear knockout picks.
-  const isFirstMount = useRef(true);
+  // Track the previous groupPicks reference to detect real changes vs. initial
+  // mount re-runs (React Strict Mode fires effects twice on mount).
+  const prevGroupPicks = useRef(groupPicks);
 
   // Persist draft
   useEffect(() => {
@@ -69,10 +69,9 @@ export function useBracket(initialData = null) {
   // Re-derive wildcards and clear knockout picks when groups change manually
   useEffect(() => {
     if (!readOnly) {
-      if (isFirstMount.current) {
-        isFirstMount.current = false;
-        return;
-      }
+      // Same reference = no real change (covers initial mount and Strict Mode re-runs)
+      if (prevGroupPicks.current === groupPicks) return;
+      prevGroupPicks.current = groupPicks;
       if (skipKnockoutClear.current) {
         skipKnockoutClear.current = false;
         return;
