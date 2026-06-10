@@ -1,5 +1,7 @@
 import TeamFlag from './TeamFlag.jsx';
 import { GROUPS } from '../data/tournamentData.js';
+import { STRENGTHS } from '../data/teamStrengths.js';
+import StrengthStars from './StrengthStars.jsx';
 
 const POSITION_LABELS = ['1st', '2nd', '3rd', '4th'];
 const POSITION_COLORS = [
@@ -57,6 +59,7 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
                 )}
               </span>
               <TeamFlag code={code} size="sm" showName />
+              <StrengthStars strength={STRENGTHS[code]} className="ml-auto text-xs flex-shrink-0" />
             </div>
           );
         })}

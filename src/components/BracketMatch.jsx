@@ -1,6 +1,8 @@
 import TeamFlag from './TeamFlag.jsx';
 import { VENUES } from '../data/tournamentData.js';
+import { STRENGTHS } from '../data/teamStrengths.js';
 import { formatMatchDate, formatMatchTime } from '../utils/bracket.js';
+import StrengthStars from './StrengthStars.jsx';
 
 export default function BracketMatch({ match, onPick, readOnly, isCompact, isFinal }) {
   const { id, team1, team2, winner, venue, date, time } = match;
@@ -50,13 +52,18 @@ export default function BracketMatch({ match, onPick, readOnly, isCompact, isFin
               <span className="text-xs text-emerald-800">TBD</span>
             ) : (
               <>
-                <TeamFlag code={teamCode} size="xs" showName />
-                {isWinner && <span className="ml-auto text-xs">✓</span>}
-                {!winner && canPick && (
-                  <span className="ml-auto text-emerald-800 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                    pick
-                  </span>
-                )}
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <TeamFlag code={teamCode} size="xs" showName />
+                    {isWinner && <span className="ml-auto text-xs">✓</span>}
+                    {!winner && canPick && (
+                      <span className="ml-auto text-emerald-800 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                        pick
+                      </span>
+                    )}
+                  </div>
+                  <StrengthStars strength={STRENGTHS[teamCode]} className="text-[10px] mt-0.5" />
+                </div>
               </>
             )}
           </div>

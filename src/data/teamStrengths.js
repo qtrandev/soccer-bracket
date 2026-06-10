@@ -80,6 +80,8 @@ export const STRATEGY_BOOSTS = {
   chaos: {}, // handled separately with randomness
 };
 
+export const MAX_STRENGTH = Math.max(...Object.values(STRENGTHS)); // 93 (France)
+
 export function getStrength(teamCode, strategy) {
   if (strategy === 'chaos') return Math.random() * 100;
   const base = STRENGTHS[teamCode] ?? 50;

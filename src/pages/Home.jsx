@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TEAMS } from '../data/tournamentData.js';
 import { STRENGTHS } from '../data/teamStrengths.js';
 import { autofillBracket } from '../utils/autofill.js';
+import StrengthStars from '../components/StrengthStars.jsx';
 
 const FEATURES = [
   {
@@ -27,7 +28,11 @@ const FEATURES = [
   },
 ];
 
-const EXAMPLE_SLUGS = ['blazing-striker', 'golden-wizard', 'phantom-keeper', 'turbo-eagle'];
+const EXAMPLE_SLUGS = ['blazing-striker', 'golden-wizard', 'turbo-eagle', 'argentina', 'matt'];
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('bracketwebb_history') ?? '[]'); } catch { return []; }
+}
 
 const ALL_TEAMS = Object.keys(TEAMS)
   .sort((a, b) => (STRENGTHS[b] ?? 50) - (STRENGTHS[a] ?? 50))
@@ -36,6 +41,7 @@ const ALL_TEAMS = Object.keys(TEAMS)
 export default function Home() {
   const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
+  const [history] = useState(loadHistory);
 
   function handleTeamClick(code) {
     const draft = autofillBracket('favorites', code);
@@ -78,7 +84,7 @@ export default function Home() {
         </Link>
         <p className="mt-3 text-sm text-neutral-400">
           Free · Saves to a link like{' '}
-          <Link to="/blazing-striker" className="font-mono text-neutral-500 hover:text-green-600 underline underline-offset-2 transition-colors">bracketwebb.com/blazing-striker</Link>
+          <Link to={`/${history[0]?.slug ?? 'blazing-striker'}`} className="font-mono text-neutral-500 hover:text-green-600 underline underline-offset-2 transition-colors">bracketwebb.com/<span className="text-neutral-700">{history[0]?.slug ?? 'blazing-striker'}</span></Link>
         </p>
       </section>
 
@@ -92,14 +98,17 @@ export default function Home() {
               key={t.code}
               onClick={() => handleTeamClick(t.code)}
               title={`Generate bracket: ${t.name} wins`}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-sm text-neutral-600 hover:border-green-400 hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer"
+              className="flex flex-col gap-0.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer text-left"
             >
-              <img
-                src={`https://flagcdn.com/${t.iso2}.svg`}
-                alt={t.name}
-                className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
-              />
-              {t.name}
+              <div className="flex items-center gap-1.5">
+                <img
+                  src={`https://flagcdn.com/${t.iso2}.svg`}
+                  alt={t.name}
+                  className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
+                />
+                <span className="text-sm text-neutral-600 whitespace-nowrap">{t.name}</span>
+              </div>
+              <StrengthStars strength={STRENGTHS[t.code]} className="text-xs" />
             </button>
           ))}
           {!showAll && (
@@ -163,22 +172,112 @@ export default function Home() {
         </ol>
       </section>
 
-      {/* ── Example links ── */}
+      {/* ── Bracket history / example links ── */}
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
-        <h2 className="text-xl font-bold text-neutral-900 mb-2">Your link looks like this</h2>
-        <p className="text-sm text-neutral-500 mb-5">
-          Pick a custom name or re-roll until you get one you like.
+        {history.length > 0 ? (
+          <>
+            <h2 className="text-xl font-bold text-neutral-900 mb-1">Your saved brackets</h2>
+            <p className="text-sm text-neutral-500 mb-5">All brackets you've saved on this device.</p>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-neutral-200 text-xs text-neutral-400 uppercase tracking-wider">
+                  <th className="text-left py-2 pr-3">#</th>
+                  <th className="text-left py-2 pr-3">Bracket</th>
+                  <th className="text-left py-2 hidden sm:table-cell">Saved</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((entry, i) => (
+                  <tr key={entry.slug} className="border-b border-neutral-100 group">
+                    <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums">{i + 1}</td>
+                    <td className="py-2 pr-3">
+                      <Link
+                        to={`/${entry.slug}`}
+                        className="font-mono text-green-600 hover:text-green-700 hover:underline"
+                      >
+                        bracketwebb.com/<span className="font-semibold">{entry.slug}</span>
+                      </Link>
+                    </td>
+                    <td className="py-2 text-xs text-neutral-400 hidden sm:table-cell">
+                      {new Date(entry.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : (
+          <>
+            <h2 className="text-xl font-bold text-neutral-900 mb-2">Your link looks like this</h2>
+            <p className="text-sm text-neutral-500 mb-5">
+              Pick a custom name or re-roll until you get one you like.
+            </p>
+            <div className="space-y-2">
+              {EXAMPLE_SLUGS.map(slug => (
+                <Link
+                  key={slug}
+                  to={`/${slug}`}
+                  className="flex px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-sm text-neutral-600 hover:border-green-300 hover:bg-green-50 transition-colors"
+                >
+                  <span className="text-neutral-400">bracketwebb.com/</span><span className="text-green-600 font-semibold">{slug}</span>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* ── Power Rankings ── */}
+      <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
+        <h2 className="text-xl font-bold text-neutral-900 mb-1">Team Power Rankings</h2>
+        <p className="text-sm text-neutral-400 mb-6">
+          Ratings (0–100) based on FIFA rankings, betting odds, squad quality, and recent form.
+          Stars show the same scale — tap any team to auto-generate a bracket with them winning.
         </p>
-        <div className="space-y-2">
-          {EXAMPLE_SLUGS.map(slug => (
-            <Link
-              key={slug}
-              to={`/${slug}`}
-              className="flex px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-sm text-neutral-600 hover:border-green-300 hover:bg-green-50 transition-colors"
-            >
-              <span className="text-neutral-400">bracketwebb.com/</span><span className="text-green-600 font-semibold">{slug}</span>
-            </Link>
-          ))}
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-neutral-200 text-xs text-neutral-400 uppercase tracking-wider">
+                <th className="text-left py-2 pr-3 w-8">#</th>
+                <th className="text-left py-2 pr-3">Team</th>
+                <th className="text-left py-2 pr-3 hidden sm:table-cell">Conf.</th>
+                <th className="text-left py-2 pr-3">Strength</th>
+                <th className="text-right py-2">Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ALL_TEAMS.map((t, i) => (
+                <tr
+                  key={t.code}
+                  onClick={() => handleTeamClick(t.code)}
+                  className="border-b border-neutral-100 hover:bg-green-50 cursor-pointer transition-colors group"
+                  title={`Generate bracket: ${t.name} wins`}
+                >
+                  <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums">{i + 1}</td>
+                  <td className="py-2 pr-3">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={`https://flagcdn.com/${t.iso2}.svg`}
+                        alt={t.name}
+                        className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
+                      />
+                      <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-2 pr-3 hidden sm:table-cell">
+                    <span className="text-xs text-neutral-400">{t.conf}</span>
+                  </td>
+                  <td className="py-2 pr-3">
+                    <StrengthStars strength={STRENGTHS[t.code]} className="text-sm" />
+                  </td>
+                  <td className="py-2 text-right tabular-nums font-mono text-xs text-neutral-500">
+                    {STRENGTHS[t.code] ?? 50}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

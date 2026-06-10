@@ -28,6 +28,12 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
       } else {
         setSaved(true);
         setSlug(customSlug);
+        try {
+          const prev = JSON.parse(localStorage.getItem('bracketwebb_history') ?? '[]');
+          const deduped = prev.filter(h => h.slug !== customSlug);
+          deduped.unshift({ slug: customSlug, savedAt: new Date().toISOString() });
+          localStorage.setItem('bracketwebb_history', JSON.stringify(deduped));
+        } catch {}
       }
     } catch (e) {
       setError('Failed to save. Try again.');
@@ -78,6 +84,8 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
             </span>
             <input
               type="text"
+              enterKeyHint="go"
+              onKeyDown={e => e.key === 'Enter' && !saving && !saved && customSlug && handleSave()}
               value={customSlug}
               onChange={e => {
                 setCustomSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'));

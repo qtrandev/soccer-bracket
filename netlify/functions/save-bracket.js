@@ -1,5 +1,28 @@
 import { getStore } from '@netlify/blobs';
 import { RESERVED_SLUGS } from '../../src/data/reservedSlugs.js';
+import naughtyWords from 'naughty-words';
+
+// ASCII-safe bad words from major Latin-script languages (slugs are [a-z0-9-] so non-ASCII can't appear)
+const ASCII_ONLY = /^[a-z0-9]+$/i;
+const BAD_WORDS = new Set(
+  ['en','es','fr','de','pt','it','nl','pl','tr','sv','da','no']
+    .flatMap(lang => (naughtyWords[lang] ?? []).filter(w => ASCII_ONLY.test(w)).map(w => w.toLowerCase()))
+);
+
+// Checks exact words AND hyphen-split bypass (cu-nt) AND stripped substring (f-u-c-k → fuck)
+function containsProfanity(slug) {
+  // Exact or whole-word match on each hyphen-separated part
+  for (const part of slug.split('-')) {
+    if (part && BAD_WORDS.has(part)) return true;
+  }
+  // Substring match on fully stripped slug — catches "cu-nt", "f-u-c-k", etc.
+  // Minimum word length 4 to avoid short false positives (e.g. 'am' in Turkish)
+  const stripped = slug.replace(/-/g, '');
+  for (const word of BAD_WORDS) {
+    if (word.length >= 4 && stripped.includes(word)) return true;
+  }
+  return false;
+}
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -21,7 +44,7 @@ export default async (req) => {
 
   if (!slug || typeof slug !== 'string') return json({ error: 'missing_slug' }, 400);
   if (!/^[a-z0-9-]{2,60}$/.test(slug))  return json({ error: 'invalid_slug' }, 400);
-  if (RESERVED_SLUGS.has(slug)) return json({ error: 'reserved' }, 400);
+  if (RESERVED_SLUGS.has(slug) || containsProfanity(slug)) return json({ error: 'reserved' }, 400);
   if (!bracket || typeof bracket !== 'object') return json({ error: 'missing_bracket' }, 400);
   if (JSON.stringify(bracket).length > 50_000) return json({ error: 'payload_too_large' }, 413);
 

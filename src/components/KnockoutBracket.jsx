@@ -5,13 +5,13 @@ import { ROUND_LABELS } from '../data/tournamentData.js';
 
 const ROUNDS = ['r32', 'r16', 'qf', 'sf', 'final'];
 
-// Heights per round for vertical spacing
+// Heights per round for vertical spacing — base unit sized for full cards (venue + 2 team rows with stars + time)
 const ROUND_ITEM_HEIGHT = {
-  r32: 88,
-  r16: 176,
-  qf: 352,
-  sf: 704,
-  final: 704,
+  r32: 132,
+  r16: 264,
+  qf: 528,
+  sf: 1056,
+  final: 1056,
 };
 
 function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }) {
