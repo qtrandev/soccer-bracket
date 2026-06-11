@@ -41,7 +41,7 @@ export default function UpcomingMatches() {
     <section className="max-w-3xl mx-auto px-6 py-10 border-b border-neutral-200">
       <h2 className="text-xl font-bold text-neutral-900 mb-1">Upcoming Matches</h2>
       <p className="text-sm text-neutral-400 mb-6">
-        Next {WINDOW_DAYS} days · Times in your local timezone
+        Next {WINDOW_DAYS} days · Times in your local timezone · Tap a match to search on Google
       </p>
 
       <div className="space-y-6">
@@ -114,8 +114,9 @@ export default function UpcomingMatches() {
 
                   const cls = 'flex items-center gap-2 py-2 px-3 rounded-lg border border-neutral-100 hover:border-green-200 hover:bg-green-50 transition-colors';
                   return searchUrl ? (
-                    <a key={m.id} href={searchUrl} target="_blank" rel="noopener noreferrer" className={cls}>
+                    <a key={m.id} href={searchUrl} target="_blank" rel="noopener noreferrer" className={cls + ' group/row'}>
                       {inner}
+                      <span className="flex-shrink-0 text-neutral-300 group-hover/row:text-green-400 transition-colors text-xs">↗</span>
                     </a>
                   ) : (
                     <div key={m.id} className={cls}>
