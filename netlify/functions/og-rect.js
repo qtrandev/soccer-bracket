@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import { getStore } from '@netlify/blobs';
-import { fontStyle, setupFonts } from './_font.js';
+import { fontStyle } from './_font.js';
 
 const TEAM_NAMES = {
   MEX: 'Mexico',       KOR: 'South Korea',  CZE: 'Czechia',        RSA: 'South Africa',
@@ -171,7 +171,6 @@ function winnerSvg(championName, flagDataUri) {
 }
 
 export default async (req) => {
-  await setupFonts();
   const slug = new URL(req.url).searchParams.get('slug') ?? '';
 
   let svg = null;
