@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TEAMS } from '../data/tournamentData.js';
-import { STRENGTHS } from '../data/teamStrengths.js';
+import { STRENGTHS, MAX_STRENGTH } from '../data/teamStrengths.js';
+
+const STRENGTH_OFFSET = 100 - MAX_STRENGTH; // shifts top team to 100
 import { autofillBracket } from '../utils/autofill.js';
 import StrengthStars from '../components/StrengthStars.jsx';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
@@ -30,6 +32,28 @@ const FEATURES = [
 ];
 
 const EXAMPLE_SLUGS = ['blazing-striker', 'golden-wizard', 'turbo-eagle', 'argentina', 'matt'];
+
+// FIFA World Cup titles per team (only past winners included)
+const WC_TITLES = {
+  BRA: 5, // 1958 1962 1970 1994 2002
+  GER: 4, // 1954 1974 1990 2014
+  ARG: 3, // 1978 1986 2022
+  FRA: 2, // 1998 2018
+  URU: 2, // 1930 1950
+  ENG: 1, // 1966
+  ESP: 1, // 2010
+};
+
+// FIFA World Cup runner-up finishes among 2026 qualified teams
+const WC_RUNNER_UP = {
+  GER: 4, // 1966 1982 1986 2002
+  NED: 3, // 1974 1978 2010
+  ARG: 3, // 1930 1990 2014
+  BRA: 2, // 1950 1998
+  FRA: 2, // 2006 2022
+  CRO: 1, // 2018
+  SWE: 1, // 1958
+};
 
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem('bracketwebb_history') ?? '[]'); } catch { return []; }
@@ -294,12 +318,22 @@ export default function Home() {
                         <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
                         <span className="ml-2 text-[10px] font-mono text-neutral-500">{t.code}</span>
                         <span className="ml-1.5 text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded group-hover:bg-green-100 group-hover:text-green-600 transition-colors">{t.conf}</span>
+                        {WC_TITLES[t.code] && (
+                          <span className="ml-1.5 text-[10px] font-medium text-amber-600">
+                            🏆×{WC_TITLES[t.code]}
+                          </span>
+                        )}
+                        {WC_RUNNER_UP[t.code] && (
+                          <span className="ml-1 text-[10px] font-medium text-neutral-400">
+                            🥈×{WC_RUNNER_UP[t.code]}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </td>
                   <td className="py-2">
                     <StrengthStars strength={STRENGTHS[t.code]} className="text-sm" />
-                    <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{STRENGTHS[t.code] ?? 50}/100</span>
+                    <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{Math.min(100, (STRENGTHS[t.code] ?? 50) + STRENGTH_OFFSET)}/100</span>
                   </td>
                 </tr>
               ))}

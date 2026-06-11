@@ -138,7 +138,7 @@ export default function ViewBracket() {
             <div className="flex items-center gap-2 mt-2">
               <span className="text-lg">🏆</span>
               <TeamFlag code={champion} size="md" showName />
-              <span className="text-sm text-gold-400 font-semibold">wins it all · {displaySlug}</span>
+              <span className="text-sm text-gold-400 font-semibold">wins it all · {displaySlug}'s Bracket</span>
             </div>
           ) : (
             <h1 className="text-2xl font-black text-emerald-100">{slug}</h1>

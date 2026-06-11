@@ -101,51 +101,57 @@ export default function UpcomingMatches({ dark = false }) {
                     : null;
 
                   const inner = (
-                    <>
-                      <span className={`text-[10px] font-bold w-6 flex-shrink-0 text-center ${t.badge}`}>
-                        {m.badge}
-                      </span>
-
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        {isGroup ? (
-                          <>
-                            <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
-                            <span className={`text-sm font-medium truncate ${t.teamName}`}>{home.name}</span>
-                          </>
-                        ) : (
-                          <span className={`text-sm italic ${t.tbd}`}>TBD</span>
-                        )}
-                      </div>
-
-                      <div className="flex-shrink-0 text-center w-20">
-                        <span className={`text-xs font-semibold whitespace-nowrap ${t.time}`}>
-                          {formatMatchTime(m.date, m.time)}
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold w-6 flex-shrink-0 text-center ${t.badge}`}>
+                          {m.badge}
                         </span>
+
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                          {isGroup ? (
+                            <>
+                              <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
+                              <span className={`text-sm font-medium truncate ${t.teamName}`}>{home.name}</span>
+                            </>
+                          ) : (
+                            <span className={`text-sm italic ${t.tbd}`}>TBD</span>
+                          )}
+                        </div>
+
+                        <div className="flex-shrink-0 text-center w-20">
+                          <span className={`text-xs font-semibold whitespace-nowrap ${t.time}`}>
+                            {formatMatchTime(m.date, m.time)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                          {isGroup ? (
+                            <>
+                              <span className={`text-sm font-medium truncate text-right ${t.teamName}`}>{away.name}</span>
+                              <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
+                            </>
+                          ) : (
+                            <span className={`text-sm italic ${t.tbd}`}>TBD</span>
+                          )}
+                        </div>
+
+                        <div className="hidden sm:block flex-shrink-0 w-40 text-right">
+                          <span className={`text-xs truncate block ${t.venueName}`}>{venue.name}</span>
+                          <span className={`text-xs truncate block ${t.venueCity}`}>{venue.city}</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                        {isGroup ? (
-                          <>
-                            <span className={`text-sm font-medium truncate text-right ${t.teamName}`}>{away.name}</span>
-                            <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
-                          </>
-                        ) : (
-                          <span className={`text-sm italic ${t.tbd}`}>TBD</span>
-                        )}
+                      <div className={`sm:hidden pl-8 mt-0.5 ${t.venueName}`}>
+                        <span className="text-xs">{venue.name}, {venue.city}</span>
                       </div>
-
-                      <div className="hidden sm:block flex-shrink-0 w-40 text-right">
-                        <span className={`text-xs truncate block ${t.venueName}`}>{venue.name}</span>
-                        <span className={`text-xs truncate block ${t.venueCity}`}>{venue.city}</span>
-                      </div>
-                    </>
+                    </div>
                   );
 
-                  const cls = `flex items-center gap-2 py-2 px-3 rounded-lg border transition-colors ${t.row}`;
+                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-colors ${t.row}`;
                   return searchUrl ? (
                     <a key={m.id} href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                       {inner}
-                      <span className={`flex-shrink-0 transition-colors text-xs ${t.arrow}`}>↗</span>
+                      <span className={`flex-shrink-0 transition-colors text-xs mt-0.5 sm:mt-0 ${t.arrow}`}>↗</span>
                     </a>
                   ) : (
                     <div key={m.id} className={cls}>
