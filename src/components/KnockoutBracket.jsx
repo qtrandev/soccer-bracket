@@ -19,10 +19,11 @@ const ROUND_ITEM_HEIGHT = {
 // Vertical connectors bridge from the SF arms (at 50%) down to this level.
 const FINAL_LIFT = 100;
 
-function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }) {
+function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false, liftConnector = 0 }) {
   const itemH = ROUND_ITEM_HEIGHT[round] ?? 88;
   const isLast = round === 'final';
   const matchArray = Array.isArray(matches) ? matches : [matches];
+  const armTop = liftConnector ? `calc(50% - ${liftConnector}px)` : '50%';
 
   return (
     <div className="flex flex-col flex-shrink-0" style={{ width: 176 }}>
@@ -41,17 +42,30 @@ function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }
           >
             {!isLast && (
               <>
-                {/* Horizontal arm toward next round */}
+                {/* Horizontal arm toward next round (lifted to Final card level when liftConnector > 0) */}
                 <div
                   style={{
                     position: 'absolute',
                     [mirror ? 'left' : 'right']: -24,
-                    top: '50%',
+                    top: armTop,
                     width: 24,
                     height: 2,
                     background: 'rgba(34,197,94,0.25)',
                   }}
                 />
+                {/* Vertical stem along column edge — bridges card centre to lifted arm */}
+                {liftConnector > 0 && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      [mirror ? 'left' : 'right']: 0,
+                      top: armTop,
+                      width: 2,
+                      height: liftConnector,
+                      background: 'rgba(34,197,94,0.25)',
+                    }}
+                  />
+                )}
                 {/* Vertical bar pairs even+odd matches — only when there are 2+ matches */}
                 {i % 2 === 0 && matchArray.length > 1 && (
                   <div
@@ -146,10 +160,11 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             matches={[bracket.sf[0]]}
             onPick={onPick}
             readOnly={readOnly}
+            liftConnector={FINAL_LIFT}
           />
 
-          {/* Final in center — card is lifted FINAL_LIFT px above 50%;
-              vertical connectors bridge from the SF arms (at 50%) up to the card */}
+          {/* Final in center — card is lifted FINAL_LIFT px above 50%.
+              SF columns carry the vertical stems; only horizontal arms here. */}
           <div className="flex flex-col flex-shrink-0" style={{ width: 208 }}>
             <div className="text-center mb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gold-400 px-2 py-1 rounded border border-gold-500/60 bg-gold-500/10">
@@ -164,12 +179,9 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
                 boxShadow: '0 0 60px rgba(245,158,11,0.07)',
               }}
             >
-              {/* Left: horizontal arm + vertical connector down to SF arm level */}
+              {/* Incoming arms — sit at the lifted card level, stems live in the SF columns */}
               <div style={{ position: 'absolute', left: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
-              <div style={{ position: 'absolute', left: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 2, height: FINAL_LIFT, background: 'rgba(34,197,94,0.25)' }} />
-              {/* Right: horizontal arm + vertical connector */}
               <div style={{ position: 'absolute', right: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
-              <div style={{ position: 'absolute', right: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 2, height: FINAL_LIFT, background: 'rgba(34,197,94,0.25)' }} />
               {/* Final card at lifted position */}
               <div style={{ position: 'absolute', top: `calc(50% - ${FINAL_LIFT}px)`, left: '50%', transform: 'translate(-50%, -50%)' }}>
                 <BracketMatch
@@ -191,6 +203,7 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             onPick={onPick}
             readOnly={readOnly}
             mirror
+            liftConnector={FINAL_LIFT}
           />
           <RoundColumn
             label="Quarterfinals"

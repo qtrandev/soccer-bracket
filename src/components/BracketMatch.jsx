@@ -15,19 +15,46 @@ export default function BracketMatch({ match, onPick, readOnly, isCompact, isFin
     onPick?.(id, teamCode);
   }
 
+  function buildSearchUrl() {
+    if (!venueInfo) return null;
+    return `https://www.google.com/maps/search/${encodeURIComponent(`${venueInfo.name}, ${venueInfo.city}`)}`;
+  }
+
+  const searchUrl = !isCompact && venueInfo ? buildSearchUrl() : null;
+
   return (
     <div className={isFinal ? 'bracket-card-final group' : 'bracket-card group'} title={venueInfo ? `${venueInfo.name} · ${venueInfo.city}` : undefined}>
-      {/* Match info tooltip row */}
-      {!isCompact && venueInfo && (
-        <div className="px-3 pt-1.5 pb-0.5 text-[10px] text-emerald-700 border-b border-emerald-900/20">
-          <div className="flex items-center gap-1">
-            <span>📍</span>
-            <span className="truncate">{venueInfo.city}</span>
-            {date && <span className="ml-auto flex-shrink-0">{formatMatchDate(date, time)}</span>}
+      {/* Match info / venue rows */}
+      {!isCompact && venueInfo && (() => {
+        const inner = (
+          <>
+            <div className="flex items-center gap-1">
+              <span>📍</span>
+              <span className="truncate">{venueInfo.city}</span>
+              {date && <span className="ml-auto flex-shrink-0">{formatMatchDate(date, time)}</span>}
+            </div>
+            <div className="flex items-center">
+              <span className="text-emerald-600 text-[10px] leading-none">↗</span>
+              <span className="flex-1 truncate text-emerald-800 text-right">{venueInfo.name}</span>
+            </div>
+          </>
+        );
+        return searchUrl ? (
+          <a
+            href={searchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="block px-3 pt-1.5 pb-0.5 text-[10px] text-emerald-700 border-b border-emerald-900/20 hover:bg-emerald-900/20 transition-colors"
+          >
+            {inner}
+          </a>
+        ) : (
+          <div className="px-3 pt-1.5 pb-0.5 text-[10px] text-emerald-700 border-b border-emerald-900/20">
+            {inner}
           </div>
-          <div className="truncate text-emerald-800 text-right">{venueInfo.name}</div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Team rows */}
       {[team1, team2].map((teamCode, i) => {
