@@ -1,6 +1,6 @@
-import sharp from 'sharp';
+import { Resvg } from '@resvg/resvg-js';
 import { getStore } from '@netlify/blobs';
-import { fontStyle } from './_font.js';
+import { setupFonts } from './_font.js';
 
 const TEAM_NAMES = {
   MEX: 'Mexico',       KOR: 'South Korea',  CZE: 'Czechia',        RSA: 'South Africa',
@@ -125,7 +125,6 @@ function bracketSvg(xStart) {
 
 function genericSvg() {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
-  ${fontStyle()}
   <rect width="1200" height="630" fill="#091a0f"/>
   <radialGradient id="glow" cx="65%" cy="50%" r="50%">
     <stop offset="0%" stop-color="#22c55e" stop-opacity="0.07"/>
@@ -134,11 +133,11 @@ function genericSvg() {
   <rect width="1200" height="630" fill="url(#glow)"/>
   <circle cx="620" cy="315" r="420" fill="none" stroke="#22c55e" stroke-width="1" stroke-opacity="0.07"/>
   ${ballSvg(215, 205, 142)}
-  <text x="68" y="432" font-family="Inter,Arial,sans-serif" font-size="78" font-weight="900" fill="white" letter-spacing="-1">BracketWebb</text>
-  <text x="68" y="480" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="400" fill="#6b7280">2026 FIFA World Cup Bracket</text>
+  <text x="68" y="432" font-family="DejaVu Sans,sans-serif" font-size="78" font-weight="700" fill="white">BracketWebb</text>
+  <text x="68" y="480" font-family="DejaVu Sans,sans-serif" font-size="28" font-weight="400" fill="#6b7280">2026 FIFA World Cup Bracket</text>
   <line x1="68" y1="510" x2="590" y2="510" stroke="#22c55e" stroke-width="3"/>
-  <text x="68" y="547" font-family="Inter,Arial,sans-serif" font-size="21" font-weight="400" fill="#22c55e">Pick your winners · Share your bracket · Who takes the trophy?</text>
-  <text x="68" y="607" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="400" fill="#22c55e" fill-opacity="0.4">bracketwebb.com</text>
+  <text x="68" y="547" font-family="DejaVu Sans,sans-serif" font-size="21" font-weight="400" fill="#22c55e">Pick your winners · Share your bracket · Who takes the trophy?</text>
+  <text x="68" y="607" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#22c55e" fill-opacity="0.4">bracketwebb.com</text>
   ${bracketSvg(645)}
 </svg>`;
 }
@@ -151,7 +150,6 @@ function winnerSvg(championName, flagDataUri) {
   const flagX = 385, flagY = 95;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
-  ${fontStyle()}
   <rect width="1200" height="630" fill="#091a0f"/>
   <radialGradient id="glow" cx="65%" cy="50%" r="50%">
     <stop offset="0%" stop-color="#22c55e" stop-opacity="0.07"/>
@@ -161,17 +159,18 @@ function winnerSvg(championName, flagDataUri) {
   <circle cx="620" cy="315" r="420" fill="none" stroke="#22c55e" stroke-width="1" stroke-opacity="0.07"/>
   ${ballSvg(215, 205, 142)}
   <image href="${flagDataUri}" x="${flagX}" y="${flagY}" width="${flagW}" height="${flagH}" preserveAspectRatio="xMidYMid meet"/>
-  <text x="68" y="420" font-family="Inter,Arial,sans-serif" font-size="${nameFontSize}" font-weight="900" fill="white" letter-spacing="-1">${escapeXml(championName)}</text>
-  <text x="68" y="478" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" fill="#22c55e">World Cup Champion · 2026</text>
+  <text x="68" y="420" font-family="DejaVu Sans,sans-serif" font-size="${nameFontSize}" font-weight="700" fill="white">${escapeXml(championName)}</text>
+  <text x="68" y="478" font-family="DejaVu Sans,sans-serif" font-size="30" font-weight="700" fill="#22c55e">World Cup Champion · 2026</text>
   <line x1="68" y1="508" x2="590" y2="508" stroke="#22c55e" stroke-width="3"/>
-  <text x="68" y="545" font-family="Inter,Arial,sans-serif" font-size="21" font-weight="400" fill="#22c55e" fill-opacity="0.7">Make your own bracket at bracketwebb.com</text>
-  <text x="68" y="607" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="400" fill="#22c55e" fill-opacity="0.4">bracketwebb.com</text>
+  <text x="68" y="545" font-family="DejaVu Sans,sans-serif" font-size="21" font-weight="400" fill="#22c55e" fill-opacity="0.7">Make your own bracket at bracketwebb.com</text>
+  <text x="68" y="607" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#22c55e" fill-opacity="0.4">bracketwebb.com</text>
   ${bracketSvg(645)}
 </svg>`;
 }
 
 export default async (req) => {
   const slug = new URL(req.url).searchParams.get('slug') ?? '';
+  const fontFiles = await setupFonts();
 
   let svg = null;
 
@@ -206,7 +205,14 @@ export default async (req) => {
     } catch { /* fall through to generic */ }
   }
 
-  const png = await sharp(Buffer.from(svg ?? genericSvg())).png().toBuffer();
+  const resvg = new Resvg(svg ?? genericSvg(), {
+    font: {
+      loadSystemFonts: false,
+      fontFiles,
+      defaultFontFamily: 'DejaVu Sans',
+    },
+  });
+  const png = resvg.render().asPng();
 
   return new Response(png, {
     status: 200,
