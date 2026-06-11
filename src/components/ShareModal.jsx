@@ -135,8 +135,6 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
             </button>
             <a
               href={shareUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               className="block w-full py-2.5 rounded-lg bg-grass-500 text-center text-sm font-bold text-pitch-950 hover:bg-grass-400 transition-colors"
             >
               View My Bracket →

@@ -5,13 +5,14 @@ import { ROUND_LABELS, FINAL_MATCH } from '../data/tournamentData.js';
 
 const ROUNDS = ['r32', 'r16', 'qf', 'sf', 'final'];
 
-// Heights per round for vertical spacing — base unit sized for full cards (venue + 2 team rows with stars + time)
+// Heights per round for vertical spacing (each round doubles the previous).
+// r32 is sized to just fit a full card (venue + 2 team rows with stars + time).
 const ROUND_ITEM_HEIGHT = {
-  r32: 132,
-  r16: 264,
-  qf: 528,
-  sf: 1056,
-  final: 1056,
+  r32: 120,
+  r16: 240,
+  qf: 480,
+  sf: 960,
+  final: 960,
 };
 
 function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }) {
@@ -20,7 +21,7 @@ function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }
   const matchArray = Array.isArray(matches) ? matches : [matches];
 
   return (
-    <div className="flex flex-col flex-shrink-0" style={{ width: 192 }}>
+    <div className="flex flex-col flex-shrink-0" style={{ width: 176 }}>
       <div className="text-center mb-3">
         <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 px-2 py-1 rounded border border-emerald-900/40">
           {label}
@@ -143,21 +144,25 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             readOnly={readOnly}
           />
 
-          {/* Final in center */}
-          <div
-            className="flex flex-col flex-shrink-0 rounded-2xl px-2 pt-2 pb-4"
-            style={{
-              width: 208,
-              background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.08) 0%, transparent 70%)',
-              boxShadow: '0 0 60px rgba(245,158,11,0.07)',
-            }}
-          >
+          {/* Final in center — same flex-col structure as RoundColumn so the card
+              center aligns with the SF horizontal arms at top:50% of sf slot */}
+          <div className="flex flex-col flex-shrink-0" style={{ width: 208 }}>
             <div className="text-center mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-gold-400 px-3 py-1 rounded-full border border-gold-500/60 bg-gold-500/10">
+              <span className="text-xs font-bold uppercase tracking-widest text-gold-400 px-2 py-1 rounded border border-gold-500/60 bg-gold-500/10">
                 🏆 Final
               </span>
             </div>
-            <div className="flex items-center justify-center" style={{ height: 704 }}>
+            <div
+              className="relative flex items-center justify-center rounded-2xl"
+              style={{
+                height: ROUND_ITEM_HEIGHT.sf,
+                background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.08) 0%, transparent 70%)',
+                boxShadow: '0 0 60px rgba(245,158,11,0.07)',
+              }}
+            >
+              {/* Incoming connector arms from both SF columns */}
+              <div style={{ position: 'absolute', left: -24, top: '50%', width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
+              <div style={{ position: 'absolute', right: -24, top: '50%', width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
               <BracketMatch
                 match={bracket.final}
                 onPick={onPick}

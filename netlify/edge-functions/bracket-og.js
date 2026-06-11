@@ -50,7 +50,7 @@ export default async function handler(request, context) {
     if (!data) return context.next();
 
     const champion = data.knockoutPicks?.['m104'] ?? data.knockoutPicks?.final;
-    const championName = champion ? (TEAM_NAMES[champion] ?? champion) : null;
+    const championName = champion ? (TEAM_NAMES[champion] ?? null) : null;
 
     const title = championName
       ? `${slug}'s bracket: ${championName} wins the World Cup`

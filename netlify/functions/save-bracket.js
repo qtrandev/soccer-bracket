@@ -1,6 +1,17 @@
 import { getStore } from '@netlify/blobs';
 import { RESERVED_SLUGS } from '../../src/data/reservedSlugs.js';
+import { TEAMS, GROUPS, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../../src/data/tournamentData.js';
 import naughtyWords from 'naughty-words';
+
+// Derive valid sets once at module load from the authoritative tournament data
+const VALID_TEAM_CODES = new Set(Object.keys(TEAMS));
+const VALID_MATCH_IDS = new Set(
+  [...R32_MATCHES, ...R16_MATCHES, ...QF_MATCHES, ...SF_MATCHES, FINAL_MATCH].map(m => m.id)
+);
+const TEAM_GROUP = Object.fromEntries(
+  Object.entries(GROUPS).flatMap(([g, { teams }]) => teams.map(t => [t, g]))
+);
+const VALID_GROUPS = new Set('ABCDEFGHIJKL'.split(''));
 
 // ASCII-safe bad words from major Latin-script languages (slugs are [a-z0-9-] so non-ASCII can't appear)
 const ASCII_ONLY = /^[a-z0-9]+$/i;
@@ -46,30 +57,43 @@ export default async (req) => {
   if (!/^[a-z0-9-]{2,60}$/.test(slug))  return json({ error: 'invalid_slug' }, 400);
   if (RESERVED_SLUGS.has(slug) || containsProfanity(slug)) return json({ error: 'reserved' }, 400);
   if (!bracket || typeof bracket !== 'object') return json({ error: 'missing_bracket' }, 400);
-  if (JSON.stringify(bracket).length > 50_000) return json({ error: 'payload_too_large' }, 413);
+  if (JSON.stringify(bracket).length > 10_000) return json({ error: 'payload_too_large' }, 413);
 
-  // Shape validation — reject structurally invalid payloads
-  const VALID_GROUPS = new Set('ABCDEFGHIJKL'.split(''));
-  const TEAM_CODE = /^[A-Z]{2,3}$/;
-  const MATCH_ID  = /^m\d{2,3}$/;
-
+  // Tournament-aware validation — reject data that can't be a real FIFA 2026 bracket
   const gp = bracket.groupPicks ?? {};
   if (typeof gp !== 'object' || Array.isArray(gp)) return json({ error: 'invalid_shape' }, 400);
-  for (const [k, v] of Object.entries(gp)) {
+  for (const k of Object.keys(gp)) {
     if (!VALID_GROUPS.has(k)) return json({ error: 'invalid_shape' }, 400);
+  }
+  for (const [k, v] of Object.entries(gp)) {
     if (!Array.isArray(v) || v.length > 4) return json({ error: 'invalid_shape' }, 400);
-    if (v.some(c => !TEAM_CODE.test(c))) return json({ error: 'invalid_shape' }, 400);
+    const seen = new Set();
+    for (const code of v) {
+      if (!VALID_TEAM_CODES.has(code)) return json({ error: 'invalid_shape' }, 400);
+      if (TEAM_GROUP[code] !== k) return json({ error: 'invalid_shape' }, 400);
+      if (seen.has(code)) return json({ error: 'invalid_shape' }, 400);
+      seen.add(code);
+    }
   }
 
   const wc = bracket.wildcards ?? [];
   if (!Array.isArray(wc) || wc.length > 8) return json({ error: 'invalid_shape' }, 400);
-  if (wc.some(c => !TEAM_CODE.test(c))) return json({ error: 'invalid_shape' }, 400);
+  const wcSeen = new Set();
+  const wcGroups = new Set();
+  for (const code of wc) {
+    if (!VALID_TEAM_CODES.has(code)) return json({ error: 'invalid_shape' }, 400);
+    if (wcSeen.has(code)) return json({ error: 'invalid_shape' }, 400);
+    const g = TEAM_GROUP[code];
+    if (wcGroups.has(g)) return json({ error: 'invalid_shape' }, 400);
+    wcSeen.add(code);
+    wcGroups.add(g);
+  }
 
   const kp = bracket.knockoutPicks ?? {};
   if (typeof kp !== 'object' || Array.isArray(kp)) return json({ error: 'invalid_shape' }, 400);
   for (const [k, v] of Object.entries(kp)) {
-    if (!MATCH_ID.test(k)) return json({ error: 'invalid_shape' }, 400);
-    if (v !== null && !TEAM_CODE.test(v)) return json({ error: 'invalid_shape' }, 400);
+    if (!VALID_MATCH_IDS.has(k)) return json({ error: 'invalid_shape' }, 400);
+    if (v !== null && !VALID_TEAM_CODES.has(v)) return json({ error: 'invalid_shape' }, 400);
   }
 
   try {
