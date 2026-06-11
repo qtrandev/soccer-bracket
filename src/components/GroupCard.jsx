@@ -1,5 +1,5 @@
 import TeamFlag from './TeamFlag.jsx';
-import { GROUPS, GROUP_MATCHES, VENUES } from '../data/tournamentData.js';
+import { GROUPS, GROUP_MATCHES, VENUES, TEAMS } from '../data/tournamentData.js';
 import { STRENGTHS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
 import { formatMatchDate, formatMatchTime } from '../utils/bracket.js';
@@ -78,32 +78,42 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
         </div>
       )}
 
-      {/* Per-game schedule — only on editable bracket, not on shared view */}
-      {!readOnly && games.length > 0 && (
+      {/* Per-game schedule */}
+      {games.length > 0 && (
         <div className="mt-3 pt-3 border-t border-emerald-900/30">
           <div className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 mb-2">Schedule</div>
           {[0, 1, 2].map(md => (
             <div key={md} className={md > 0 ? 'mt-2.5 pt-2.5 border-t border-emerald-900/20' : ''}>
               <div className="text-[9px] text-emerald-800 mb-1.5">Matchday {md + 1}</div>
-              {games.slice(md * 2, md * 2 + 2).map(game => (
-                <div key={game.id} className="mb-2 last:mb-0">
-                  <div className="flex items-center gap-1 text-[10px] min-w-0">
-                    <div className="flex items-center gap-1 flex-1 min-w-0">
-                      <TeamFlag code={game.home} size="xs" />
-                      <span className="text-emerald-600 flex-shrink-0">{game.home}</span>
+              {games.slice(md * 2, md * 2 + 2).map(game => {
+                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${TEAMS[game.home].name} vs ${TEAMS[game.away].name} 2026 FIFA World Cup`)}`;
+                return (
+                  <a
+                    key={game.id}
+                    href={searchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mb-2 last:mb-0 rounded hover:bg-emerald-900/20 transition-colors -mx-1 px-1 py-0.5"
+                  >
+                    <div className="flex items-center gap-1 text-[10px] min-w-0">
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                        <TeamFlag code={game.home} size="xs" />
+                        <span className="text-emerald-600 flex-shrink-0">{game.home}</span>
+                      </div>
+                      <span className="text-emerald-700 flex-shrink-0">vs</span>
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                        <TeamFlag code={game.away} size="xs" />
+                        <span className="text-emerald-600 flex-shrink-0">{game.away}</span>
+                      </div>
+                      <span className="text-[9px] text-emerald-700 flex-shrink-0 ml-1">{formatMatchTime(game.date, game.time)}</span>
+                      <span className="text-[9px] text-emerald-800 ml-0.5">↗</span>
                     </div>
-                    <span className="text-emerald-700 flex-shrink-0">vs</span>
-                    <div className="flex items-center gap-1 flex-1 min-w-0">
-                      <TeamFlag code={game.away} size="xs" />
-                      <span className="text-emerald-600 flex-shrink-0">{game.away}</span>
+                    <div className="text-[9px] text-emerald-800 mt-0.5 truncate">
+                      📍 {VENUES[game.venue].name}, {VENUES[game.venue].city} · {formatMatchDate(game.date, game.time)}
                     </div>
-                    <span className="text-[9px] text-emerald-700 flex-shrink-0 ml-1">{formatMatchTime(game.date, game.time)}</span>
-                  </div>
-                  <div className="text-[9px] text-emerald-800 mt-0.5 truncate">
-                    📍 {VENUES[game.venue].name}, {VENUES[game.venue].city} · {formatMatchDate(game.date, game.time)}
-                  </div>
-                </div>
-              ))}
+                  </a>
+                );
+              })}
             </div>
           ))}
         </div>
