@@ -129,7 +129,7 @@ export function countKnockoutPicks(knockoutPicks) {
 export function formatMatchDate(dateStr, timeStr) {
   if (!dateStr) return '';
   try {
-    const dt = new Date(`${dateStr}T${timeStr ?? '00:00'}:00`);
+    const dt = new Date(`${dateStr}T${timeStr ?? '12:00'}:00-04:00`);
     return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   } catch {
     return dateStr;
