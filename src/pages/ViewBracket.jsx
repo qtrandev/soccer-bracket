@@ -193,7 +193,7 @@ export default function ViewBracket() {
         )
       )}
       <div className="mt-10">
-        <UpcomingMatches />
+        <UpcomingMatches dark />
       </div>
     </div>
   );
