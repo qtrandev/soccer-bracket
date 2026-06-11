@@ -57,6 +57,10 @@ export default function CreateBracket() {
       });
       const json = await res.json();
       if (!res.ok) return { error: json.error ?? 'save_failed' };
+      // Pre-warm OG images so they're generated before the first share link is opened
+      const encoded = encodeURIComponent(chosenSlug);
+      fetch(`/og-rect?slug=${encoded}`).catch(() => {});
+      fetch(`/og-square?slug=${encoded}`).catch(() => {});
       return { ok: true };
     } catch {
       return { error: 'network_error' };

@@ -1,5 +1,26 @@
+import { useState, useEffect, useRef } from 'react';
 import { TEAMS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
+
+function useScores() {
+  const [scores, setScores] = useState({});
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/.netlify/functions/scores');
+        if (res.ok) setScores(await res.json());
+      } catch {}
+    }
+    load();
+    // refresh every 60 s — short enough to catch live updates
+    timerRef.current = setInterval(load, 60_000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  return scores;
+}
 
 const ALL_MATCHES = [
   ...Object.entries(GROUP_MATCHES).flatMap(([group, matches]) =>
@@ -26,18 +47,25 @@ function localDateLabel(dt) {
 }
 
 export default function UpcomingMatches({ dark = false }) {
+  const scores = useScores();
   const now = new Date();
   const windowEnd = new Date(now.getTime() + WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const todayStr = localDateKey(now);
+  const yesterdayStr = localDateKey(new Date(now.getTime() - 24 * 60 * 60 * 1000));
 
-  const upcoming = ALL_MATCHES
+  const allRelevant = ALL_MATCHES
     .map(m => ({ ...m, dt: new Date(`${m.date}T${m.time}:00-04:00`) }))
-    .filter(m => m.dt >= now && m.dt <= windowEnd);
+    .filter(m => {
+      const dk = localDateKey(m.dt);
+      // always show yesterday and all of today (including already-kicked-off matches)
+      if (dk === yesterdayStr || dk === todayStr) return true;
+      return m.dt >= now && m.dt <= windowEnd;
+    });
 
-  if (upcoming.length === 0) return null;
+  if (allRelevant.length === 0) return null;
 
   const byDate = {};
-  for (const m of upcoming) {
+  for (const m of allRelevant) {
     const key = localDateKey(m.dt);
     (byDate[key] ??= { label: localDateLabel(m.dt), matches: [] }).matches.push(m);
   }
@@ -77,18 +105,24 @@ export default function UpcomingMatches({ dark = false }) {
     <section className={`max-w-3xl mx-auto px-4 py-10 border-b ${t.section}`}>
       <h2 className={`text-xl font-bold mb-1 ${t.title}`}>Upcoming Matches</h2>
       <p className={`text-sm mb-6 ${t.subtitle}`}>
-        Next {WINDOW_DAYS} days · Times in your local timezone · Tap a match to search on Google
+        Next {WINDOW_DAYS} days · Yesterday's results · Times in your local timezone · Tap a match to search on Google
       </p>
 
       <div className="space-y-6">
         {Object.entries(byDate).map(([dateKey, { label, matches }]) => {
           const isToday = dateKey === todayStr;
+          const isPast = dateKey < todayStr;
+          const dateLabel = dateKey === yesterdayStr
+            ? `Yesterday · ${label}`
+            : isToday ? `Today · ${label}` : label;
           return (
             <div key={dateKey}>
               <p className={`text-xs font-semibold uppercase tracking-wider mb-2 pb-1.5 border-b ${
-                isToday ? t.dateToday : t.dateOther
+                isPast
+                  ? (dark ? 'text-emerald-900 border-emerald-900/20' : 'text-neutral-300 border-neutral-100')
+                  : isToday ? t.dateToday : t.dateOther
               }`}>
-                {isToday ? `Today · ${label}` : label}
+                {dateLabel}
               </p>
               <div className="space-y-1.5">
                 {matches.map(({ dt: _dt, ...m }) => {
@@ -99,6 +133,12 @@ export default function UpcomingMatches({ dark = false }) {
                   const searchUrl = isGroup
                     ? `https://www.google.com/search?q=${encodeURIComponent(`${home.name} vs ${away.name} 2026 FIFA World Cup`)}`
                     : null;
+
+                  const score = isGroup ? scores[`${m.home}-${m.away}`] : null;
+                  const isLive = score?.state === 'in';
+                  const isFinal = score?.completed;
+                  const homeWon = isFinal && score.homeScore > score.awayScore;
+                  const awayWon = isFinal && score.awayScore > score.homeScore;
 
                   const inner = (
                     <div className="flex flex-col flex-1 min-w-0">
@@ -111,7 +151,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {isGroup ? (
                             <>
                               <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
-                              <span className={`text-sm font-medium truncate ${t.teamName}`}>{home.name}</span>
+                              <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
                             </>
                           ) : (
                             <span className={`text-sm italic ${t.tbd}`}>TBD</span>
@@ -119,15 +159,33 @@ export default function UpcomingMatches({ dark = false }) {
                         </div>
 
                         <div className="flex-shrink-0 text-center w-20">
-                          <span className={`text-xs font-semibold whitespace-nowrap ${t.time}`}>
-                            {formatMatchTime(m.date, m.time)}
-                          </span>
+                          {isLive ? (
+                            <>
+                              <span className={`text-sm font-bold tabular-nums ${dark ? 'text-grass-400' : 'text-green-600'}`}>
+                                {score.homeScore} – {score.awayScore}
+                              </span>
+                              <span className={`block text-[10px] font-semibold animate-pulse ${dark ? 'text-grass-500' : 'text-green-500'}`}>
+                                {score.detail || 'LIVE'}
+                              </span>
+                            </>
+                          ) : isFinal ? (
+                            <>
+                              <span className={`text-sm font-bold tabular-nums ${dark ? 'text-emerald-200' : 'text-neutral-700'}`}>
+                                {score.homeScore} – {score.awayScore}
+                              </span>
+                              <span className={`block text-[10px] ${dark ? 'text-emerald-700' : 'text-neutral-400'}`}>FT</span>
+                            </>
+                          ) : (
+                            <span className={`text-xs font-semibold whitespace-nowrap ${t.time}`}>
+                              {formatMatchTime(m.date, m.time)}
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
                           {isGroup ? (
                             <>
-                              <span className={`text-sm font-medium truncate text-right ${t.teamName}`}>{away.name}</span>
+                              <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
                               <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
                             </>
                           ) : (
@@ -147,7 +205,10 @@ export default function UpcomingMatches({ dark = false }) {
                     </div>
                   );
 
-                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-colors ${t.row}`;
+                  const pastCls = dark
+                    ? 'border-emerald-900/20 opacity-50 hover:opacity-100'
+                    : 'border-neutral-100 opacity-50 hover:opacity-100';
+                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-all ${isPast ? pastCls : t.row}`;
                   return searchUrl ? (
                     <a key={m.id} href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                       {inner}

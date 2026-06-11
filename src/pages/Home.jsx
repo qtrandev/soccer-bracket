@@ -70,8 +70,9 @@ export default function Home() {
 
   function handleTeamClick(code) {
     const draft = autofillBracket('favorites', code);
-    try { localStorage.setItem('bracketwebb_draft', JSON.stringify({ version: 2, ...draft })); } catch {}
-    navigate('/new', { state: { makeMine: draft } });
+    const versioned = { version: 2, ...draft };
+    try { localStorage.setItem('bracketwebb_draft', JSON.stringify(versioned)); } catch {}
+    navigate('/new', { state: { makeMine: versioned } });
   }
 
   const visibleTeams = showAll ? ALL_TEAMS : ALL_TEAMS.slice(0, 12);

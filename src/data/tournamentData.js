@@ -185,7 +185,7 @@ export const GROUP_MATCHES = {
     { id: 'm7',  home: 'BRA', away: 'MAR', venue: 'MetLife',  date: '2026-06-13', time: '18:00' },
     { id: 'm5',  home: 'HAI', away: 'SCO', venue: 'Gillette', date: '2026-06-13', time: '21:00' },
     { id: 'm30', home: 'SCO', away: 'MAR', venue: 'Gillette', date: '2026-06-19', time: '18:00' },
-    { id: 'm29', home: 'BRA', away: 'HAI', venue: 'Lincoln',  date: '2026-06-19', time: '21:00' },
+    { id: 'm29', home: 'BRA', away: 'HAI', venue: 'Lincoln',  date: '2026-06-19', time: '20:30' },
     { id: 'm49', home: 'SCO', away: 'BRA', venue: 'HardRock', date: '2026-06-24', time: '18:00' },
     { id: 'm50', home: 'MAR', away: 'HAI', venue: 'Mercedes', date: '2026-06-24', time: '18:00' },
   ],
