@@ -3,6 +3,30 @@ import { RESERVED_SLUGS } from '../../src/data/reservedSlugs.js';
 import { TEAMS, GROUPS, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../../src/data/tournamentData.js';
 import naughtyWords from 'naughty-words';
 
+const RATE_LIMIT = 10; // max saves per IP per hour
+
+function clientIp(req) {
+  return (
+    req.headers.get('x-nf-client-connection-ip') ||
+    (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() ||
+    'unknown'
+  );
+}
+
+function hourBucket() {
+  const d = new Date();
+  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}${String(d.getUTCHours()).padStart(2, '0')}`;
+}
+
+async function checkRateLimit(ip) {
+  const store = getStore({ name: 'rate-limits', consistency: 'strong' });
+  const key = `${ip}:${hourBucket()}`;
+  const rec = await store.get(key, { type: 'json' }) ?? { count: 0 };
+  if (rec.count >= RATE_LIMIT) return false;
+  await store.setJSON(key, { count: rec.count + 1 });
+  return true;
+}
+
 // Derive valid sets once at module load from the authoritative tournament data
 const VALID_TEAM_CODES = new Set(Object.keys(TEAMS));
 const VALID_MATCH_IDS = new Set(
@@ -43,6 +67,19 @@ const json = (data, status = 200) =>
 
 export default async (req) => {
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+
+  let allowed = true;
+  try {
+    allowed = await checkRateLimit(clientIp(req));
+  } catch (err) {
+    console.warn('rate-limit check failed, failing open:', err?.message ?? err);
+  }
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: 'rate_limited' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json', 'Retry-After': '3600' },
+    });
+  }
 
   let body;
   try {

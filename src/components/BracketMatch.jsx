@@ -19,14 +19,13 @@ export default function BracketMatch({ match, onPick, readOnly, isCompact, isFin
     <div className={isFinal ? 'bracket-card-final group' : 'bracket-card group'} title={venueInfo ? `${venueInfo.name} · ${venueInfo.city}` : undefined}>
       {/* Match info tooltip row */}
       {!isCompact && venueInfo && (
-        <div className="px-3 pt-1.5 pb-0.5 flex items-center gap-1 text-[10px] text-emerald-700 border-b border-emerald-900/20">
-          <span>📍</span>
-          <span className="truncate">{venueInfo.city}</span>
-          {date && (
-            <>
-              <span className="ml-auto flex-shrink-0">{formatMatchDate(date, time)}</span>
-            </>
-          )}
+        <div className="px-3 pt-1.5 pb-0.5 text-[10px] text-emerald-700 border-b border-emerald-900/20">
+          <div className="flex items-center gap-1">
+            <span>📍</span>
+            <span className="truncate">{venueInfo.city}</span>
+            {date && <span className="ml-auto flex-shrink-0">{formatMatchDate(date, time)}</span>}
+          </div>
+          <div className="truncate text-emerald-800 text-right">{venueInfo.name}</div>
         </div>
       )}
 

@@ -13,6 +13,9 @@ export default function GroupStage({ groupPicks, onPick, readOnly }) {
             <span className="text-emerald-400">Pick 2 qualifiers per group</span>
             <span className="text-grass-400 font-semibold">{completed}/12 groups done</span>
           </div>
+          <p className="text-xs text-emerald-700 mb-3">
+            Click once to pick <span className="text-gold-400 font-semibold">1st place</span>, click again for <span className="text-slate-400 font-semibold">2nd place</span>. Order matters — it determines your Round of 32 matchups. Third-place qualifiers are auto-selected from the remaining teams.
+          </p>
           <div className="h-1.5 rounded-full bg-pitch-700 overflow-hidden">
             <div
               className="h-full rounded-full bg-grass-500 transition-all duration-500"
@@ -22,7 +25,7 @@ export default function GroupStage({ groupPicks, onPick, readOnly }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {GROUP_LETTERS.map(letter => (
           <GroupCard
             key={letter}

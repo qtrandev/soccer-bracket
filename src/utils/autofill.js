@@ -41,13 +41,17 @@ export function autofillBracket(strategy, forcedChampion = null, existingGroupPi
     const picks = {};
     for (const letter of GROUP_LETTERS) {
       const teams = [...GROUPS[letter].teams];
+      const randomRank = strategy === 'chaos'
+        ? Object.fromEntries(teams.map(t => [t, Math.random()]))
+        : null;
       teams.sort((a, b) => {
         if (forcedChampion) {
           if (a === forcedChampion) return -1;
           if (b === forcedChampion) return 1;
         }
-        const sa = strategy === 'chaos' ? (chaosRolls[[a, b].sort().join('-')] === a ? 1 : -1) : getStrength(b, strategy) - getStrength(a, strategy);
-        return sa;
+        return strategy === 'chaos'
+          ? randomRank[b] - randomRank[a]
+          : getStrength(b, strategy) - getStrength(a, strategy);
       });
       picks[letter] = teams;
     }

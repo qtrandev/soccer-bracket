@@ -162,6 +162,107 @@ export const FINAL_MATCH = {
   id: 'm104', src: ['m101', 'm102'], venue: 'MetLife', date: '2026-07-19', time: '15:00',
 };
 
+// All 72 group stage matches. Times stored in EDT (UTC-4).
+// Arrays are sorted chronologically within each group; every pair of two is one matchday.
+export const GROUP_MATCHES = {
+  A: [
+    { id: 'm1',  home: 'MEX', away: 'RSA', venue: 'Azteca',   date: '2026-06-11', time: '15:00' },
+    { id: 'm2',  home: 'KOR', away: 'CZE', venue: 'Akron',    date: '2026-06-11', time: '22:00' },
+    { id: 'm25', home: 'CZE', away: 'RSA', venue: 'Mercedes', date: '2026-06-18', time: '12:00' },
+    { id: 'm28', home: 'MEX', away: 'KOR', venue: 'Akron',    date: '2026-06-18', time: '21:00' },
+    { id: 'm53', home: 'CZE', away: 'MEX', venue: 'Azteca',   date: '2026-06-24', time: '21:00' },
+    { id: 'm54', home: 'RSA', away: 'KOR', venue: 'BBVA',     date: '2026-06-24', time: '21:00' },
+  ],
+  B: [
+    { id: 'm3',  home: 'CAN', away: 'BIH', venue: 'BMO',      date: '2026-06-12', time: '15:00' },
+    { id: 'm8',  home: 'QAT', away: 'SUI', venue: 'Levis',    date: '2026-06-13', time: '15:00' },
+    { id: 'm26', home: 'SUI', away: 'BIH', venue: 'SoFi',     date: '2026-06-18', time: '15:00' },
+    { id: 'm27', home: 'CAN', away: 'QAT', venue: 'BCPlace',  date: '2026-06-18', time: '18:00' },
+    { id: 'm51', home: 'SUI', away: 'CAN', venue: 'BCPlace',  date: '2026-06-24', time: '15:00' },
+    { id: 'm52', home: 'BIH', away: 'QAT', venue: 'Lumen',    date: '2026-06-24', time: '15:00' },
+  ],
+  C: [
+    { id: 'm7',  home: 'BRA', away: 'MAR', venue: 'MetLife',  date: '2026-06-13', time: '18:00' },
+    { id: 'm5',  home: 'HAI', away: 'SCO', venue: 'Gillette', date: '2026-06-13', time: '21:00' },
+    { id: 'm30', home: 'SCO', away: 'MAR', venue: 'Gillette', date: '2026-06-19', time: '18:00' },
+    { id: 'm29', home: 'BRA', away: 'HAI', venue: 'Lincoln',  date: '2026-06-19', time: '21:00' },
+    { id: 'm49', home: 'SCO', away: 'BRA', venue: 'HardRock', date: '2026-06-24', time: '18:00' },
+    { id: 'm50', home: 'MAR', away: 'HAI', venue: 'Mercedes', date: '2026-06-24', time: '18:00' },
+  ],
+  D: [
+    { id: 'm4',  home: 'USA', away: 'PAR', venue: 'SoFi',     date: '2026-06-12', time: '21:00' },
+    { id: 'm6',  home: 'AUS', away: 'TUR', venue: 'BCPlace',  date: '2026-06-14', time: '00:00' },
+    { id: 'm32', home: 'USA', away: 'AUS', venue: 'Lumen',    date: '2026-06-19', time: '15:00' },
+    { id: 'm31', home: 'TUR', away: 'PAR', venue: 'Levis',    date: '2026-06-20', time: '00:00' },
+    { id: 'm59', home: 'TUR', away: 'USA', venue: 'SoFi',     date: '2026-06-25', time: '22:00' },
+    { id: 'm60', home: 'PAR', away: 'AUS', venue: 'Levis',    date: '2026-06-25', time: '22:00' },
+  ],
+  E: [
+    { id: 'm10', home: 'GER', away: 'CUW', venue: 'NRG',      date: '2026-06-14', time: '13:00' },
+    { id: 'm9',  home: 'CIV', away: 'ECU', venue: 'Lincoln',  date: '2026-06-14', time: '19:00' },
+    { id: 'm33', home: 'GER', away: 'CIV', venue: 'BMO',      date: '2026-06-20', time: '16:00' },
+    { id: 'm34', home: 'ECU', away: 'CUW', venue: 'Arrowhead',date: '2026-06-20', time: '20:00' },
+    { id: 'm56', home: 'ECU', away: 'GER', venue: 'MetLife',  date: '2026-06-25', time: '16:00' },
+    { id: 'm55', home: 'CUW', away: 'CIV', venue: 'Lincoln',  date: '2026-06-25', time: '16:00' },
+  ],
+  F: [
+    { id: 'm11', home: 'NED', away: 'JPN', venue: 'ATT',      date: '2026-06-14', time: '16:00' },
+    { id: 'm12', home: 'TUN', away: 'SWE', venue: 'BBVA',     date: '2026-06-14', time: '22:00' },
+    { id: 'm35', home: 'NED', away: 'SWE', venue: 'NRG',      date: '2026-06-20', time: '13:00' },
+    { id: 'm36', home: 'TUN', away: 'JPN', venue: 'BBVA',     date: '2026-06-21', time: '00:00' },
+    { id: 'm57', home: 'JPN', away: 'SWE', venue: 'ATT',      date: '2026-06-25', time: '19:00' },
+    { id: 'm58', home: 'TUN', away: 'NED', venue: 'Arrowhead',date: '2026-06-25', time: '19:00' },
+  ],
+  G: [
+    { id: 'm16', home: 'BEL', away: 'EGY', venue: 'Lumen',    date: '2026-06-15', time: '15:00' },
+    { id: 'm15', home: 'IRN', away: 'NZL', venue: 'SoFi',     date: '2026-06-15', time: '21:00' },
+    { id: 'm39', home: 'BEL', away: 'IRN', venue: 'SoFi',     date: '2026-06-21', time: '15:00' },
+    { id: 'm40', home: 'NZL', away: 'EGY', venue: 'BCPlace',  date: '2026-06-21', time: '21:00' },
+    { id: 'm63', home: 'EGY', away: 'IRN', venue: 'Lumen',    date: '2026-06-26', time: '23:00' },
+    { id: 'm64', home: 'NZL', away: 'BEL', venue: 'BCPlace',  date: '2026-06-26', time: '23:00' },
+  ],
+  H: [
+    { id: 'm14', home: 'ESP', away: 'CPV', venue: 'Mercedes', date: '2026-06-15', time: '12:00' },
+    { id: 'm13', home: 'KSA', away: 'URU', venue: 'HardRock', date: '2026-06-15', time: '18:00' },
+    { id: 'm38', home: 'ESP', away: 'KSA', venue: 'Mercedes', date: '2026-06-21', time: '12:00' },
+    { id: 'm37', home: 'URU', away: 'CPV', venue: 'HardRock', date: '2026-06-21', time: '18:00' },
+    { id: 'm66', home: 'URU', away: 'ESP', venue: 'Akron',    date: '2026-06-26', time: '20:00' },
+    { id: 'm65', home: 'CPV', away: 'KSA', venue: 'NRG',      date: '2026-06-26', time: '20:00' },
+  ],
+  I: [
+    { id: 'm17', home: 'FRA', away: 'SEN', venue: 'MetLife',  date: '2026-06-16', time: '15:00' },
+    { id: 'm18', home: 'IRQ', away: 'NOR', venue: 'Gillette', date: '2026-06-16', time: '18:00' },
+    { id: 'm42', home: 'FRA', away: 'IRQ', venue: 'Lincoln',  date: '2026-06-22', time: '17:00' },
+    { id: 'm41', home: 'NOR', away: 'SEN', venue: 'MetLife',  date: '2026-06-22', time: '20:00' },
+    { id: 'm61', home: 'NOR', away: 'FRA', venue: 'Gillette', date: '2026-06-26', time: '15:00' },
+    { id: 'm62', home: 'SEN', away: 'IRQ', venue: 'BMO',      date: '2026-06-26', time: '15:00' },
+  ],
+  J: [
+    { id: 'm19', home: 'ARG', away: 'ALG', venue: 'Arrowhead',date: '2026-06-16', time: '21:00' },
+    { id: 'm20', home: 'AUT', away: 'JOR', venue: 'Levis',    date: '2026-06-17', time: '00:00' },
+    { id: 'm43', home: 'ARG', away: 'AUT', venue: 'ATT',      date: '2026-06-22', time: '13:00' },
+    { id: 'm44', home: 'JOR', away: 'ALG', venue: 'Levis',    date: '2026-06-22', time: '23:00' },
+    { id: 'm69', home: 'ALG', away: 'AUT', venue: 'Arrowhead',date: '2026-06-27', time: '22:00' },
+    { id: 'm70', home: 'JOR', away: 'ARG', venue: 'ATT',      date: '2026-06-27', time: '22:00' },
+  ],
+  K: [
+    { id: 'm23', home: 'POR', away: 'COD', venue: 'NRG',      date: '2026-06-17', time: '13:00' },
+    { id: 'm24', home: 'UZB', away: 'COL', venue: 'Azteca',   date: '2026-06-17', time: '22:00' },
+    { id: 'm47', home: 'POR', away: 'UZB', venue: 'NRG',      date: '2026-06-23', time: '13:00' },
+    { id: 'm48', home: 'COL', away: 'COD', venue: 'Akron',    date: '2026-06-23', time: '22:00' },
+    { id: 'm71', home: 'COL', away: 'POR', venue: 'HardRock', date: '2026-06-27', time: '19:30' },
+    { id: 'm72', home: 'COD', away: 'UZB', venue: 'Mercedes', date: '2026-06-27', time: '19:30' },
+  ],
+  L: [
+    { id: 'm22', home: 'ENG', away: 'CRO', venue: 'ATT',      date: '2026-06-17', time: '16:00' },
+    { id: 'm21', home: 'GHA', away: 'PAN', venue: 'BMO',      date: '2026-06-17', time: '19:00' },
+    { id: 'm45', home: 'ENG', away: 'GHA', venue: 'Gillette', date: '2026-06-23', time: '16:00' },
+    { id: 'm46', home: 'PAN', away: 'CRO', venue: 'BMO',      date: '2026-06-23', time: '19:00' },
+    { id: 'm67', home: 'PAN', away: 'ENG', venue: 'MetLife',  date: '2026-06-27', time: '17:00' },
+    { id: 'm68', home: 'CRO', away: 'GHA', venue: 'Lincoln',  date: '2026-06-27', time: '17:00' },
+  ],
+};
+
 export const ROUND_LABELS = {
   r32: 'Round of 32',
   r16: 'Round of 16',

@@ -126,7 +126,7 @@ export function countKnockoutPicks(knockoutPicks) {
   return Object.values(knockoutPicks ?? {}).filter(Boolean).length;
 }
 
-export function formatMatchDate(dateStr, timeStr, venueKey) {
+export function formatMatchDate(dateStr, timeStr) {
   if (!dateStr) return '';
   try {
     const dt = new Date(`${dateStr}T${timeStr ?? '00:00'}:00`);

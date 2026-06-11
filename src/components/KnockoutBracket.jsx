@@ -8,11 +8,11 @@ const ROUNDS = ['r32', 'r16', 'qf', 'sf', 'final'];
 // Heights per round for vertical spacing (each round doubles the previous).
 // r32 is sized to just fit a full card (venue + 2 team rows with stars + time).
 const ROUND_ITEM_HEIGHT = {
-  r32: 120,
-  r16: 240,
-  qf: 480,
-  sf: 960,
-  final: 960,
+  r32: 148,
+  r16: 296,
+  qf: 592,
+  sf: 1184,
+  final: 1184,
 };
 
 function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }) {
