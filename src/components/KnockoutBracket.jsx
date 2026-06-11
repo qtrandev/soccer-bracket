@@ -15,6 +15,10 @@ const ROUND_ITEM_HEIGHT = {
   final: 1184,
 };
 
+// How many px above the vertical centre to place the Final card.
+// Vertical connectors bridge from the SF arms (at 50%) down to this level.
+const FINAL_LIFT = 100;
+
 function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }) {
   const itemH = ROUND_ITEM_HEIGHT[round] ?? 88;
   const isLast = round === 'final';
@@ -144,8 +148,8 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
             readOnly={readOnly}
           />
 
-          {/* Final in center — same flex-col structure as RoundColumn so the card
-              center aligns with the SF horizontal arms at top:50% of sf slot */}
+          {/* Final in center — card is lifted FINAL_LIFT px above 50%;
+              vertical connectors bridge from the SF arms (at 50%) up to the card */}
           <div className="flex flex-col flex-shrink-0" style={{ width: 208 }}>
             <div className="text-center mb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gold-400 px-2 py-1 rounded border border-gold-500/60 bg-gold-500/10">
@@ -153,23 +157,29 @@ export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, 
               </span>
             </div>
             <div
-              className="relative flex items-center justify-center rounded-2xl"
+              className="relative rounded-2xl"
               style={{
                 height: ROUND_ITEM_HEIGHT.sf,
                 background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.08) 0%, transparent 70%)',
                 boxShadow: '0 0 60px rgba(245,158,11,0.07)',
               }}
             >
-              {/* Incoming connector arms from both SF columns */}
-              <div style={{ position: 'absolute', left: -24, top: '50%', width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
-              <div style={{ position: 'absolute', right: -24, top: '50%', width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
-              <BracketMatch
-                match={bracket.final}
-                onPick={onPick}
-                readOnly={readOnly}
-                isCompact={false}
-                isFinal
-              />
+              {/* Left: horizontal arm + vertical connector down to SF arm level */}
+              <div style={{ position: 'absolute', left: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
+              <div style={{ position: 'absolute', left: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 2, height: FINAL_LIFT, background: 'rgba(34,197,94,0.25)' }} />
+              {/* Right: horizontal arm + vertical connector */}
+              <div style={{ position: 'absolute', right: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 24, height: 2, background: 'rgba(34,197,94,0.25)' }} />
+              <div style={{ position: 'absolute', right: -24, top: `calc(50% - ${FINAL_LIFT}px)`, width: 2, height: FINAL_LIFT, background: 'rgba(34,197,94,0.25)' }} />
+              {/* Final card at lifted position */}
+              <div style={{ position: 'absolute', top: `calc(50% - ${FINAL_LIFT}px)`, left: '50%', transform: 'translate(-50%, -50%)' }}>
+                <BracketMatch
+                  match={bracket.final}
+                  onPick={onPick}
+                  readOnly={readOnly}
+                  isCompact={false}
+                  isFinal
+                />
+              </div>
             </div>
           </div>
 

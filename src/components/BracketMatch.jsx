@@ -37,7 +37,7 @@ export default function BracketMatch({ match, onPick, readOnly, isCompact, isFin
 
         let rowClass = 'bracket-team-row';
         if (isTbd) rowClass += ' tbd';
-        else if (isWinner) rowClass += ' winner';
+        else if (isWinner) rowClass += isFinal ? ' winner bg-gold-500/20 border-gold-400/50' : ' winner';
         else if (isLoser) rowClass += ' opacity-40';
 
         return (
@@ -54,7 +54,7 @@ export default function BracketMatch({ match, onPick, readOnly, isCompact, isFin
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <TeamFlag code={teamCode} size="xs" showName />
-                    {isWinner && <span className="ml-auto text-xs">✓</span>}
+                    {isWinner && <span className="ml-auto text-xs">{isFinal ? '🏆' : '✓'}</span>}
                     {!winner && canPick && (
                       <span className="ml-auto text-emerald-800 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
                         pick
