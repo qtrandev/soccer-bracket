@@ -26,6 +26,16 @@ export default function ViewBracket() {
           return;
         }
         setBracketData(data);
+        // Record this bracket in the visitor's local history
+        try {
+          const champion = data.knockoutPicks?.['m104'] ?? data.knockoutPicks?.final ?? null;
+          const prev = JSON.parse(localStorage.getItem('bracketwebb_history') ?? '[]');
+          const existing = prev.find(h => h.slug === slug);
+          const deduped = prev.filter(h => h.slug !== slug);
+          // Preserve mine:true if already saved by this user
+          deduped.unshift({ slug, champion, mine: existing?.mine ?? false, savedAt: new Date().toISOString() });
+          localStorage.setItem('bracketwebb_history', JSON.stringify(deduped.slice(0, 20)));
+        } catch {}
         // Silently migrate v1 brackets to the official FIFA structure
         if (data.version === 1) {
           setMigrating(true);

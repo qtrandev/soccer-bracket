@@ -179,33 +179,61 @@ export default function Home() {
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
         {history.length > 0 ? (
           <>
-            <h2 className="text-xl font-bold text-neutral-900 mb-1">Your saved brackets</h2>
-            <p className="text-sm text-neutral-500 mb-5">All brackets you've saved on this device.</p>
+            <h2 className="text-xl font-bold text-neutral-900 mb-1">Your bracket history</h2>
+            <p className="text-sm text-neutral-500 mb-5">Brackets you've visited or saved on this device.</p>
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="border-b border-neutral-200 text-xs text-neutral-400 uppercase tracking-wider">
-                  <th className="text-left py-2 pr-3">#</th>
+                  <th className="text-left py-2 pr-3 w-8">#</th>
                   <th className="text-left py-2 pr-3">Bracket</th>
-                  <th className="text-left py-2 hidden sm:table-cell">Saved</th>
+                  <th className="text-left py-2 pr-3 hidden sm:table-cell">Pick</th>
+                  <th className="text-left py-2 hidden sm:table-cell">Visited</th>
                 </tr>
               </thead>
               <tbody>
-                {history.map((entry, i) => (
-                  <tr key={entry.slug} className="border-b border-neutral-100 group">
-                    <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums">{i + 1}</td>
-                    <td className="py-2 pr-3">
-                      <Link
-                        to={`/${entry.slug}`}
-                        className="font-mono text-green-600 hover:text-green-700 hover:underline"
-                      >
-                        bracketwebb.com/<span className="font-semibold">{entry.slug}</span>
-                      </Link>
-                    </td>
-                    <td className="py-2 text-xs text-neutral-400 hidden sm:table-cell">
-                      {new Date(entry.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </td>
-                  </tr>
-                ))}
+                {history.slice(0, 20).map((entry, i) => {
+                  const flagSrc = entry.champion && TEAMS[entry.champion]
+                    ? `https://flagcdn.com/${TEAMS[entry.champion].iso2}.svg`
+                    : null;
+                  return (
+                    <tr key={entry.slug} className="border-b border-neutral-100 group">
+                      <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums">{i + 1}</td>
+                      <td className="py-2 pr-3">
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/${entry.slug}`}
+                            className="font-mono text-green-600 hover:text-green-700 hover:underline"
+                          >
+                            bracketwebb.com/<span className="font-semibold">{entry.slug}</span>
+                          </Link>
+                          {entry.mine && (
+                            <span className="text-[10px] font-medium text-green-700 bg-green-100 px-1.5 py-0.5 rounded">
+                              YOU
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2 pr-3 hidden sm:table-cell">
+                        {flagSrc ? (
+                          <div className="flex items-center gap-1.5">
+                            <img src={flagSrc} alt={entry.champion} className="w-5 h-3.5 object-cover rounded-sm" />
+                            <span className="text-xs text-neutral-600">{TEAMS[entry.champion].name}</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-neutral-300">—</span>
+                        )}
+                      </td>
+                      <td className="py-2 text-xs text-neutral-400 hidden sm:table-cell whitespace-nowrap">
+                        {(() => {
+                          const d = new Date(entry.savedAt);
+                          const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                          const hour = d.toLocaleTimeString(undefined, { hour: 'numeric' }).replace(' ', '');
+                          return `${date} ${hour}`;
+                        })()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </>

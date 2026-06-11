@@ -108,17 +108,12 @@ export default function CreateBracket() {
           {/* ── Auto-fill button ── */}
           <AutofillPanel onAutofill={handleAutofill} applied={appliedStrategy} />
 
+          <span className="text-xs text-emerald-800">✓ Auto-saved</span>
           <button
             onClick={() => { if (window.confirm('Reset your entire bracket?')) { resetBracket(); setAppliedStrategy(null); setStep('groups'); } }}
             className="text-xs text-emerald-700 hover:text-red-400 transition-colors px-2 py-1"
           >
             Reset
-          </button>
-          <button
-            onClick={() => setShowShare(true)}
-            className="px-4 py-2 rounded-lg bg-grass-500 text-pitch-950 font-bold text-sm hover:bg-grass-400 transition-colors"
-          >
-            💾 Save & Share
           </button>
         </div>
       </div>
@@ -213,6 +208,7 @@ export default function CreateBracket() {
           setSlug={() => {}}
           onSave={handleSave}
           onClose={() => setShowShare(false)}
+          champion={knockoutPicks?.[FINAL_MATCH.id] ?? null}
         />
       )}
     </div>

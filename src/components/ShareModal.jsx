@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { generateSlug } from '../data/slugWords.js';
 import { RESERVED_SLUGS } from '../data/reservedSlugs.js';
+import { TEAMS } from '../data/tournamentData.js';
 
-export default function ShareModal({ onClose, onSave, slug, setSlug }) {
+export default function ShareModal({ onClose, onSave, slug, setSlug, champion = null }) {
   const [customSlug, setCustomSlug] = useState(slug);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -31,8 +32,8 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
         try {
           const prev = JSON.parse(localStorage.getItem('bracketwebb_history') ?? '[]');
           const deduped = prev.filter(h => h.slug !== customSlug);
-          deduped.unshift({ slug: customSlug, savedAt: new Date().toISOString() });
-          localStorage.setItem('bracketwebb_history', JSON.stringify(deduped));
+          deduped.unshift({ slug: customSlug, champion, mine: true, savedAt: new Date().toISOString() });
+          localStorage.setItem('bracketwebb_history', JSON.stringify(deduped.slice(0, 20)));
         } catch {}
       }
     } catch (e) {
@@ -69,9 +70,26 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
         </button>
 
         <h2 className="text-xl font-bold text-emerald-100 mb-1">Save & Share</h2>
-        <p className="text-sm text-emerald-600 mb-6">
+        <p className="text-sm text-emerald-600 mb-1">
           Your bracket gets a unique soccer-themed link.
         </p>
+        {/* Share preview — updates live as slug changes */}
+        {(() => {
+          const raw = customSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ').trim();
+          const owner = raw ? `${raw}'s` : 'Your';
+          const team = champion ? TEAMS[champion] : null;
+          const title = team
+            ? `${owner} bracket · ${team.name} wins 🏆`
+            : `${owner} 2026 World Cup bracket`;
+          return (
+            <div className="flex items-center gap-1.5 mb-6 text-sm text-emerald-400">
+              {team && (
+                <img src={`https://flagcdn.com/${team.iso2}.svg`} alt={team.name} className="w-4 h-3 object-cover rounded-sm flex-shrink-0" />
+              )}
+              <span className="truncate">{title}</span>
+            </div>
+          );
+        })()}
 
         {/* Slug picker */}
         <label className="block text-xs text-emerald-500 mb-1.5 font-medium uppercase tracking-wider">
@@ -106,9 +124,7 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
           </button>
         </div>
 
-        <p className="text-xs text-emerald-700 mb-4">
-          {shareUrl}
-        </p>
+        <p className="text-xs text-emerald-700 mb-4">{shareUrl}</p>
 
         {error && (
           <div className="mb-4 px-3 py-2 rounded-lg bg-red-900/30 border border-red-500/30 text-sm text-red-400">
