@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
 import TeamFlag from '../components/TeamFlag.jsx';
+import UpcomingMatches from '../components/UpcomingMatches.jsx';
 import { FINAL_MATCH } from '../data/tournamentData.js';
 
 export default function ViewBracket() {
@@ -191,6 +192,9 @@ export default function ViewBracket() {
           />
         )
       )}
+      <div className="mt-10">
+        <UpcomingMatches />
+      </div>
     </div>
   );
 }

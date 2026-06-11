@@ -23,7 +23,7 @@ async function checkRateLimit(ip) {
   const key = `${ip}:${hourBucket()}`;
   const rec = await store.get(key, { type: 'json' }) ?? { count: 0 };
   if (rec.count >= RATE_LIMIT) return false;
-  await store.setJSON(key, { count: rec.count + 1 });
+  await store.setJSON(key, { count: rec.count + 1 }, { expiration: Date.now() + 2 * 3600 * 1000 });
   return true;
 }
 

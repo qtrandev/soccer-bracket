@@ -78,8 +78,8 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
         </div>
       )}
 
-      {/* Per-game schedule */}
-      {games.length > 0 && (
+      {/* Per-game schedule — only on editable bracket, not on shared view */}
+      {!readOnly && games.length > 0 && (
         <div className="mt-3 pt-3 border-t border-emerald-900/30">
           <div className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 mb-2">Schedule</div>
           {[0, 1, 2].map(md => (

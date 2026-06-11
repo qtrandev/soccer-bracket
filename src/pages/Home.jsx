@@ -234,7 +234,7 @@ export default function Home() {
         <h2 className="text-xl font-bold text-neutral-900 mb-1">Team Power Rankings</h2>
         <p className="text-sm text-neutral-400 mb-6">
           Ratings (0–100) based on FIFA rankings, betting odds, squad quality, and recent form.
-          Stars show the same scale — tap any team to auto-generate a bracket with them winning.
+          Tap any team to auto-fill a bracket with them winning the trophy.
         </p>
 
         <div className="overflow-x-auto">
