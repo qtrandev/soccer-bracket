@@ -56,6 +56,7 @@ export default function ViewBracket() {
 
   function handleMakeMine() {
     const draft = {
+      version:       2,
       groupPicks:    bracketData.groupPicks    ?? {},
       wildcards:     bracketData.wildcards     ?? [],
       knockoutPicks: bracketData.knockoutPicks ?? {},

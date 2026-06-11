@@ -23,8 +23,8 @@ const FEATURES = [
   },
   {
     icon: '📍',
-    title: 'Venue Info',
-    desc: 'Each match shows the stadium and US city. Semifinal and Final dates shown.',
+    title: 'Venue & Time Info',
+    desc: 'Every knockout match shows the stadium, city, and kickoff time in your local timezone.',
   },
 ];
 
@@ -45,7 +45,7 @@ export default function Home() {
 
   function handleTeamClick(code) {
     const draft = autofillBracket('favorites', code);
-    try { localStorage.setItem('bracketwebb_draft', JSON.stringify(draft)); } catch {}
+    try { localStorage.setItem('bracketwebb_draft', JSON.stringify({ version: 2, ...draft })); } catch {}
     navigate('/new', { state: { makeMine: draft } });
   }
 

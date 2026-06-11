@@ -25,17 +25,17 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
           Group <span className="text-grass-400">{letter}</span>
         </h3>
         <span className="text-xs text-emerald-700">
-          {picks.length}/2 picked
+          {Math.min(picks.length, 2)}/2 picked
         </span>
       </div>
 
       <div className="space-y-1">
         {teams.map(code => {
           const pos = getPosition(code);
-          const isPicked = pos >= 0;
+          const isPicked = pos === 0 || pos === 1;
           const isFirst = pos === 0;
           const isSecond = pos === 1;
-          const isEliminated = picks.length >= 2 && !isPicked;
+          const isEliminated = picks.length >= 2 && (pos < 0 || pos > 1);
 
           let pillClass = 'team-pill';
           if (isFirst) pillClass += ' selected-1st';
@@ -65,7 +65,7 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
         })}
       </div>
 
-      {picks.length === 2 && (
+      {picks.length >= 2 && (
         <div className="mt-2 pt-2 border-t border-emerald-900/30 flex gap-2 text-xs text-emerald-600">
           <span>↑ Advancing:</span>
           {picks.slice(0, 2).map((c, i) => (

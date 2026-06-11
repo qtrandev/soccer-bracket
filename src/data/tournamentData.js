@@ -115,51 +115,51 @@ export const VENUES = {
 //   SF: Jul 14 (Dallas/AT&T) & Jul 15 (Atlanta/Mercedes-Benz) · Final: Jul 19 (MetLife)
 export const R32_MATCHES = [
   // ---- Left half ----
-  { id: 'm74', slot1: 'E1', slot2: '3RD' },  // 3rd from A/B/C/D/F
-  { id: 'm77', slot1: 'I1', slot2: '3RD' },  // 3rd from C/D/F/G/H
-  { id: 'm73', slot1: 'A2', slot2: 'B2' },
-  { id: 'm75', slot1: 'F1', slot2: 'C2' },
-  { id: 'm83', slot1: 'K2', slot2: 'L2' },
-  { id: 'm84', slot1: 'H1', slot2: 'J2' },
-  { id: 'm81', slot1: 'D1', slot2: '3RD' },  // 3rd from B/E/F/I/J
-  { id: 'm82', slot1: 'G1', slot2: '3RD' },  // 3rd from A/E/H/I/J
+  { id: 'm74', slot1: 'E1', slot2: '3RD', venue: 'Gillette',  date: '2026-06-29', time: '16:30' },
+  { id: 'm77', slot1: 'I1', slot2: '3RD', venue: 'MetLife',   date: '2026-06-30', time: '17:00' },
+  { id: 'm73', slot1: 'A2', slot2: 'B2',  venue: 'SoFi',      date: '2026-06-28', time: '15:00' },
+  { id: 'm75', slot1: 'F1', slot2: 'C2',  venue: 'BBVA',      date: '2026-06-29', time: '21:00' },
+  { id: 'm83', slot1: 'K2', slot2: 'L2',  venue: 'BMO',       date: '2026-07-02', time: '19:00' },
+  { id: 'm84', slot1: 'H1', slot2: 'J2',  venue: 'SoFi',      date: '2026-07-02', time: '15:00' },
+  { id: 'm81', slot1: 'D1', slot2: '3RD', venue: 'Levis',     date: '2026-07-01', time: '20:00' },
+  { id: 'm82', slot1: 'G1', slot2: '3RD', venue: 'Lumen',     date: '2026-07-01', time: '16:00' },
   // ---- Right half ----
-  { id: 'm76', slot1: 'C1', slot2: 'F2' },
-  { id: 'm78', slot1: 'E2', slot2: 'I2' },
-  { id: 'm79', slot1: 'A1', slot2: '3RD' },  // 3rd from C/E/F/H/I
-  { id: 'm80', slot1: 'L1', slot2: '3RD' },  // 3rd from E/H/I/J/K
-  { id: 'm86', slot1: 'J1', slot2: 'H2' },
-  { id: 'm88', slot1: 'D2', slot2: 'G2' },
-  { id: 'm85', slot1: 'B1', slot2: '3RD' },  // 3rd from E/F/G/I/J
-  { id: 'm87', slot1: 'K1', slot2: '3RD' },  // 3rd from D/E/I/J/L
+  { id: 'm76', slot1: 'C1', slot2: 'F2',  venue: 'NRG',       date: '2026-06-29', time: '13:00' },
+  { id: 'm78', slot1: 'E2', slot2: 'I2',  venue: 'ATT',       date: '2026-06-30', time: '13:00' },
+  { id: 'm79', slot1: 'A1', slot2: '3RD', venue: 'Azteca',    date: '2026-06-30', time: '21:00' },
+  { id: 'm80', slot1: 'L1', slot2: '3RD', venue: 'Mercedes',  date: '2026-07-01', time: '12:00' },
+  { id: 'm86', slot1: 'J1', slot2: 'H2',  venue: 'HardRock',  date: '2026-07-03', time: '18:00' },
+  { id: 'm88', slot1: 'D2', slot2: 'G2',  venue: 'ATT',       date: '2026-07-03', time: '14:00' },
+  { id: 'm85', slot1: 'B1', slot2: '3RD', venue: 'BCPlace',   date: '2026-07-02', time: '23:00' },
+  { id: 'm87', slot1: 'K1', slot2: '3RD', venue: 'Arrowhead', date: '2026-07-03', time: '21:30' },
 ];
 
 // R16 feeds — sequential display pairing (r16[i] = winners of r32[2i], r32[2i+1])
 export const R16_MATCHES = [
-  { id: 'm89', src: ['m74', 'm77'] },
-  { id: 'm90', src: ['m73', 'm75'] },
-  { id: 'm93', src: ['m83', 'm84'] },
-  { id: 'm94', src: ['m81', 'm82'] },
-  { id: 'm91', src: ['m76', 'm78'] },
-  { id: 'm92', src: ['m79', 'm80'] },
-  { id: 'm95', src: ['m86', 'm88'] },
-  { id: 'm96', src: ['m85', 'm87'] },
+  { id: 'm89', src: ['m74', 'm77'], venue: 'Lincoln',  date: '2026-07-04', time: '17:00' },
+  { id: 'm90', src: ['m73', 'm75'], venue: 'NRG',      date: '2026-07-04', time: '13:00' },
+  { id: 'm93', src: ['m83', 'm84'], venue: 'ATT',      date: '2026-07-06', time: '15:00' },
+  { id: 'm94', src: ['m81', 'm82'], venue: 'Lumen',    date: '2026-07-06', time: '20:00' },
+  { id: 'm91', src: ['m76', 'm78'], venue: 'MetLife',  date: '2026-07-05', time: '16:00' },
+  { id: 'm92', src: ['m79', 'm80'], venue: 'Azteca',   date: '2026-07-05', time: '20:00' },
+  { id: 'm95', src: ['m86', 'm88'], venue: 'Mercedes', date: '2026-07-07', time: '12:00' },
+  { id: 'm96', src: ['m85', 'm87'], venue: 'BCPlace',  date: '2026-07-07', time: '16:00' },
 ];
 
 export const QF_MATCHES = [
-  { id: 'm97',  src: ['m89', 'm90'] },
-  { id: 'm98',  src: ['m93', 'm94'] },
-  { id: 'm99',  src: ['m91', 'm92'] },
-  { id: 'm100', src: ['m95', 'm96'] },
+  { id: 'm97',  src: ['m89', 'm90'], venue: 'Gillette',  date: '2026-07-09', time: '16:00' },
+  { id: 'm98',  src: ['m93', 'm94'], venue: 'SoFi',      date: '2026-07-10', time: '15:00' },
+  { id: 'm99',  src: ['m91', 'm92'], venue: 'HardRock',  date: '2026-07-11', time: '17:00' },
+  { id: 'm100', src: ['m95', 'm96'], venue: 'Arrowhead', date: '2026-07-11', time: '21:00' },
 ];
 
 export const SF_MATCHES = [
-  { id: 'm101', src: ['m97', 'm98'],   venue: 'ATT',     date: '2026-07-14' },
-  { id: 'm102', src: ['m99', 'm100'],  venue: 'Mercedes', date: '2026-07-15' },
+  { id: 'm101', src: ['m97', 'm98'],  venue: 'ATT',      date: '2026-07-14', time: '15:00' },
+  { id: 'm102', src: ['m99', 'm100'], venue: 'Mercedes', date: '2026-07-15', time: '15:00' },
 ];
 
 export const FINAL_MATCH = {
-  id: 'm104', src: ['m101', 'm102'], venue: 'MetLife', date: '2026-07-19',
+  id: 'm104', src: ['m101', 'm102'], venue: 'MetLife', date: '2026-07-19', time: '15:00',
 };
 
 export const ROUND_LABELS = {
