@@ -4,6 +4,7 @@ import { TEAMS } from '../data/tournamentData.js';
 import { STRENGTHS } from '../data/teamStrengths.js';
 import { autofillBracket } from '../utils/autofill.js';
 import StrengthStars from '../components/StrengthStars.jsx';
+import UpcomingMatches from '../components/UpcomingMatches.jsx';
 
 const FEATURES = [
   {
@@ -121,6 +122,8 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      <UpcomingMatches />
 
       {/* ── Features ── */}
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
@@ -240,9 +243,7 @@ export default function Home() {
               <tr className="border-b border-neutral-200 text-xs text-neutral-400 uppercase tracking-wider">
                 <th className="text-left py-2 pr-3 w-8">#</th>
                 <th className="text-left py-2 pr-3">Team</th>
-                <th className="text-left py-2 pr-3 hidden sm:table-cell">Conf.</th>
-                <th className="text-left py-2 pr-3">Strength</th>
-                <th className="text-right py-2">Rating</th>
+                <th className="text-left py-2">Strength</th>
               </tr>
             </thead>
             <tbody>
@@ -261,17 +262,16 @@ export default function Home() {
                         alt={t.name}
                         className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
                       />
-                      <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
+                      <div>
+                        <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
+                        <span className="ml-2 text-[10px] font-mono text-neutral-500">{t.code}</span>
+                        <span className="ml-1.5 text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded group-hover:bg-green-100 group-hover:text-green-600 transition-colors">{t.conf}</span>
+                      </div>
                     </div>
                   </td>
-                  <td className="py-2 pr-3 hidden sm:table-cell">
-                    <span className="text-xs text-neutral-400">{t.conf}</span>
-                  </td>
-                  <td className="py-2 pr-3">
+                  <td className="py-2">
                     <StrengthStars strength={STRENGTHS[t.code]} className="text-sm" />
-                  </td>
-                  <td className="py-2 text-right tabular-nums font-mono text-xs text-neutral-500">
-                    {STRENGTHS[t.code] ?? 50}
+                    <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{STRENGTHS[t.code] ?? 50}/100</span>
                   </td>
                 </tr>
               ))}
