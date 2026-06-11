@@ -151,7 +151,7 @@ export default function Home() {
 
       {/* ── Features ── */}
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
-        <h2 className="text-xl font-bold text-neutral-900 mb-6">What you get</h2>
+        <h2 className="text-xl font-bold text-neutral-900 mb-6">Features</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {FEATURES.map(f => (
             <div
@@ -199,6 +199,51 @@ export default function Home() {
         </ol>
       </section>
 
+      {/* ── Power Rankings ── */}
+      <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
+        <h2 className="text-xl font-bold text-neutral-900 mb-1">Team Power Rankings</h2>
+        <p className="text-sm text-neutral-400 mb-6">
+          Ratings (0–100) based on FIFA rankings, betting odds, squad quality, and recent form.
+          Tap any team to auto-fill a bracket with them winning the trophy.
+        </p>
+
+        <div className="space-y-1.5">
+          {ALL_TEAMS.map((t, i) => (
+            <button
+              key={t.code}
+              onClick={() => handleTeamClick(t.code)}
+              title={`Generate bracket: ${t.name} wins`}
+              className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 active:bg-green-100 active:border-green-500 transition-colors cursor-pointer text-left select-none"
+            >
+              <span className="text-neutral-400 text-xs tabular-nums w-5 flex-shrink-0 text-center">{i + 1}</span>
+              <img
+                src={`https://flagcdn.com/${t.iso2}.svg`}
+                alt={t.name}
+                className="w-6 h-4 object-cover rounded-sm flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
+                  <span className="text-[10px] font-mono text-neutral-400">{t.code}</span>
+                  <span className="text-[10px] font-medium text-neutral-400 bg-neutral-200 group-hover:bg-green-100 group-hover:text-green-600 px-1.5 py-0.5 rounded transition-colors">{t.conf}</span>
+                  {WC_TITLES[t.code] && (
+                    <span className="text-[10px] font-medium text-amber-600">🏆×{WC_TITLES[t.code]}</span>
+                  )}
+                  {WC_RUNNER_UP[t.code] && (
+                    <span className="text-[10px] font-medium text-neutral-400">🥈×{WC_RUNNER_UP[t.code]}</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex-shrink-0 text-right">
+                <StrengthStars strength={STRENGTHS[t.code]} className="text-sm" />
+                <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{Math.min(100, (STRENGTHS[t.code] ?? 50) + STRENGTH_OFFSET)}/100</span>
+              </div>
+              <span className="flex-shrink-0 text-neutral-300 group-hover:text-green-500 transition-colors text-sm">→</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* ── Bracket history / example links ── */}
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
         {history.length > 0 ? (
@@ -221,9 +266,9 @@ export default function Home() {
                     : null;
                   return (
                     <tr key={entry.slug} className="border-b border-neutral-100 group">
-                      <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums">{i + 1}</td>
+                      <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums align-top">{i + 1}</td>
                       <td className="py-2 pr-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Link
                             to={`/${entry.slug}`}
                             className="font-mono text-green-600 hover:text-green-700 hover:underline"
@@ -235,6 +280,25 @@ export default function Home() {
                               YOU
                             </span>
                           )}
+                        </div>
+                        {/* Mobile-only: pick + date below the link */}
+                        <div className="flex items-center gap-3 mt-1 sm:hidden">
+                          {flagSrc ? (
+                            <div className="flex items-center gap-1.5">
+                              <img src={flagSrc} alt={entry.champion} className="w-5 h-3.5 object-cover rounded-sm" />
+                              <span className="text-xs text-neutral-600">{TEAMS[entry.champion].name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-neutral-300">—</span>
+                          )}
+                          <span className="text-xs text-neutral-400">
+                            {(() => {
+                              const d = new Date(entry.savedAt);
+                              const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                              const hour = d.toLocaleTimeString(undefined, { hour: 'numeric' }).replace(' ', '');
+                              return `${date} ${hour}`;
+                            })()}
+                          </span>
                         </div>
                       </td>
                       <td className="py-2 pr-3 hidden sm:table-cell">
@@ -279,67 +343,6 @@ export default function Home() {
             </div>
           </>
         )}
-      </section>
-
-      {/* ── Power Rankings ── */}
-      <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
-        <h2 className="text-xl font-bold text-neutral-900 mb-1">Team Power Rankings</h2>
-        <p className="text-sm text-neutral-400 mb-6">
-          Ratings (0–100) based on FIFA rankings, betting odds, squad quality, and recent form.
-          Tap any team to auto-fill a bracket with them winning the trophy.
-        </p>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-neutral-200 text-xs text-neutral-400 uppercase tracking-wider">
-                <th className="text-left py-2 pr-3 w-8">#</th>
-                <th className="text-left py-2 pr-3">Team</th>
-                <th className="text-left py-2">Strength</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ALL_TEAMS.map((t, i) => (
-                <tr
-                  key={t.code}
-                  onClick={() => handleTeamClick(t.code)}
-                  className="border-b border-neutral-100 hover:bg-green-50 cursor-pointer transition-colors group"
-                  title={`Generate bracket: ${t.name} wins`}
-                >
-                  <td className="py-2 pr-3 text-neutral-400 text-xs tabular-nums">{i + 1}</td>
-                  <td className="py-2 pr-3">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={`https://flagcdn.com/${t.iso2}.svg`}
-                        alt={t.name}
-                        className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
-                      />
-                      <div>
-                        <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
-                        <span className="ml-2 text-[10px] font-mono text-neutral-500">{t.code}</span>
-                        <span className="ml-1.5 text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded group-hover:bg-green-100 group-hover:text-green-600 transition-colors">{t.conf}</span>
-                        {WC_TITLES[t.code] && (
-                          <span className="ml-1.5 text-[10px] font-medium text-amber-600">
-                            🏆×{WC_TITLES[t.code]}
-                          </span>
-                        )}
-                        {WC_RUNNER_UP[t.code] && (
-                          <span className="ml-1 text-[10px] font-medium text-neutral-400">
-                            🥈×{WC_RUNNER_UP[t.code]}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-2">
-                    <StrengthStars strength={STRENGTHS[t.code]} className="text-sm" />
-                    <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{Math.min(100, (STRENGTHS[t.code] ?? 50) + STRENGTH_OFFSET)}/100</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
 
       {/* ── CTA ── */}

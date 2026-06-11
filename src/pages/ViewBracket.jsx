@@ -203,7 +203,7 @@ export default function ViewBracket() {
           />
         )
       )}
-      <div className="mt-10">
+      <div className="mt-10 -mx-4">
         <UpcomingMatches dark />
       </div>
     </div>

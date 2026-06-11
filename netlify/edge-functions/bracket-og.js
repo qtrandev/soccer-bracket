@@ -37,7 +37,7 @@ const TEAM_FLAGS = {
 // Paths that are app routes or static files — never treat as bracket slugs
 const SKIP = new Set([
   'new', 'favicon.ico', 'robots.txt', 'sitemap.xml',
-  'og.png', 'apple-touch-icon.png', 'ball.svg', 'og.svg',
+  'og.png', 'apple-touch-icon.png', 'ball.svg', 'og.svg', 'og-square', 'og-rect',
 ]);
 
 function escapeAttr(str) {
@@ -82,19 +82,30 @@ export default async function handler(request, context) {
       ? `${displaySlug} picks ${championName} to win the 2026 FIFA World Cup. Make your own predictions on BracketWebb!`
       : `Check out ${displaySlug}'s 2026 FIFA World Cup bracket on BracketWebb. Make your own predictions!`;
 
-    const canonicalUrl = `https://bracketwebb.com/${encodeURIComponent(slug)}`;
+    const canonicalUrl   = `https://bracketwebb.com/${encodeURIComponent(slug)}`;
+    const rectImageUrl   = `https://bracketwebb.com/og-rect?slug=${encodeURIComponent(slug)}`;
+    const squareImageUrl = `https://bracketwebb.com/og-square?slug=${encodeURIComponent(slug)}`;
 
     // Fetch the underlying response — the /* redirect serves index.html
     const res = await context.next();
     const html = await res.text();
 
+    // index.html has two og:image tags: first is the 1200×630 rect, second is the 1200×1200 square.
+    // Replace them in order using a counter so each gets the right dynamic URL.
+    let ogImageIdx = 0;
     const modified = html
-      .replace(/(<meta property="og:title" content=")[^"]*(")/,       `$1${escapeAttr(title)}$2`)
-      .replace(/(<meta property="og:description" content=")[^"]*(")/,  `$1${escapeAttr(description)}$2`)
-      .replace(/(<meta property="og:url" content=")[^"]*(")/,          `$1${escapeAttr(canonicalUrl)}$2`)
-      .replace(/(<meta name="twitter:title" content=")[^"]*(")/,       `$1${escapeAttr(title)}$2`)
+      .replace(/(<meta property="og:title" content=")[^"]*(")/,        `$1${escapeAttr(title)}$2`)
+      .replace(/(<meta property="og:description" content=")[^"]*(")/,   `$1${escapeAttr(description)}$2`)
+      .replace(/(<meta property="og:url" content=")[^"]*(")/,           `$1${escapeAttr(canonicalUrl)}$2`)
+      .replace(/(<meta property="og:image" content=")[^"]*(")/g, (_, p1, p2) => {
+        ogImageIdx++;
+        const url = ogImageIdx === 1 ? rectImageUrl : squareImageUrl;
+        return `${p1}${escapeAttr(url)}${p2}`;
+      })
+      .replace(/(<meta name="twitter:title" content=")[^"]*(")/,        `$1${escapeAttr(title)}$2`)
       .replace(/(<meta name="twitter:description" content=")[^"]*(")/,  `$1${escapeAttr(description)}$2`)
-      .replace(/(<link rel="canonical" href=")[^"]*(")/,               `$1${escapeAttr(canonicalUrl)}$2`);
+      .replace(/(<meta name="twitter:image" content=")[^"]*(")/,        `$1${escapeAttr(rectImageUrl)}$2`)
+      .replace(/(<link rel="canonical" href=")[^"]*(")/,                `$1${escapeAttr(canonicalUrl)}$2`);
 
     const headers = new Headers(res.headers);
     headers.set('content-type', 'text/html; charset=utf-8');
