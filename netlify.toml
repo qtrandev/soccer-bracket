@@ -8,12 +8,23 @@
   NODE_VERSION = "22"
 
 [[redirects]]
+  from = "/og-square"
+  to = "/.netlify/functions/og-square"
+  status = 200
+
+[[redirects]]
+  from = "/og-rect"
+  to = "/.netlify/functions/og-rect"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["sharp"]
 
 [dev]
   command = "npm run dev"

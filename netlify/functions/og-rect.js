@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import { getStore } from '@netlify/blobs';
 
 const TEAM_NAMES = {
@@ -130,15 +131,12 @@ function genericSvg() {
   </radialGradient>
   <rect width="1200" height="630" fill="url(#glow)"/>
   <circle cx="620" cy="315" r="420" fill="none" stroke="#22c55e" stroke-width="1" stroke-opacity="0.07"/>
-
   ${ballSvg(215, 205, 142)}
-
   <text x="68" y="432" font-family="Arial,Helvetica,sans-serif" font-size="78" font-weight="900" fill="white" letter-spacing="-1">BracketWebb</text>
   <text x="68" y="480" font-family="Arial,Helvetica,sans-serif" font-size="28" fill="#6b7280">2026 FIFA World Cup Bracket</text>
   <line x1="68" y1="510" x2="590" y2="510" stroke="#22c55e" stroke-width="3"/>
   <text x="68" y="547" font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#22c55e">Pick your winners · Share your bracket · Who takes the trophy?</text>
   <text x="68" y="607" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#22c55e" fill-opacity="0.4">bracketwebb.com</text>
-
   ${bracketSvg(645)}
 </svg>`;
 }
@@ -147,7 +145,6 @@ function winnerSvg(championName, flagDataUri) {
   const nameLen = championName.length;
   const nameFontSize = nameLen >= 14 ? 56 : nameLen >= 9 ? 72 : nameLen >= 6 ? 86 : 100;
 
-  // Flag sits to the right of the ball
   const flagW = 210, flagH = 140;
   const flagX = 385, flagY = 95;
 
@@ -159,23 +156,19 @@ function winnerSvg(championName, flagDataUri) {
   </radialGradient>
   <rect width="1200" height="630" fill="url(#glow)"/>
   <circle cx="620" cy="315" r="420" fill="none" stroke="#22c55e" stroke-width="1" stroke-opacity="0.07"/>
-
   ${ballSvg(215, 205, 142)}
-
   <image href="${flagDataUri}" x="${flagX}" y="${flagY}" width="${flagW}" height="${flagH}" preserveAspectRatio="xMidYMid meet"/>
-
   <text x="68" y="420" font-family="Arial,Helvetica,sans-serif" font-size="${nameFontSize}" font-weight="900" fill="white" letter-spacing="-1">${escapeXml(championName)}</text>
   <text x="68" y="478" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#22c55e">World Cup Champion · 2026</text>
   <line x1="68" y1="508" x2="590" y2="508" stroke="#22c55e" stroke-width="3"/>
   <text x="68" y="545" font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#22c55e" fill-opacity="0.7">Make your own bracket at bracketwebb.com</text>
   <text x="68" y="607" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#22c55e" fill-opacity="0.4">bracketwebb.com</text>
-
   ${bracketSvg(645)}
 </svg>`;
 }
 
-export default async function handler(request, context) {
-  const slug = new URL(request.url).searchParams.get('slug') ?? '';
+export default async (req) => {
+  const slug = new URL(req.url).searchParams.get('slug') ?? '';
 
   let svg = null;
 
@@ -210,13 +203,13 @@ export default async function handler(request, context) {
     } catch { /* fall through to generic */ }
   }
 
-  return new Response(svg ?? genericSvg(), {
+  const png = await sharp(Buffer.from(svg ?? genericSvg())).png().toBuffer();
+
+  return new Response(png, {
     status: 200,
     headers: {
-      'content-type': 'image/svg+xml',
+      'content-type': 'image/png',
       'cache-control': 'public, max-age=300, stale-while-revalidate=60',
     },
   });
-}
-
-export const config = { path: '/og-rect' };
+};
