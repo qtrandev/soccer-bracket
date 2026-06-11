@@ -23,8 +23,8 @@ const FEATURES = [
   },
   {
     icon: '📍',
-    title: 'Venue & Time Info',
-    desc: 'Each match shows the stadium and US city. Kickoff times shown in your local timezone.',
+    title: 'Venue Info',
+    desc: 'Each match shows the stadium and US city. Semifinal and Final dates shown.',
   },
 ];
 

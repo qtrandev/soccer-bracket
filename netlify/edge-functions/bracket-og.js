@@ -49,7 +49,7 @@ export default async function handler(request, context) {
     // Bracket doesn't exist — let the React app render its own not-found state
     if (!data) return context.next();
 
-    const champion = data.knockoutPicks?.final;
+    const champion = data.knockoutPicks?.['m104'] ?? data.knockoutPicks?.final;
     const championName = champion ? (TEAM_NAMES[champion] ?? champion) : null;
 
     const title = championName

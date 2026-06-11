@@ -48,6 +48,30 @@ export default async (req) => {
   if (!bracket || typeof bracket !== 'object') return json({ error: 'missing_bracket' }, 400);
   if (JSON.stringify(bracket).length > 50_000) return json({ error: 'payload_too_large' }, 413);
 
+  // Shape validation — reject structurally invalid payloads
+  const VALID_GROUPS = new Set('ABCDEFGHIJKL'.split(''));
+  const TEAM_CODE = /^[A-Z]{2,3}$/;
+  const MATCH_ID  = /^m\d{2,3}$/;
+
+  const gp = bracket.groupPicks ?? {};
+  if (typeof gp !== 'object' || Array.isArray(gp)) return json({ error: 'invalid_shape' }, 400);
+  for (const [k, v] of Object.entries(gp)) {
+    if (!VALID_GROUPS.has(k)) return json({ error: 'invalid_shape' }, 400);
+    if (!Array.isArray(v) || v.length > 4) return json({ error: 'invalid_shape' }, 400);
+    if (v.some(c => !TEAM_CODE.test(c))) return json({ error: 'invalid_shape' }, 400);
+  }
+
+  const wc = bracket.wildcards ?? [];
+  if (!Array.isArray(wc) || wc.length > 8) return json({ error: 'invalid_shape' }, 400);
+  if (wc.some(c => !TEAM_CODE.test(c))) return json({ error: 'invalid_shape' }, 400);
+
+  const kp = bracket.knockoutPicks ?? {};
+  if (typeof kp !== 'object' || Array.isArray(kp)) return json({ error: 'invalid_shape' }, 400);
+  for (const [k, v] of Object.entries(kp)) {
+    if (!MATCH_ID.test(k)) return json({ error: 'invalid_shape' }, 400);
+    if (v !== null && !TEAM_CODE.test(v)) return json({ error: 'invalid_shape' }, 400);
+  }
+
   try {
     // strong consistency ensures the read-after-write check is accurate across regions
     const store = getStore({ name: 'brackets', consistency: 'strong' });
