@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TEAMS } from '../data/tournamentData.js';
 import { STRENGTHS, MAX_STRENGTH } from '../data/teamStrengths.js';
@@ -59,6 +59,29 @@ function loadHistory() {
   try { return JSON.parse(localStorage.getItem('bracketwebb_history') ?? '[]'); } catch { return []; }
 }
 
+async function enrichChampions(history, setHistory) {
+  const missing = history.filter(e => !e.champion);
+  if (missing.length === 0) return;
+  const updates = await Promise.all(
+    missing.map(async e => {
+      try {
+        const res = await fetch(`/.netlify/functions/get-bracket?slug=${encodeURIComponent(e.slug)}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const champion = data.knockoutPicks?.['m104'] ?? data.knockoutPicks?.final ?? null;
+        return champion ? { slug: e.slug, champion } : null;
+      } catch { return null; }
+    })
+  );
+  const patchMap = Object.fromEntries(updates.filter(Boolean).map(u => [u.slug, u.champion]));
+  if (Object.keys(patchMap).length === 0) return;
+  setHistory(prev => {
+    const next = prev.map(e => (patchMap[e.slug] && !e.champion ? { ...e, champion: patchMap[e.slug] } : e));
+    try { localStorage.setItem('bracketwebb_history', JSON.stringify(next)); } catch {}
+    return next;
+  });
+}
+
 const ALL_TEAMS = Object.keys(TEAMS)
   .sort((a, b) => (STRENGTHS[b] ?? 50) - (STRENGTHS[a] ?? 50))
   .map(code => ({ code, ...TEAMS[code] }));
@@ -66,7 +89,9 @@ const ALL_TEAMS = Object.keys(TEAMS)
 export default function Home() {
   const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
-  const [history] = useState(loadHistory);
+  const [history, setHistory] = useState(loadHistory);
+
+  useEffect(() => { enrichChampions(history, setHistory); }, []);
 
   function handleTeamClick(code) {
     const draft = autofillBracket('favorites', code);

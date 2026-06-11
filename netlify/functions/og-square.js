@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import { getStore } from '@netlify/blobs';
+import { fontStyle } from './_font.js';
 
 const TEAM_NAMES = {
   MEX: 'Mexico',       KOR: 'South Korea',  CZE: 'Czechia',        RSA: 'South Africa',
@@ -99,6 +100,7 @@ function winnerSvg(championName, flagDataUri) {
   const flagX = 655, flagY = ballCy - flagH / 2;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  ${fontStyle()}
   <rect width="1200" height="1200" fill="#091a0f"/>
   <radialGradient id="g" cx="50%" cy="95%" r="65%">
     <stop offset="0%" stop-color="#22c55e" stop-opacity="0.10"/>
@@ -107,16 +109,17 @@ function winnerSvg(championName, flagDataUri) {
   <rect width="1200" height="1200" fill="url(#g)"/>
   ${ballSvg(ballCx, ballCy, ballR)}
   <image href="${flagDataUri}" x="${flagX}" y="${flagY}" width="${flagW}" height="${flagH}" preserveAspectRatio="xMidYMid meet"/>
-  <text x="600" y="575" font-family="Arial,Helvetica,sans-serif" font-size="${nameFontSize}" font-weight="900" fill="white" text-anchor="middle">${escapeXml(championName)}</text>
+  <text x="600" y="575" font-family="Inter,Arial,sans-serif" font-size="${nameFontSize}" font-weight="900" fill="white" text-anchor="middle">${escapeXml(championName)}</text>
   ${trophySvg(600, 770, 0.70)}
-  <text x="600" y="980" font-family="Arial,Helvetica,sans-serif" font-size="38" font-weight="700" fill="#22c55e" text-anchor="middle">World Cup Champion · 2026</text>
-  <text x="600" y="1042" font-family="Arial,Helvetica,sans-serif" font-size="30" fill="#22c55e" fill-opacity="0.7" text-anchor="middle">Make your own bracket at bracketwebb.com</text>
-  <text x="600" y="1095" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#22c55e" fill-opacity="0.4" text-anchor="middle">bracketwebb.com</text>
+  <text x="600" y="980" font-family="Inter,Arial,sans-serif" font-size="38" font-weight="700" fill="#22c55e" text-anchor="middle">World Cup Champion · 2026</text>
+  <text x="600" y="1042" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="400" fill="#22c55e" fill-opacity="0.7" text-anchor="middle">Make your own bracket at bracketwebb.com</text>
+  <text x="600" y="1095" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="400" fill="#22c55e" fill-opacity="0.4" text-anchor="middle">bracketwebb.com</text>
 </svg>`;
 }
 
 function genericSvg() {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  ${fontStyle()}
   <rect width="1200" height="1200" fill="#091a0f"/>
   <radialGradient id="g" cx="50%" cy="58%" r="55%">
     <stop offset="0%" stop-color="#22c55e" stop-opacity="0.07"/>
@@ -125,8 +128,8 @@ function genericSvg() {
   <rect width="1200" height="1200" fill="url(#g)"/>
   ${ballSvg(600, 375, 270)}
   ${trophySvg(600, 852, 0.88)}
-  <text x="600" y="1075" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="900" fill="white" text-anchor="middle">2026 FIFA World Cup</text>
-  <text x="600" y="1150" font-family="Arial,Helvetica,sans-serif" font-size="30" fill="#22c55e" fill-opacity="0.6" text-anchor="middle">bracketwebb.com</text>
+  <text x="600" y="1075" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="900" fill="white" text-anchor="middle">2026 FIFA World Cup</text>
+  <text x="600" y="1150" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="400" fill="#22c55e" fill-opacity="0.6" text-anchor="middle">bracketwebb.com</text>
 </svg>`;
 }
 
