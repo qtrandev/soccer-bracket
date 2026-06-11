@@ -16,6 +16,24 @@ const TEAM_NAMES = {
   ENG: 'England',      CRO: 'Croatia',      GHA: 'Ghana',          PAN: 'Panama',
 };
 
+// Team code → flag emoji.
+// SCO and ENG use Unicode subdivision tag sequences (🏴󠁧󠁢󠁳󠁣󠁴󠁿 / 🏴󠁧󠁢󠁥󠁮󠁧󠁿), supported on iOS 16+,
+// Android 11+, macOS 11+ and all major messaging apps — recommended by Unicode/Emojipedia.
+const TEAM_FLAGS = {
+  MEX: '🇲🇽', KOR: '🇰🇷', CZE: '🇨🇿', RSA: '🇿🇦',
+  CAN: '🇨🇦', SUI: '🇨🇭', BIH: '🇧🇦', QAT: '🇶🇦',
+  BRA: '🇧🇷', MAR: '🇲🇦', SCO: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', HAI: '🇭🇹',
+  USA: '🇺🇸', TUR: '🇹🇷', AUS: '🇦🇺', PAR: '🇵🇾',
+  GER: '🇩🇪', ECU: '🇪🇨', CIV: '🇨🇮', CUW: '🇨🇼',
+  NED: '🇳🇱', JPN: '🇯🇵', SWE: '🇸🇪', TUN: '🇹🇳',
+  BEL: '🇧🇪', IRN: '🇮🇷', EGY: '🇪🇬', NZL: '🇳🇿',
+  ESP: '🇪🇸', URU: '🇺🇾', KSA: '🇸🇦', CPV: '🇨🇻',
+  FRA: '🇫🇷', SEN: '🇸🇳', NOR: '🇳🇴', IRQ: '🇮🇶',
+  ARG: '🇦🇷', AUT: '🇦🇹', ALG: '🇩🇿', JOR: '🇯🇴',
+  POR: '🇵🇹', COL: '🇨🇴', COD: '🇨🇩', UZB: '🇺🇿',
+  ENG: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', CRO: '🇭🇷', GHA: '🇬🇭', PAN: '🇵🇦',
+};
+
 // Paths that are app routes or static files — never treat as bracket slugs
 const SKIP = new Set([
   'new', 'favicon.ico', 'robots.txt', 'sitemap.xml',
@@ -51,14 +69,18 @@ export default async function handler(request, context) {
 
     const champion = data.knockoutPicks?.['m104'] ?? data.knockoutPicks?.final;
     const championName = champion ? (TEAM_NAMES[champion] ?? null) : null;
+    const flag = champion ? (TEAM_FLAGS[champion] ?? '') : '';
+
+    // "blazing-striker" → "Blazing Striker"
+    const displaySlug = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     const title = championName
-      ? `${slug}'s bracket: ${championName} wins the World Cup`
-      : `${slug}'s 2026 World Cup bracket`;
+      ? `${displaySlug}'s bracket: ${flag ? flag + ' ' : ''}${championName} wins the World Cup 🏆`
+      : `${displaySlug}'s 2026 World Cup bracket`;
 
     const description = championName
-      ? `${slug} picks ${championName} to win the 2026 FIFA World Cup. Make your own predictions on BracketWebb!`
-      : `Check out ${slug}'s 2026 FIFA World Cup bracket on BracketWebb. Make your own predictions!`;
+      ? `${displaySlug} picks ${championName} to win the 2026 FIFA World Cup. Make your own predictions on BracketWebb!`
+      : `Check out ${displaySlug}'s 2026 FIFA World Cup bracket on BracketWebb. Make your own predictions!`;
 
     const canonicalUrl = `https://bracketwebb.com/${encodeURIComponent(slug)}`;
 

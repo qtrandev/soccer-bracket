@@ -106,6 +106,7 @@ export default function ViewBracket() {
   const knockoutPicks = bracketData?.knockoutPicks ?? {};
   const isLegacyBracket = bracketData?.version === 1;
   const champion      = knockoutPicks?.[FINAL_MATCH.id];
+  const displaySlug   = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const createdAt     = bracketData?.createdAt
     ? new Date(bracketData.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null;
@@ -127,7 +128,7 @@ export default function ViewBracket() {
             <div className="flex items-center gap-2 mt-2">
               <span className="text-lg">🏆</span>
               <TeamFlag code={champion} size="md" showName />
-              <span className="text-sm text-gold-400 font-semibold">to win it all</span>
+              <span className="text-sm text-gold-400 font-semibold">wins it all · {displaySlug}</span>
             </div>
           ) : (
             <h1 className="text-2xl font-black text-emerald-100">{slug}</h1>
