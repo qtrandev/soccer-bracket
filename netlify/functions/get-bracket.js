@@ -19,7 +19,7 @@ export default async (req) => {
 
     if (data === null) return json({ error: 'not_found' }, 404);
 
-    return json(data, 200, { 'Cache-Control': 'public, max-age=30' });
+    return json(data, 200, { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600' });
   } catch (err) {
     console.error('get-bracket error:', err?.message ?? err);
     return json({ error: 'server_error' }, 500);

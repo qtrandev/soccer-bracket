@@ -7,6 +7,7 @@ import AutofillPanel from '../components/AutofillPanel.jsx';
 import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
 import { countCompletedGroups } from '../utils/bracket.js';
+import { FINAL_MATCH } from '../data/tournamentData.js';
 
 const STEPS = [
   { id: 'groups', label: 'Group Stage' },
@@ -33,7 +34,7 @@ export default function CreateBracket() {
 
   const completedGroups = countCompletedGroups(groupPicks);
   const canProceed = completedGroups >= 12;
-  const hasChampion = Boolean(knockoutPicks?.final);
+  const hasChampion = Boolean(knockoutPicks?.[FINAL_MATCH.id]);
 
   function handleAutofill(strategyId) {
     const result = autofillBracket(strategyId);

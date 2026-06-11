@@ -30,27 +30,29 @@ function rollChaos(allTeams) {
   return rolls;
 }
 
-export function autofillBracket(strategy, forcedChampion = null) {
+export function autofillBracket(strategy, forcedChampion = null, existingGroupPicks = null) {
   const allTeamCodes = Object.keys(
     Object.fromEntries(GROUP_LETTERS.flatMap(l => GROUPS[l].teams.map(t => [t, 1])))
   );
   const chaosRolls = strategy === 'chaos' ? rollChaos(allTeamCodes) : {};
 
-  // ── 1. Fill group picks (sort all 4 by strength) ──
-  const groupPicks = {};
-  for (const letter of GROUP_LETTERS) {
-    const teams = [...GROUPS[letter].teams];
-    teams.sort((a, b) => {
-      // Forced champion always ranks 1st in their group
-      if (forcedChampion) {
-        if (a === forcedChampion) return -1;
-        if (b === forcedChampion) return 1;
-      }
-      const sa = strategy === 'chaos' ? (chaosRolls[[a, b].sort().join('-')] === a ? 1 : -1) : getStrength(b, strategy) - getStrength(a, strategy);
-      return sa;
-    });
-    groupPicks[letter] = teams;
-  }
+  // ── 1. Fill group picks (sort all 4 by strength), or use provided picks ──
+  const groupPicks = existingGroupPicks ?? (() => {
+    const picks = {};
+    for (const letter of GROUP_LETTERS) {
+      const teams = [...GROUPS[letter].teams];
+      teams.sort((a, b) => {
+        if (forcedChampion) {
+          if (a === forcedChampion) return -1;
+          if (b === forcedChampion) return 1;
+        }
+        const sa = strategy === 'chaos' ? (chaosRolls[[a, b].sort().join('-')] === a ? 1 : -1) : getStrength(b, strategy) - getStrength(a, strategy);
+        return sa;
+      });
+      picks[letter] = teams;
+    }
+    return picks;
+  })();
 
   // ── 2. Derive wildcards ──
   const wildcards = deriveWildcards(groupPicks);
@@ -73,7 +75,7 @@ export function autofillBracket(strategy, forcedChampion = null) {
       ...Object.fromEntries(state.r16.map(m => [m.id, m])),
       ...Object.fromEntries(state.qf.map(m => [m.id, m])),
       ...Object.fromEntries(state.sf.map(m => [m.id, m])),
-      final: state.final,
+      [state.final.id]: state.final,
     };
 
     for (const match of matches) {

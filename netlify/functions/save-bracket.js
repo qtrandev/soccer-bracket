@@ -56,7 +56,7 @@ export default async (req) => {
     if (existing !== null) return json({ error: 'taken' }, 409);
 
     const payload = {
-      version: 1,
+      version: 2,
       slug,
       createdAt: new Date().toISOString(),
       groupPicks:    bracket.groupPicks    ?? {},

@@ -94,7 +94,7 @@ export default function ShareModal({ onClose, onSave, slug, setSlug }) {
               }}
               className="flex-1 bg-transparent px-3 py-2 text-sm text-emerald-100 outline-none"
               placeholder="soccer-god"
-              maxLength={40}
+              maxLength={60}
             />
           </div>
           <button

@@ -3,12 +3,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
 import TeamFlag from '../components/TeamFlag.jsx';
+import { FINAL_MATCH } from '../data/tournamentData.js';
 
 export default function ViewBracket() {
   const { slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [bracketData, setBracketData] = useState(null);
+  const [migrating, setMigrating] = useState(false);
   const [tab, setTab] = useState('knockout');
 
   useEffect(() => {
@@ -23,6 +25,19 @@ export default function ViewBracket() {
           return;
         }
         setBracketData(data);
+        // Silently migrate v1 brackets to the official FIFA structure
+        if (data.version === 1) {
+          setMigrating(true);
+          fetch('/.netlify/functions/migrate-bracket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug }),
+          })
+            .then(r => r.json())
+            .then(result => { if (result.bracket) setBracketData(result.bracket); })
+            .catch(() => {})
+            .finally(() => setMigrating(false));
+        }
       } catch (err) {
         console.error('get-bracket fetch error:', err);
         setNotFound(true);
@@ -87,7 +102,8 @@ export default function ViewBracket() {
   const groupPicks    = bracketData?.groupPicks    ?? {};
   const wildcards     = bracketData?.wildcards     ?? [];
   const knockoutPicks = bracketData?.knockoutPicks ?? {};
-  const champion      = knockoutPicks?.final;
+  const isLegacyBracket = bracketData?.version === 1;
+  const champion      = knockoutPicks?.[FINAL_MATCH.id];
   const createdAt     = bracketData?.createdAt
     ? new Date(bracketData.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null;
@@ -154,13 +170,25 @@ export default function ViewBracket() {
       )}
 
       {tab === 'knockout' && (
-        <KnockoutBracket
-          groupPicks={groupPicks}
-          wildcards={wildcards}
-          knockoutPicks={knockoutPicks}
-          onPick={() => {}}
-          readOnly
-        />
+        migrating ? (
+          <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3">
+            <div className="text-3xl animate-spin">⚽</div>
+            <p className="text-emerald-500 text-sm">Updating to official FIFA bracket…</p>
+          </div>
+        ) : isLegacyBracket ? (
+          <div className="px-4 py-6 rounded-xl border border-amber-500/30 bg-amber-500/10 text-center">
+            <p className="text-amber-400 font-semibold mb-1">Couldn't migrate to the official FIFA bracket</p>
+            <p className="text-sm text-amber-600">Group picks are still viewable in the Groups tab.</p>
+          </div>
+        ) : (
+          <KnockoutBracket
+            groupPicks={groupPicks}
+            wildcards={wildcards}
+            knockoutPicks={knockoutPicks}
+            onPick={() => {}}
+            readOnly
+          />
+        )
       )}
     </div>
   );

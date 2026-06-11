@@ -214,13 +214,12 @@ export default function Home() {
             </p>
             <div className="space-y-2">
               {EXAMPLE_SLUGS.map(slug => (
-                <Link
+                <div
                   key={slug}
-                  to={`/${slug}`}
-                  className="flex px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-sm text-neutral-600 hover:border-green-300 hover:bg-green-50 transition-colors"
+                  className="flex px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-sm text-neutral-600"
                 >
                   <span className="text-neutral-400">bracketwebb.com/</span><span className="text-green-600 font-semibold">{slug}</span>
-                </Link>
+                </div>
               ))}
             </div>
           </>

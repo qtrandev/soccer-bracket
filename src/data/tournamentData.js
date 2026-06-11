@@ -100,66 +100,66 @@ export const VENUES = {
   'BCPlace':      { name: 'BC Place',              city: 'Vancouver',     tz: 'America/Vancouver',   country: 'Canada' },
 };
 
-// Knockout-round venue assignments (approximate – Final at MetLife)
-export const KNOCKOUT_VENUES = {
-  r32: ['MetLife', 'ATT', 'Mercedes', 'SoFi', 'Lumen', 'Gillette', 'NRG', 'Arrowhead',
-        'HardRock', 'Lincoln', 'Levis', 'Azteca', 'BBVA', 'Akron', 'BMO', 'BCPlace'],
-  r16: ['MetLife', 'ATT', 'Mercedes', 'SoFi', 'Lumen', 'Gillette', 'NRG', 'Arrowhead'],
-  qf:  ['MetLife', 'ATT', 'SoFi', 'Lumen'],
-  sf:  ['MetLife', 'ATT'],
-  final: ['MetLife'],
-};
-
-// Round of 32 bracket – slot codes reference group positions: A1 = group A winner, etc.
-// Third-place wildcards: 3rd-1 through 3rd-8 (best 8 of 12 third-place teams)
+// Official FIFA World Cup 2026 knockout structure (match numbers 73–104)
+// Slot codes: 'A1' = Group A winner, 'A2' = Group A runner-up,
+//             '3RD' = third-placed team; which group's third fills each slot
+//             is resolved at runtime via resolveThirdPlaceSlots() (Annex C).
+//
+// Arrays are in BRACKET DISPLAY ORDER (not match-number order) so the existing
+// left/right slicing in KnockoutBracket.jsx keeps working:
+//   r32[0..7] = left half, r32[8..15] = right half
+//   r16[i] = winners of r32[2i] and r32[2i+1]; same pattern up the rounds.
+//
+// Official round windows (per FIFA match schedule):
+//   R32: Jun 28 – Jul 3 · R16: Jul 4 – 7 · QF: Jul 9 – 11
+//   SF: Jul 14 (Dallas/AT&T) & Jul 15 (Atlanta/Mercedes-Benz) · Final: Jul 19 (MetLife)
 export const R32_MATCHES = [
-  // Left side of bracket
-  { id: 'r32-1',  slot1: 'A1', slot2: 'B2', venue: 'Azteca',    date: '2026-06-28', time: '15:00' },
-  { id: 'r32-2',  slot1: 'C1', slot2: 'D2', venue: 'MetLife',   date: '2026-06-28', time: '19:00' },
-  { id: 'r32-3',  slot1: 'B1', slot2: 'A2', venue: 'SoFi',      date: '2026-06-29', time: '15:00' },
-  { id: 'r32-4',  slot1: 'D1', slot2: 'C2', venue: 'ATT',       date: '2026-06-29', time: '19:00' },
-  { id: 'r32-5',  slot1: 'E1', slot2: 'F2', venue: 'Mercedes',  date: '2026-06-30', time: '15:00' },
-  { id: 'r32-6',  slot1: 'G1', slot2: 'H2', venue: 'Lumen',     date: '2026-06-30', time: '19:00' },
-  { id: 'r32-7',  slot1: 'F1', slot2: 'E2', venue: 'Arrowhead', date: '2026-07-01', time: '15:00' },
-  { id: 'r32-8',  slot1: 'H1', slot2: 'G2', venue: 'NRG',       date: '2026-07-01', time: '19:00' },
-  // Right side of bracket
-  { id: 'r32-9',  slot1: 'I1', slot2: 'J2', venue: 'Gillette',  date: '2026-07-02', time: '15:00' },
-  { id: 'r32-10', slot1: 'K1', slot2: 'L2', venue: 'Lincoln',   date: '2026-07-02', time: '19:00' },
-  { id: 'r32-11', slot1: 'J1', slot2: 'I2', venue: 'HardRock',  date: '2026-07-03', time: '15:00' },
-  { id: 'r32-12', slot1: 'L1', slot2: 'K2', venue: 'Levis',     date: '2026-07-03', time: '19:00' },
-  // Wildcard section (best 8 third-place teams)
-  { id: 'r32-13', slot1: '3W1', slot2: '3W2', venue: 'BBVA',    date: '2026-07-04', time: '15:00' },
-  { id: 'r32-14', slot1: '3W3', slot2: '3W4', venue: 'Akron',   date: '2026-07-04', time: '19:00' },
-  { id: 'r32-15', slot1: '3W5', slot2: '3W6', venue: 'BMO',     date: '2026-07-05', time: '15:00' },
-  { id: 'r32-16', slot1: '3W7', slot2: '3W8', venue: 'BCPlace',  date: '2026-07-05', time: '19:00' },
+  // ---- Left half ----
+  { id: 'm74', slot1: 'E1', slot2: '3RD' },  // 3rd from A/B/C/D/F
+  { id: 'm77', slot1: 'I1', slot2: '3RD' },  // 3rd from C/D/F/G/H
+  { id: 'm73', slot1: 'A2', slot2: 'B2' },
+  { id: 'm75', slot1: 'F1', slot2: 'C2' },
+  { id: 'm83', slot1: 'K2', slot2: 'L2' },
+  { id: 'm84', slot1: 'H1', slot2: 'J2' },
+  { id: 'm81', slot1: 'D1', slot2: '3RD' },  // 3rd from B/E/F/I/J
+  { id: 'm82', slot1: 'G1', slot2: '3RD' },  // 3rd from A/E/H/I/J
+  // ---- Right half ----
+  { id: 'm76', slot1: 'C1', slot2: 'F2' },
+  { id: 'm78', slot1: 'E2', slot2: 'I2' },
+  { id: 'm79', slot1: 'A1', slot2: '3RD' },  // 3rd from C/E/F/H/I
+  { id: 'm80', slot1: 'L1', slot2: '3RD' },  // 3rd from E/H/I/J/K
+  { id: 'm86', slot1: 'J1', slot2: 'H2' },
+  { id: 'm88', slot1: 'D2', slot2: 'G2' },
+  { id: 'm85', slot1: 'B1', slot2: '3RD' },  // 3rd from E/F/G/I/J
+  { id: 'm87', slot1: 'K1', slot2: '3RD' },  // 3rd from D/E/I/J/L
 ];
 
-// R32 → R16 path: pairs of r32 match IDs that feed one R16 match
+// R16 feeds — sequential display pairing (r16[i] = winners of r32[2i], r32[2i+1])
 export const R16_MATCHES = [
-  { id: 'r16-1', src: ['r32-1', 'r32-2'], venue: 'MetLife',   date: '2026-07-06', time: '15:00' },
-  { id: 'r16-2', src: ['r32-3', 'r32-4'], venue: 'ATT',       date: '2026-07-06', time: '19:00' },
-  { id: 'r16-3', src: ['r32-5', 'r32-6'], venue: 'SoFi',      date: '2026-07-07', time: '15:00' },
-  { id: 'r16-4', src: ['r32-7', 'r32-8'], venue: 'Mercedes',  date: '2026-07-07', time: '19:00' },
-  { id: 'r16-5', src: ['r32-9',  'r32-10'], venue: 'Lumen',   date: '2026-07-08', time: '15:00' },
-  { id: 'r16-6', src: ['r32-11', 'r32-12'], venue: 'Gillette',date: '2026-07-08', time: '19:00' },
-  { id: 'r16-7', src: ['r32-13', 'r32-14'], venue: 'NRG',     date: '2026-07-09', time: '15:00' },
-  { id: 'r16-8', src: ['r32-15', 'r32-16'], venue: 'Arrowhead',date: '2026-07-09',time: '19:00' },
+  { id: 'm89', src: ['m74', 'm77'] },
+  { id: 'm90', src: ['m73', 'm75'] },
+  { id: 'm93', src: ['m83', 'm84'] },
+  { id: 'm94', src: ['m81', 'm82'] },
+  { id: 'm91', src: ['m76', 'm78'] },
+  { id: 'm92', src: ['m79', 'm80'] },
+  { id: 'm95', src: ['m86', 'm88'] },
+  { id: 'm96', src: ['m85', 'm87'] },
 ];
 
 export const QF_MATCHES = [
-  { id: 'qf-1', src: ['r16-1', 'r16-2'], venue: 'MetLife',  date: '2026-07-11', time: '15:00' },
-  { id: 'qf-2', src: ['r16-3', 'r16-4'], venue: 'ATT',      date: '2026-07-11', time: '19:00' },
-  { id: 'qf-3', src: ['r16-5', 'r16-6'], venue: 'SoFi',     date: '2026-07-12', time: '15:00' },
-  { id: 'qf-4', src: ['r16-7', 'r16-8'], venue: 'Lumen',    date: '2026-07-12', time: '19:00' },
+  { id: 'm97',  src: ['m89', 'm90'] },
+  { id: 'm98',  src: ['m93', 'm94'] },
+  { id: 'm99',  src: ['m91', 'm92'] },
+  { id: 'm100', src: ['m95', 'm96'] },
 ];
 
 export const SF_MATCHES = [
-  { id: 'sf-1', src: ['qf-1', 'qf-2'], venue: 'MetLife', date: '2026-07-14', time: '19:00' },
-  { id: 'sf-2', src: ['qf-3', 'qf-4'], venue: 'ATT',     date: '2026-07-15', time: '19:00' },
+  { id: 'm101', src: ['m97', 'm98'],   venue: 'ATT',     date: '2026-07-14' },
+  { id: 'm102', src: ['m99', 'm100'],  venue: 'Mercedes', date: '2026-07-15' },
 ];
 
 export const FINAL_MATCH = {
-  id: 'final', src: ['sf-1', 'sf-2'], venue: 'MetLife', date: '2026-07-19', time: '15:00',
+  id: 'm104', src: ['m101', 'm102'], venue: 'MetLife', date: '2026-07-19',
 };
 
 export const ROUND_LABELS = {

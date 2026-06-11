@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GROUPS, GROUP_LETTERS } from '../data/tournamentData.js';
 import { deriveWildcards } from '../utils/bracket.js';
+import { autofillBracket } from '../utils/autofill.js';
 import { generateSlug } from '../data/slugWords.js';
 
 const STORAGE_KEY = 'bracketwebb_draft';
+const DRAFT_VERSION = 2;
 
 function defaultGroupPicks() {
   const picks = {};
@@ -14,7 +16,16 @@ function defaultGroupPicks() {
 function loadDraft() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const draft = JSON.parse(raw);
+    // v1 used old fabricated match IDs — keep group picks, re-simulate knockout
+    if (draft.version !== DRAFT_VERSION) {
+      const savedGroupPicks = draft.groupPicks ?? defaultGroupPicks();
+      const oldChampion = draft.knockoutPicks?.final ?? null;
+      const { wildcards, knockoutPicks } = autofillBracket('favorites', oldChampion, savedGroupPicks);
+      return { groupPicks: savedGroupPicks, wildcards, knockoutPicks };
+    }
+    return draft;
   } catch {
     return null;
   }
@@ -62,7 +73,7 @@ export function useBracket(initialData = null) {
   // Persist draft
   useEffect(() => {
     if (!readOnly) {
-      saveDraft({ groupPicks, wildcards, knockoutPicks, slug });
+      saveDraft({ version: DRAFT_VERSION, groupPicks, wildcards, knockoutPicks, slug });
     }
   }, [groupPicks, wildcards, knockoutPicks, slug, readOnly]);
 
@@ -133,7 +144,7 @@ export function useBracket(initialData = null) {
   }, [readOnly]);
 
   const exportBracket = useCallback(() => ({
-    version: 1,
+    version: DRAFT_VERSION,
     slug,
     createdAt: new Date().toISOString(),
     groupPicks,

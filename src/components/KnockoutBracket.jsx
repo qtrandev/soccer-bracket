@@ -1,7 +1,7 @@
 import BracketMatch from './BracketMatch.jsx';
 import TeamFlag from './TeamFlag.jsx';
 import { buildBracket } from '../utils/bracket.js';
-import { ROUND_LABELS } from '../data/tournamentData.js';
+import { ROUND_LABELS, FINAL_MATCH } from '../data/tournamentData.js';
 
 const ROUNDS = ['r32', 'r16', 'qf', 'sf', 'final'];
 
@@ -78,7 +78,7 @@ function RoundColumn({ label, matches, onPick, readOnly, round, mirror = false }
 
 export default function KnockoutBracket({ groupPicks, wildcards, knockoutPicks, onPick, readOnly }) {
   const bracket = buildBracket(groupPicks, knockoutPicks, wildcards);
-  const champion = knockoutPicks?.final;
+  const champion = knockoutPicks?.[FINAL_MATCH.id];
 
   const totalMatches = 31;
   const pickedMatches = Object.values(knockoutPicks ?? {}).filter(Boolean).length;
