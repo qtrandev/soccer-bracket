@@ -155,7 +155,6 @@ export default function UpcomingMatches({ dark = false }) {
                             <>
                               <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
                               <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
-                              <span className={`text-[10px] font-bold flex-shrink-0 ${homeWon ? t.teamName : awayWon ? 'opacity-30' : t.badge}`}>{m.home}</span>
                             </>
                           ) : (
                             <span className={`text-sm italic ${t.tbd}`}>TBD</span>
@@ -189,7 +188,6 @@ export default function UpcomingMatches({ dark = false }) {
                         <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
                           {isGroup ? (
                             <>
-                              <span className={`text-[10px] font-bold flex-shrink-0 ${awayWon ? t.teamName : homeWon ? 'opacity-30' : t.badge}`}>{m.away}</span>
                               <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
                               <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
                             </>
@@ -199,13 +197,19 @@ export default function UpcomingMatches({ dark = false }) {
                         </div>
                       </div>
 
-                      {/* Row 2: home stars | venue city | away stars */}
+                      {/* Row 2: MEX [stars] | city | [stars] CAN */}
                       <div className="flex items-center gap-2 pl-8 mt-0.5">
                         {isGroup ? (
                           <>
-                            <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px] flex-shrink-0" />
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <span className={`text-[10px] font-bold ${t.badge}`}>{m.home}</span>
+                              <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px]" />
+                            </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueCity}`}>{venue.city}</span>
-                            <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px] flex-shrink-0" />
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
+                              <span className={`text-[10px] font-bold ${t.badge}`}>{m.away}</span>
+                            </div>
                           </>
                         ) : (
                           <span className={`text-xs ${t.venueCity}`}>{venue.city}</span>
