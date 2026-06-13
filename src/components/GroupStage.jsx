@@ -14,7 +14,7 @@ export default function GroupStage({ groupPicks, onPick, readOnly }) {
             <span className="text-grass-400 font-semibold">{completed}/12 groups done</span>
           </div>
           <p className="text-xs text-emerald-700 mb-3">
-            Click once to pick <span className="text-gold-400 font-semibold">1st place</span>, click again for <span className="text-slate-400 font-semibold">2nd place</span>. Order matters — it determines your Round of 32 matchups. Third-place qualifiers are auto-selected from the remaining teams.
+            Click once to pick <span className="text-gold-400 font-semibold">1st place</span>, click again for <span className="text-slate-400 font-semibold">2nd place</span>. Order matters — it determines your Round of 32 matchups. After all groups, you'll choose which 8 third-place teams qualify.
           </p>
           <div className="h-1.5 rounded-full bg-pitch-700 overflow-hidden">
             <div
@@ -37,13 +37,6 @@ export default function GroupStage({ groupPicks, onPick, readOnly }) {
         ))}
       </div>
 
-      {!readOnly && completed === 12 && (
-        <div className="mt-6 text-center animate-fade-in">
-          <p className="text-grass-400 font-semibold text-lg">
-            ✓ All groups complete! Move to the knockout bracket →
-          </p>
-        </div>
-      )}
     </div>
   );
 }

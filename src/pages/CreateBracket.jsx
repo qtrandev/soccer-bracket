@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
+import ThirdPlaceSelector from '../components/ThirdPlaceSelector.jsx';
 import ShareModal from '../components/ShareModal.jsx';
 import AutofillPanel from '../components/AutofillPanel.jsx';
 import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
-import { countCompletedGroups } from '../utils/bracket.js';
+import { countCompletedGroups, getThirdPlaceCandidates } from '../utils/bracket.js';
 import { FINAL_MATCH } from '../data/tournamentData.js';
 
 const STEPS = [
@@ -18,7 +19,7 @@ export default function CreateBracket() {
   const location = useLocation();
   const {
     groupPicks, wildcards, knockoutPicks, slug,
-    pickGroupTeam, pickKnockoutWinner, applyAutofill, resetBracket, exportBracket,
+    pickGroupTeam, toggleWildcard, pickKnockoutWinner, applyAutofill, resetBracket, exportBracket,
   } = useBracket();
 
   const [step, setStep] = useState(() => location.state?.makeMine ? 'knockout' : 'groups');
@@ -33,7 +34,8 @@ export default function CreateBracket() {
   const [autofillFlash, setAutofillFlash] = useState(false);
 
   const completedGroups = countCompletedGroups(groupPicks);
-  const canProceed = completedGroups >= 12;
+  const allGroupsDone = completedGroups >= 12;
+  const canProceed = allGroupsDone && wildcards.length === 8;
   const hasChampion = Boolean(knockoutPicks?.[FINAL_MATCH.id]);
 
   function handleAutofill(strategyId) {
@@ -97,7 +99,7 @@ export default function CreateBracket() {
             >
               <span
                 className={`step-dot text-sm ${
-                  step === s.id ? 'active' : canProceed && s.id === 'knockout' ? 'done' : 'pending'
+                  step === s.id ? 'active' : (canProceed && s.id === 'knockout') ? 'done' : 'pending'
                 }`}
               >
                 {i + 1}
@@ -158,6 +160,15 @@ export default function CreateBracket() {
           )}
 
           <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} readOnly={false} />
+
+          {allGroupsDone && (
+            <ThirdPlaceSelector
+              candidates={getThirdPlaceCandidates(groupPicks)}
+              wildcards={wildcards}
+              onToggle={toggleWildcard}
+              readOnly={false}
+            />
+          )}
 
           {canProceed && (
             <div className="mt-8 text-center">

@@ -83,7 +83,7 @@ export function useBracket(initialData = null) {
         skipKnockoutClear.current = false;
         return;
       }
-      setWildcards(deriveWildcards(groupPicks));
+      setWildcards([]);
       setKnockoutPicks({});
     }
   }, [groupPicks, readOnly]);
@@ -111,6 +111,15 @@ export function useBracket(initialData = null) {
   const setWildcardOrder = useCallback((orderedCodes) => {
     if (readOnly) return;
     setWildcards(orderedCodes);
+  }, [readOnly]);
+
+  const toggleWildcard = useCallback((teamCode) => {
+    if (readOnly) return;
+    setWildcards(prev => {
+      if (prev.includes(teamCode)) return prev.filter(t => t !== teamCode);
+      if (prev.length >= 8) return prev;
+      return [...prev, teamCode];
+    });
   }, [readOnly]);
 
   const pickKnockoutWinner = useCallback((matchId, teamCode) => {
@@ -157,6 +166,7 @@ export function useBracket(initialData = null) {
     pickGroupTeam,
     setGroupOrder,
     setWildcardOrder,
+    toggleWildcard,
     pickKnockoutWinner,
     applyAutofill,
     resetBracket,
