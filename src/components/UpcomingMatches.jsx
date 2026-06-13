@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { TEAMS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
+import { STRENGTHS } from '../data/teamStrengths.js';
+import StrengthStars from './StrengthStars.jsx';
 
 function useScores() {
   const [scores, setScores] = useState({});
@@ -142,6 +144,7 @@ export default function UpcomingMatches({ dark = false }) {
 
                   const inner = (
                     <div className="flex flex-col flex-1 min-w-0">
+                      {/* Row 1: badge | home team | score/time | away team */}
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-bold w-6 flex-shrink-0 text-center ${t.badge}`}>
                           {m.badge}
@@ -152,6 +155,7 @@ export default function UpcomingMatches({ dark = false }) {
                             <>
                               <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
                               <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
+                              <span className={`text-[10px] font-bold flex-shrink-0 ${homeWon ? t.teamName : awayWon ? 'opacity-30' : t.badge}`}>{m.home}</span>
                             </>
                           ) : (
                             <span className={`text-sm italic ${t.tbd}`}>TBD</span>
@@ -185,6 +189,7 @@ export default function UpcomingMatches({ dark = false }) {
                         <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
                           {isGroup ? (
                             <>
+                              <span className={`text-[10px] font-bold flex-shrink-0 ${awayWon ? t.teamName : homeWon ? 'opacity-30' : t.badge}`}>{m.away}</span>
                               <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
                               <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
                             </>
@@ -192,15 +197,19 @@ export default function UpcomingMatches({ dark = false }) {
                             <span className={`text-sm italic ${t.tbd}`}>TBD</span>
                           )}
                         </div>
-
-                        <div className="hidden sm:block flex-shrink-0 w-40 text-right">
-                          <span className={`text-xs truncate block ${t.venueName}`}>{venue.name}</span>
-                          <span className={`text-xs truncate block ${t.venueCity}`}>{venue.city}</span>
-                        </div>
                       </div>
 
-                      <div className={`sm:hidden pl-8 mt-0.5 ${t.venueName}`}>
-                        <span className="text-xs">{venue.name}, {venue.city}</span>
+                      {/* Row 2: home stars | venue city | away stars */}
+                      <div className="flex items-center gap-2 pl-8 mt-0.5">
+                        {isGroup ? (
+                          <>
+                            <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px] flex-shrink-0" />
+                            <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueCity}`}>{venue.city}</span>
+                            <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px] flex-shrink-0" />
+                          </>
+                        ) : (
+                          <span className={`text-xs ${t.venueCity}`}>{venue.city}</span>
+                        )}
                       </div>
                     </div>
                   );
