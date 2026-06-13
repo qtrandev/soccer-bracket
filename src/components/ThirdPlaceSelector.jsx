@@ -24,7 +24,7 @@ export default function ThirdPlaceSelector({ candidates, wildcards, onToggle, re
           third-place teams to the Round of 32.{!readOnly && ' Pick which ones qualify.'}
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
           {candidates.map(({ group, team }) => {
             const isSelected = wildcards.includes(team);
             const isDisabled = !readOnly && !isSelected && selectedCount >= 8;
@@ -44,11 +44,9 @@ export default function ThirdPlaceSelector({ candidates, wildcards, onToggle, re
               >
                 <span className="text-[10px] text-emerald-700 font-bold w-3 flex-shrink-0">{group}</span>
                 <TeamFlag code={team} size="sm" showName />
-                <span className="ml-auto flex-shrink-0">
-                  {isSelected
-                    ? <span className="text-grass-400 text-xs font-bold">✓</span>
-                    : <StrengthStars strength={STRENGTHS[team]} className="text-[10px]" />
-                  }
+                <span className="ml-auto flex-shrink-0 flex items-center gap-1">
+                  <StrengthStars strength={STRENGTHS[team]} className="text-[10px]" />
+                  {isSelected && <span className="text-grass-400 text-xs font-bold">✓</span>}
                 </span>
               </button>
             );
