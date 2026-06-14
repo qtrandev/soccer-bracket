@@ -27,6 +27,7 @@ export default function CreateBracket() {
 
   // Apply "Make Mine" data passed via router state (reliable even if localStorage failed)
   useEffect(() => {
+    window.scrollTo(0, 0);
     const draft = location.state?.makeMine;
     if (draft) applyAutofill(draft);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

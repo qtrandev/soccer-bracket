@@ -16,6 +16,8 @@ export default function ViewBracket() {
   const [migrating, setMigrating] = useState(false);
   const [tab, setTab] = useState('knockout');
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     async function load() {
       try {
