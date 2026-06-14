@@ -138,18 +138,16 @@ export default function UpcomingMatches({ dark = false }) {
 
                   const score = isGroup ? scores[`${m.home}-${m.away}`] : null;
                   const isLive = score?.state === 'in';
-                  const isFinal = score?.completed;
+                  // ESPN sometimes keeps state='in' past the final whistle; treat as done after 130 min
+                  const matchStart = new Date(`${m.date}T${m.time}:00-04:00`);
+                  const isFinal = score?.completed || (isLive && (now - matchStart) > 130 * 60 * 1000);
                   const homeWon = isFinal && score.homeScore > score.awayScore;
                   const awayWon = isFinal && score.awayScore > score.homeScore;
 
                   const inner = (
                     <div className="flex flex-col flex-1 min-w-0">
-                      {/* Row 1: badge | home team | score/time | away team */}
+                      {/* Row 1: home team | score/time | away team */}
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold w-6 flex-shrink-0 text-center ${t.badge}`}>
-                          {m.badge}
-                        </span>
-
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           {isGroup ? (
                             <>
@@ -197,23 +195,34 @@ export default function UpcomingMatches({ dark = false }) {
                         </div>
                       </div>
 
-                      {/* Row 2: MEX [stars] | city | [stars] CAN */}
-                      <div className="flex items-center gap-2 pl-8 mt-0.5">
+                      {/* Row 2: HAI [stars] | stadium name | [stars] SCO */}
+                      <div className="flex items-center gap-2 mt-0.5">
                         {isGroup ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <span className={`text-[10px] font-bold ${t.badge}`}>{m.home}</span>
                               <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px]" />
                             </div>
-                            <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueCity}`}>{venue.city}</span>
+                            <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
                               <span className={`text-[10px] font-bold ${t.badge}`}>{m.away}</span>
                             </div>
                           </>
                         ) : (
-                          <span className={`text-xs ${t.venueCity}`}>{venue.city}</span>
+                          <span className={`text-xs ${t.venueName}`}>{venue.name}</span>
                         )}
+                      </div>
+
+                      {/* Row 3: group/badge | city | ↗ link */}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[10px] font-bold flex-1 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
+                        <span className={`text-xs text-center flex-shrink-0 ${t.venueName}`}>{venue.city}</span>
+                        <div className="flex-1 flex justify-end">
+                          {searchUrl && (
+                            <span className={`text-xs transition-colors ${t.arrow}`}>↗</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -225,7 +234,6 @@ export default function UpcomingMatches({ dark = false }) {
                   return searchUrl ? (
                     <a key={m.id} href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                       {inner}
-                      <span className={`flex-shrink-0 transition-colors text-xs mt-0.5 sm:mt-0 ${t.arrow}`}>↗</span>
                     </a>
                   ) : (
                     <div key={m.id} className={cls}>
