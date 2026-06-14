@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TEAMS } from '../data/tournamentData.js';
-import { STRENGTHS, MAX_STRENGTH } from '../data/teamStrengths.js';
+import { STRENGTHS, MAX_STRENGTH, STRENGTH_RANKS, FIFA_RANKINGS } from '../data/teamStrengths.js';
 
 const STRENGTH_OFFSET = 100 - MAX_STRENGTH; // shifts top team to 100
 import { autofillBracket } from '../utils/autofill.js';
@@ -152,6 +152,7 @@ export default function Home() {
               className="flex flex-col gap-0.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer text-left"
             >
               <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold bg-neutral-200 text-neutral-500 px-1 py-0.5 rounded flex-shrink-0">#{STRENGTH_RANKS[t.code]}</span>
                 <img
                   src={`https://flagcdn.com/${t.iso2}.svg`}
                   alt={t.name}
@@ -241,23 +242,31 @@ export default function Home() {
               title={`Generate bracket: ${t.name} wins`}
               className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 active:bg-green-100 active:border-green-500 transition-colors cursor-pointer text-left select-none"
             >
-              <span className="text-neutral-400 text-xs tabular-nums w-5 flex-shrink-0 text-center">{i + 1}</span>
-              <img
-                src={`https://flagcdn.com/${t.iso2}.svg`}
-                alt={t.name}
-                className="w-6 h-4 object-cover rounded-sm flex-shrink-0"
-              />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-7 flex-shrink-0 flex justify-center">
+                    <span className="text-[10px] font-bold bg-neutral-200 text-neutral-500 px-1 py-0.5 rounded">#{i + 1}</span>
+                  </div>
+                  <img
+                    src={`https://flagcdn.com/${t.iso2}.svg`}
+                    alt={t.name}
+                    className="w-6 h-4 object-cover rounded-sm flex-shrink-0"
+                  />
                   <span className="font-medium text-neutral-800 group-hover:text-green-700 transition-colors">{t.name}</span>
                   <span className="text-[10px] font-mono text-neutral-400">{t.code}</span>
-                  <span className="text-[10px] font-medium text-neutral-400 bg-neutral-200 group-hover:bg-green-100 group-hover:text-green-600 px-1.5 py-0.5 rounded transition-colors">{t.conf}</span>
                   {WC_TITLES[t.code] && (
                     <span className="text-[10px] font-medium text-amber-600">🏆×{WC_TITLES[t.code]}</span>
                   )}
                   {WC_RUNNER_UP[t.code] && (
                     <span className="text-[10px] font-medium text-neutral-400">🥈×{WC_RUNNER_UP[t.code]}</span>
                   )}
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className="w-7 flex-shrink-0" />
+                  {FIFA_RANKINGS[t.code] && (
+                    <span className="text-[10px] font-bold bg-neutral-200 text-neutral-500 px-1 py-0.5 rounded">FIFA #{FIFA_RANKINGS[t.code]}</span>
+                  )}
+                  <span className="text-[10px] font-medium text-neutral-400">{t.conf}</span>
                 </div>
               </div>
               <div className="flex-shrink-0 text-right">

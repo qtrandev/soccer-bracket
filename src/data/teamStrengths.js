@@ -60,6 +60,28 @@ export const STRENGTHS = {
   CUW: 40,
 };
 
+// Rank 1–48 derived from STRENGTHS (highest strength = #1)
+export const STRENGTH_RANKS = Object.fromEntries(
+  Object.entries(STRENGTHS)
+    .sort(([, a], [, b]) => b - a)
+    .map(([code], i) => [code, i + 1])
+);
+
+// Official FIFA/Coca-Cola Men's World Ranking — June 11, 2026 (published day of WC kickoff)
+// Note: ranks are global positions, not 1–48, so gaps exist where non-WC teams sit
+export const FIFA_RANKINGS = {
+  ARG: 1,  ESP: 2,  FRA: 3,  ENG: 4,  POR: 5,
+  BRA: 6,  MAR: 7,  NED: 8,  BEL: 9,  GER: 10,
+  CRO: 11, COL: 13, MEX: 14, SEN: 15, URU: 16,
+  USA: 17, JPN: 18, SUI: 19, IRN: 20, TUR: 22,
+  ECU: 23, AUT: 24, KOR: 25, AUS: 27, ALG: 28,
+  EGY: 29, CAN: 30, NOR: 31, CIV: 33, PAN: 34,
+  SWE: 38, CZE: 40, PAR: 41, SCO: 42, TUN: 45,
+  COD: 46, UZB: 50, QAT: 56, IRQ: 57, RSA: 60,
+  KSA: 61, JOR: 63, BIH: 64, CPV: 67, GHA: 73,
+  CUW: 82, HAI: 83, NZL: 85,
+};
+
 // Per-strategy strength modifiers (added on top of base STRENGTHS)
 export const STRATEGY_BOOSTS = {
   favorites: {},

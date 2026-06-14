@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { TEAMS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
-import { STRENGTHS } from '../data/teamStrengths.js';
+import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
 
 function useScores() {
@@ -87,6 +87,7 @@ export default function UpcomingMatches({ dark = false }) {
     venueCity:   'text-emerald-800',
     row:         'border-emerald-900/40 hover:border-emerald-700/60 hover:bg-emerald-900/20',
     arrow:       'text-emerald-800 group-hover/row:text-grass-400',
+    rankPill:    'bg-emerald-900/60 text-emerald-500',
   } : {
     section:     'border-neutral-200',
     title:       'text-neutral-900',
@@ -101,6 +102,7 @@ export default function UpcomingMatches({ dark = false }) {
     venueCity:   'text-neutral-300',
     row:         'border-neutral-100 hover:border-green-200 hover:bg-green-50',
     arrow:       'text-neutral-300 group-hover/row:text-green-400',
+    rankPill:    'bg-neutral-200 text-neutral-500',
   };
 
   return (
@@ -151,6 +153,7 @@ export default function UpcomingMatches({ dark = false }) {
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           {isGroup ? (
                             <>
+                              {STRENGTH_RANKS[m.home] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.home]}</span>}
                               <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
                               <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
                             </>
@@ -188,6 +191,7 @@ export default function UpcomingMatches({ dark = false }) {
                             <>
                               <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
                               <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
+                              {STRENGTH_RANKS[m.away] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.away]}</span>}
                             </>
                           ) : (
                             <span className={`text-sm italic ${t.tbd}`}>TBD</span>
