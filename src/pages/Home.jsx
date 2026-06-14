@@ -197,6 +197,12 @@ export default function Home() {
             </button>
           )}
         </div>
+        <button
+          onClick={() => document.getElementById('power-rankings')?.scrollIntoView({ behavior: 'smooth' })}
+          className="mt-4 text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
+        >
+          View Team Power Rankings ↓
+        </button>
       </section>
 
       <UpcomingMatches />
@@ -252,7 +258,7 @@ export default function Home() {
       </section>
 
       {/* ── Power Rankings ── */}
-      <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
+      <section id="power-rankings" className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
         <h2 className="text-xl font-bold text-neutral-900 mb-1">Team Power Rankings</h2>
         <p className="text-sm text-neutral-400 mb-6">
           Ratings (0–100) based on FIFA rankings, betting odds, squad quality, and recent form.

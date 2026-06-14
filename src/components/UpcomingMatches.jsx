@@ -231,17 +231,32 @@ export default function UpcomingMatches({ dark = false }) {
                     </div>
                   );
 
+                  const isLiveActive = isLive && !isFinal;
                   const pastCls = dark
                     ? 'border-emerald-900/20 opacity-50 hover:opacity-100'
                     : 'border-neutral-100 opacity-50 hover:opacity-100';
-                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-all ${isPast ? pastCls : t.row}`;
+                  const liveRowCls = dark
+                    ? 'border-grass-600/50 bg-grass-500/5'
+                    : 'border-green-400 bg-green-50/50';
+                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-all ${
+                    isLiveActive ? liveRowCls : isPast ? pastCls : t.row
+                  }`;
+                  const liveOverlay = isLiveActive ? (
+                    <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none animate-pulse ${dark ? 'border-grass-400' : 'border-green-400'}`} />
+                  ) : null;
                   return searchUrl ? (
-                    <a key={m.id} href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
-                      {inner}
-                    </a>
+                    <div key={m.id} className="relative">
+                      {liveOverlay}
+                      <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
+                        {inner}
+                      </a>
+                    </div>
                   ) : (
-                    <div key={m.id} className={cls}>
-                      {inner}
+                    <div key={m.id} className="relative">
+                      {liveOverlay}
+                      <div className={cls}>
+                        {inner}
+                      </div>
                     </div>
                   );
                 })}

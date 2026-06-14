@@ -120,17 +120,11 @@ export function buildBracket(groupPicks, knockoutPicks, wildcards) {
 // derived from the strongest non-qualifying team. Used to populate the
 // ThirdPlaceSelector so users can pick which 8 of 12 actually advance.
 export function getThirdPlaceCandidates(groupPicks) {
-  return GROUP_LETTERS.map(letter => {
-    const picks = groupPicks[letter] ?? [];
-    // autofill stores all 4 sorted; picks[2] is already the 3rd-place team
-    if (picks.length >= 3) return { group: letter, team: picks[2] };
-    const nonQualifiers = (GROUPS[letter]?.teams ?? []).filter(t => !picks.slice(0, 2).includes(t));
-    if (nonQualifiers.length === 0) return null;
-    const best = nonQualifiers.reduce((b, t) =>
-      getStrength(t, 'favorites') >= getStrength(b, 'favorites') ? t : b
-    );
-    return { group: letter, team: best };
-  }).filter(Boolean);
+  return GROUP_LETTERS.flatMap(letter => {
+    const qualifiers = (groupPicks[letter] ?? []).slice(0, 2);
+    const nonQualifiers = (GROUPS[letter]?.teams ?? []).filter(t => !qualifiers.includes(t));
+    return nonQualifiers.map(team => ({ group: letter, team }));
+  });
 }
 
 // Count how many groups have at least 2 teams picked (valid group picks).
