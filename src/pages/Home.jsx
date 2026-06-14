@@ -198,7 +198,10 @@ export default function Home() {
           )}
         </div>
         <button
-          onClick={() => document.getElementById('power-rankings')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => {
+            const el = document.getElementById('power-rankings');
+            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 5, behavior: 'smooth' });
+          }}
           className="mt-4 text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
         >
           View Team Power Rankings ↓
@@ -422,6 +425,15 @@ export default function Home() {
         <p className="mt-4 text-sm text-neutral-400">
           48 teams · 5 rounds · 1 champion
         </p>
+        <button
+          onClick={() => {
+            const el = document.getElementById('today-games');
+            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: 'smooth' });
+          }}
+          className="mt-6 text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
+        >
+          ↑ Jump to today's games
+        </button>
       </section>
 
     </div>

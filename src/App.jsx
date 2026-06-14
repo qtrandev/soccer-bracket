@@ -16,7 +16,8 @@ export default function App() {
         </Routes>
       </main>
       <footer className="border-t border-emerald-900/30 py-6 text-center text-xs text-emerald-800">
-        BracketWebb · 2026 FIFA World Cup · Free bracket predictions
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-emerald-500 transition-colors">BracketWebb</button>
+        {' · 2026 FIFA World Cup · Free bracket predictions'}
       </footer>
     </div>
   );

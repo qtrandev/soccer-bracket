@@ -242,7 +242,7 @@ export default function UpcomingMatches({ dark = false }) {
                     isLiveActive ? liveRowCls : isPast ? pastCls : t.row
                   }`;
                   const liveOverlay = isLiveActive ? (
-                    <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none animate-pulse ${dark ? 'border-grass-400' : 'border-green-400'}`} />
+                    <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none ${dark ? 'border-grass-400' : 'border-green-400'}`} />
                   ) : null;
                   return searchUrl ? (
                     <div key={m.id} className="relative">
