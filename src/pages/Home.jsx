@@ -107,7 +107,11 @@ export default function Home() {
   useEffect(() => {
     if (hasLiveGame()) {
       setTimeout(() => {
-        document.getElementById('upcoming-matches')?.scrollIntoView({ behavior: 'smooth' });
+        const el = document.getElementById('today-games');
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY - 72;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
       }, 100);
     } else {
       window.scrollTo(0, 0);

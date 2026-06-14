@@ -121,7 +121,7 @@ export default function UpcomingMatches({ dark = false }) {
             : isToday ? `Today · ${label}` : label;
           return (
             <div key={dateKey}>
-              <p className={`text-xs font-semibold uppercase tracking-wider mb-2 pb-1.5 border-b ${
+              <p id={isToday ? 'today-games' : undefined} className={`text-xs font-semibold uppercase tracking-wider mb-2 pb-1.5 border-b ${
                 isPast
                   ? (dark ? 'text-emerald-900 border-emerald-900/20' : 'text-neutral-300 border-neutral-100')
                   : isToday ? t.dateToday : t.dateOther

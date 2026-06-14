@@ -1,6 +1,6 @@
 import TeamFlag from './TeamFlag.jsx';
 import StrengthStars from './StrengthStars.jsx';
-import { STRENGTHS } from '../data/teamStrengths.js';
+import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 
 export default function ThirdPlaceSelector({ candidates, wildcards, onToggle, readOnly }) {
   const selectedCount = wildcards.length;
@@ -43,6 +43,9 @@ export default function ThirdPlaceSelector({ candidates, wildcards, onToggle, re
                 }`}
               >
                 <span className="text-[10px] text-emerald-700 font-bold w-3 flex-shrink-0">{group}</span>
+                <span className="text-[10px] font-bold bg-emerald-900/60 text-emerald-500 px-1 py-0.5 rounded flex-shrink-0">
+                  #{STRENGTH_RANKS[team]}
+                </span>
                 <TeamFlag code={team} size="sm" showName showCode />
                 <span className="ml-auto flex-shrink-0 flex items-center gap-1">
                   <StrengthStars strength={STRENGTHS[team]} className="text-[10px]" />

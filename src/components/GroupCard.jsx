@@ -1,6 +1,6 @@
 import TeamFlag from './TeamFlag.jsx';
 import { GROUPS, GROUP_MATCHES, VENUES, TEAMS } from '../data/tournamentData.js';
-import { STRENGTHS } from '../data/teamStrengths.js';
+import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
 import { formatMatchDate, formatMatchTime } from '../utils/bracket.js';
 
@@ -60,6 +60,9 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
                   <span className="text-xs text-emerald-800">·</span>
                 )}
               </span>
+              <span className="text-[10px] font-bold bg-emerald-900/60 text-emerald-500 px-1 py-0.5 rounded flex-shrink-0">
+                #{STRENGTH_RANKS[code]}
+              </span>
               <TeamFlag code={code} size="sm" showName showCode />
               <StrengthStars strength={STRENGTHS[code]} className="ml-auto text-xs flex-shrink-0" />
             </div>
@@ -100,14 +103,17 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
                         <TeamFlag code={game.home} size="xs" />
                       </div>
                       <span className="text-emerald-700 flex-shrink-0">vs</span>
-                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                      <div className="flex items-center gap-1 flex-1 min-w-0 ml-1">
                         <TeamFlag code={game.away} size="xs" />
                       </div>
-                      <span className="text-[9px] text-emerald-700 flex-shrink-0 ml-1">{formatMatchTime(game.date, game.time)}</span>
+                      <div className="flex-shrink-0 text-right ml-1">
+                        <div className="text-[9px] text-emerald-700">{formatMatchTime(game.date, game.time)}</div>
+                        <div className="text-[9px] text-emerald-800">{formatMatchDate(game.date, game.time)}</div>
+                      </div>
                       <span className="text-[9px] text-emerald-800 ml-0.5">↗</span>
                     </div>
                     <div className="text-[9px] text-emerald-800 mt-0.5 truncate">
-                      📍 {VENUES[game.venue].name}, {VENUES[game.venue].city} · {formatMatchDate(game.date, game.time)}
+                      📍 {VENUES[game.venue].name}, {VENUES[game.venue].city}
                     </div>
                   </a>
                 );
