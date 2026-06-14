@@ -1,6 +1,6 @@
 import { TEAMS } from '../data/tournamentData.js';
 
-export default function TeamFlag({ code, size = 'sm', showName = true, className = '' }) {
+export default function TeamFlag({ code, size = 'sm', showName = true, showCode = false, className = '' }) {
   if (!code) return null;
   const team = TEAMS[code];
   if (!team) return <span className="text-emerald-700 italic text-xs">{code}</span>;
@@ -28,6 +28,9 @@ export default function TeamFlag({ code, size = 'sm', showName = true, className
       />
       {showName && (
         <span className={`${textSize} font-medium leading-none truncate`}>{team.name}</span>
+      )}
+      {showCode && (
+        <span className="text-[10px] font-bold text-emerald-700 flex-shrink-0">{code}</span>
       )}
     </span>
   );

@@ -43,7 +43,7 @@ export default function ThirdPlaceSelector({ candidates, wildcards, onToggle, re
                 }`}
               >
                 <span className="text-[10px] text-emerald-700 font-bold w-3 flex-shrink-0">{group}</span>
-                <TeamFlag code={team} size="sm" showName />
+                <TeamFlag code={team} size="sm" showName showCode />
                 <span className="ml-auto flex-shrink-0 flex items-center gap-1">
                   <StrengthStars strength={STRENGTHS[team]} className="text-[10px]" />
                   {isSelected && <span className="text-grass-400 text-xs font-bold">✓</span>}

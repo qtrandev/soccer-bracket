@@ -9,6 +9,7 @@ import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
 import { countCompletedGroups, getThirdPlaceCandidates } from '../utils/bracket.js';
 import { FINAL_MATCH } from '../data/tournamentData.js';
+import UpcomingMatches from '../components/UpcomingMatches.jsx';
 
 const STEPS = [
   { id: 'groups', label: 'Group Stage' },
@@ -216,6 +217,8 @@ export default function CreateBracket() {
           />
         </div>
       )}
+
+      <UpcomingMatches dark />
 
       {showShare && (
         <ShareModal

@@ -60,7 +60,7 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
                   <span className="text-xs text-emerald-800">·</span>
                 )}
               </span>
-              <TeamFlag code={code} size="sm" showName />
+              <TeamFlag code={code} size="sm" showName showCode />
               <StrengthStars strength={STRENGTHS[code]} className="ml-auto text-xs flex-shrink-0" />
             </div>
           );
@@ -98,12 +98,10 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
                     <div className="flex items-center gap-1 text-[10px] min-w-0">
                       <div className="flex items-center gap-1 flex-1 min-w-0">
                         <TeamFlag code={game.home} size="xs" />
-                        <span className="text-emerald-600 flex-shrink-0">{game.home}</span>
                       </div>
                       <span className="text-emerald-700 flex-shrink-0">vs</span>
                       <div className="flex items-center gap-1 flex-1 min-w-0">
                         <TeamFlag code={game.away} size="xs" />
-                        <span className="text-emerald-600 flex-shrink-0">{game.away}</span>
                       </div>
                       <span className="text-[9px] text-emerald-700 flex-shrink-0 ml-1">{formatMatchTime(game.date, game.time)}</span>
                       <span className="text-[9px] text-emerald-800 ml-0.5">↗</span>
