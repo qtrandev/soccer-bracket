@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TEAMS } from '../data/tournamentData.js';
-import { STRENGTHS, MAX_STRENGTH, STRENGTH_RANKS, FIFA_RANKINGS } from '../data/teamStrengths.js';
-
-const STRENGTH_OFFSET = 100 - MAX_STRENGTH; // shifts top team to 100
+import { STRENGTHS, STRENGTH_RANKS, FIFA_RANKINGS } from '../data/teamStrengths.js';
 import { autofillBracket } from '../utils/autofill.js';
 import StrengthStars from '../components/StrengthStars.jsx';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
@@ -271,7 +269,7 @@ export default function Home() {
               </div>
               <div className="flex-shrink-0 text-right">
                 <StrengthStars strength={STRENGTHS[t.code]} className="text-sm" />
-                <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{Math.min(100, (STRENGTHS[t.code] ?? 50) + STRENGTH_OFFSET)}/100</span>
+                <span className="block text-[10px] text-neutral-400 tabular-nums mt-0.5">{STRENGTHS[t.code] ?? 50}/100</span>
               </div>
               <span className="flex-shrink-0 text-neutral-300 group-hover:text-green-500 transition-colors text-sm">→</span>
             </button>
