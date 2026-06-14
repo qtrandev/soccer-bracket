@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TEAMS } from '../data/tournamentData.js';
+import { TEAMS, GROUP_MATCHES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
+
+const ALL_MATCH_TIMES = [
+  ...Object.values(GROUP_MATCHES).flat(),
+  ...R32_MATCHES, ...R16_MATCHES, ...QF_MATCHES, ...SF_MATCHES, FINAL_MATCH,
+];
+
+function hasLiveGame() {
+  const now = new Date();
+  return ALL_MATCH_TIMES.some(m => {
+    const start = new Date(`${m.date}T${m.time}:00-04:00`);
+    return now >= start && now <= new Date(start.getTime() + 130 * 60 * 1000);
+  });
+}
 import { STRENGTHS, STRENGTH_RANKS, FIFA_RANKINGS } from '../data/teamStrengths.js';
 import { autofillBracket } from '../utils/autofill.js';
 import StrengthStars from '../components/StrengthStars.jsx';
@@ -90,6 +103,16 @@ export default function Home() {
   const [history, setHistory] = useState(loadHistory);
 
   useEffect(() => { enrichChampions(history, setHistory); }, []);
+
+  useEffect(() => {
+    if (hasLiveGame()) {
+      setTimeout(() => {
+        document.getElementById('upcoming-matches')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   function handleTeamClick(code) {
     const draft = autofillBracket('favorites', code);

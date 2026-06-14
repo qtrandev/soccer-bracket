@@ -106,7 +106,7 @@ export default function UpcomingMatches({ dark = false }) {
   };
 
   return (
-    <section className={`max-w-3xl mx-auto px-4 py-10 border-b ${t.section}`}>
+    <section id="upcoming-matches" className={`max-w-3xl mx-auto px-4 py-10 border-b ${t.section}`}>
       <h2 className={`text-xl font-bold mb-1 ${t.title}`}>Upcoming Matches</h2>
       <p className={`text-sm mb-6 ${t.subtitle}`}>
         Next {WINDOW_DAYS} days · Yesterday's results · Times in your local timezone · Tap a match to search on Google
