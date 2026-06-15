@@ -9,6 +9,7 @@ import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
 import { countCompletedGroups, groupOfTeam } from '../utils/bracket.js';
 import { FINAL_MATCH, GROUP_LETTERS } from '../data/tournamentData.js';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
+import GroupJumpNav from '../components/GroupJumpNav.jsx';
 
 const STEPS = [
   { id: 'groups', label: 'Group Stage' },
@@ -40,8 +41,11 @@ export default function CreateBracket() {
   const hasChampion = Boolean(knockoutPicks?.[FINAL_MATCH.id]);
 
   const proceedRef = useRef(null);
+  const prevWildcardsLength = useRef(wildcards.length);
   useEffect(() => {
-    if (wildcards.length === 8 && allGroupsDone) {
+    const prev = prevWildcardsLength.current;
+    prevWildcardsLength.current = wildcards.length;
+    if (wildcards.length === 8 && prev !== 8 && allGroupsDone) {
       setTimeout(() => proceedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
     }
   }, [wildcards.length]);
@@ -135,24 +139,7 @@ export default function CreateBracket() {
       {/* ── Group stage ── */}
       {step === 'groups' && (
         <div>
-          <div className="sticky top-0 z-20 -mx-4 px-4 py-2 bg-pitch-950/95 backdrop-blur border-b border-emerald-900/30 flex items-center gap-1.5 flex-wrap mb-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mr-1">Group</span>
-            {['A','B','C','D','E','F','G','H','I','J','K','L'].map(l => (
-              <button
-                key={l}
-                onClick={() => document.getElementById(`group-${l}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                className="w-7 h-7 rounded-md border border-emerald-800/50 bg-emerald-900/30 text-emerald-400 text-xs font-black hover:border-grass-500/60 hover:text-grass-400 hover:bg-grass-500/10 transition-all"
-              >
-                {l}
-              </button>
-            ))}
-            <button
-              onClick={() => document.getElementById('upcoming-games')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              className="px-2.5 h-7 rounded-md border border-emerald-800/50 bg-emerald-900/30 text-emerald-400 text-[10px] font-black uppercase tracking-wide hover:border-grass-500/60 hover:text-grass-400 hover:bg-grass-500/10 transition-all whitespace-nowrap"
-            >
-              📅 Upcoming
-            </button>
-          </div>
+          <GroupJumpNav />
           <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-2xl font-black text-emerald-100">Group Stage Picks</h1>
