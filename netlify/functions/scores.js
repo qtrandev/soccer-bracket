@@ -69,7 +69,7 @@ export default async () => {
     }
 
     return json(scores, 200, {
-      'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+      'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30',
     });
   } catch (err) {
     console.error('scores error:', err?.message ?? err);

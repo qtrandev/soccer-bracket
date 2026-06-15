@@ -17,7 +17,7 @@ function useScores() {
     }
     load();
     // refresh every 60 s — short enough to catch live updates
-    timerRef.current = setInterval(load, 60_000);
+    timerRef.current = setInterval(load, 15_000);
     return () => clearInterval(timerRef.current);
   }, []);
 
@@ -235,7 +235,7 @@ export default function UpcomingMatches({ dark = false }) {
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           <span className={`text-[10px] font-bold flex-shrink-0 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
                           {parsedOdds && score.state !== 'post' && (
-                            <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {parsedOdds.team} {parsedOdds.pct}% (🎲{parsedOdds.line})</span>
+                            <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {parsedOdds.team} {parsedOdds.pct}%</span>
                           )}
                         </div>
                         <span className={`text-[10px] text-center flex-shrink-0 ${t.venueName}`}>
