@@ -37,6 +37,8 @@ function parseEvents(events, into) {
       state: status.state ?? 'pre',       // 'pre' | 'in' | 'post'
       completed: status.completed ?? false,
       detail: status.detail ?? '',         // "82'", "HT", "Final", "FT"
+      broadcast: (comp.broadcasts?.[0]?.names ?? []).slice(0, 3), // US networks only
+      oddsDetail: comp.odds?.[0]?.details ?? null,                 // e.g. "ESP -1200"
     };
     // Store under both orderings so our home/away assignment never has to match ESPN's
     into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore };

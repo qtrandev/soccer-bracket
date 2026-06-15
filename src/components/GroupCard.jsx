@@ -12,7 +12,7 @@ const POSITION_COLORS = [
   'text-emerald-800',
 ];
 
-export default function GroupCard({ letter, picks, onPick, readOnly }) {
+export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null }) {
   const teams = GROUPS[letter].teams;
   const games = GROUP_MATCHES[letter] ?? [];
 
@@ -37,25 +37,41 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
           const isPicked = pos === 0 || pos === 1;
           const isFirst = pos === 0;
           const isSecond = pos === 1;
-          const isEliminated = picks.length >= 2 && (pos < 0 || pos > 1);
+          const isThirdPick = picks.length >= 2 && !isPicked && code === wildcard;
+          const isEliminated = picks.length >= 2 && !isPicked && !isThirdPick;
 
           let pillClass = 'team-pill';
           if (isFirst) pillClass += ' selected-1st';
           else if (isSecond) pillClass += ' selected-2nd';
+          else if (isThirdPick) pillClass += ' selected-3rd';
           else if (isEliminated) pillClass += ' eliminated';
+
+          const handleClick = () => {
+            if (readOnly) return;
+            if (picks.length >= 2 && !isPicked) onThirdPick(code);
+            else onPick(letter, code);
+          };
+
+          const tooltipText = readOnly ? undefined
+            : isPicked ? 'Click to deselect'
+            : isThirdPick ? 'Click to remove 3rd place pick'
+            : picks.length >= 2 ? 'Click to pick as 3rd place wildcard'
+            : 'Click to pick as qualifier';
 
           return (
             <div
               key={code}
               className={pillClass}
-              onClick={() => !readOnly && onPick(letter, code)}
-              title={readOnly ? undefined : isPicked ? 'Click to deselect' : 'Click to pick as qualifier'}
+              onClick={handleClick}
+              title={tooltipText}
             >
               <span className="w-6 text-center flex-shrink-0">
                 {isPicked ? (
                   <span className={`text-xs font-bold ${isFirst ? 'text-gold-400' : 'text-slate-400'}`}>
                     {isFirst ? '🥇' : '🥈'}
                   </span>
+                ) : isThirdPick ? (
+                  <span className="text-xs font-bold text-amber-500">🥉</span>
                 ) : (
                   <span className="text-xs text-emerald-800">·</span>
                 )}
@@ -71,13 +87,20 @@ export default function GroupCard({ letter, picks, onPick, readOnly }) {
       </div>
 
       {picks.length >= 2 && (
-        <div className="mt-2 pt-2 border-t border-emerald-900/30 flex gap-2 text-xs text-emerald-600">
+        <div className="mt-2 pt-2 border-t border-emerald-900/30 flex gap-2 text-xs text-emerald-600 flex-wrap">
           <span>↑ Advancing:</span>
           {picks.slice(0, 2).map((c, i) => (
             <span key={c} className={i === 0 ? 'text-gold-500' : 'text-slate-400'}>
               {c}
             </span>
           ))}
+          {wildcard && (
+            <>
+              <span>·</span>
+              <span className="text-amber-600 font-semibold">[3RD]</span>
+              <span className="text-amber-500">{wildcard}</span>
+            </>
+          )}
         </div>
       )}
 

@@ -161,7 +161,7 @@ export default function CreateBracket() {
             </div>
           )}
 
-          <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} readOnly={false} />
+          <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} onThirdPick={toggleWildcard} readOnly={false} wildcards={wildcards} />
 
           {allGroupsDone && (
             <ThirdPlaceSelector

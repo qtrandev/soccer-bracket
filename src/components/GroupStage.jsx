@@ -1,7 +1,7 @@
 import GroupCard from './GroupCard.jsx';
-import { GROUP_LETTERS } from '../data/tournamentData.js';
+import { GROUP_LETTERS, GROUPS } from '../data/tournamentData.js';
 
-export default function GroupStage({ groupPicks, onPick, readOnly }) {
+export default function GroupStage({ groupPicks, onPick, onThirdPick = () => {}, readOnly, wildcards = [] }) {
   const completed = GROUP_LETTERS.filter(l => groupPicks[l]?.length >= 2).length;
   const pct = Math.round((completed / 12) * 100);
 
@@ -32,7 +32,9 @@ export default function GroupStage({ groupPicks, onPick, readOnly }) {
             letter={letter}
             picks={groupPicks[letter] ?? []}
             onPick={onPick}
+            onThirdPick={onThirdPick}
             readOnly={readOnly}
+            wildcard={wildcards.find(w => (GROUPS[letter]?.teams ?? []).includes(w)) ?? null}
           />
         ))}
       </div>

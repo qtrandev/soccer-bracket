@@ -48,6 +48,17 @@ function localDateLabel(dt) {
   }).format(dt);
 }
 
+function oddsToWinPct(detail) {
+  if (!detail) return null;
+  const m = detail.match(/^([A-Z]+)\s+([+-]?\d+)$/);
+  if (!m) return null;
+  const odds = Number(m[2]);
+  const pct = odds < 0
+    ? Math.round((-odds) / (-odds + 100) * 100)
+    : Math.round(100 / (odds + 100) * 100);
+  return `${m[1]} ${pct}%`;
+}
+
 export default function UpcomingMatches({ dark = false }) {
   const scores = useScores();
   const now = new Date();
@@ -218,15 +229,23 @@ export default function UpcomingMatches({ dark = false }) {
                         )}
                       </div>
 
-                      {/* Row 3: group/badge | city | ↗ link */}
+                      {/* Row 3: group + odds | city, country | broadcast + ↗ */}
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`text-[10px] font-bold flex-1 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
-                        <span className={`text-xs text-center flex-shrink-0 ${t.venueName}`}>
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                          <span className={`text-[10px] font-bold flex-shrink-0 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
+                          {score?.oddsDetail && score.state !== 'post' && oddsToWinPct(score.oddsDetail) && (
+                            <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {oddsToWinPct(score.oddsDetail)}</span>
+                          )}
+                        </div>
+                        <span className={`text-[10px] text-center flex-shrink-0 ${t.venueName}`}>
                           {venue.city}{venue.country ? `, ${venue.country}` : ''}
                         </span>
-                        <div className="flex-1 flex justify-end">
+                        <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
+                          {score?.broadcast?.length > 0 && score.state !== 'post' && (
+                            <span className={`text-[10px] truncate ${t.badge}`}>📺 {score.broadcast.slice(0, 2).join(' · ')}</span>
+                          )}
                           {searchUrl && (
-                            <span className={`text-xs transition-colors ${t.arrow}`}>↗</span>
+                            <span className={`text-xs flex-shrink-0 transition-colors ${t.arrow}`}>↗</span>
                           )}
                         </div>
                       </div>

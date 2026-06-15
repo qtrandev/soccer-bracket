@@ -184,7 +184,7 @@ export default function ViewBracket() {
 
       {tab === 'groups' && (
         <>
-          <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly />
+          <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly wildcards={wildcards} />
           {wildcards.length > 0 && (
             <ThirdPlaceSelector
               candidates={getThirdPlaceCandidates(groupPicks)}
