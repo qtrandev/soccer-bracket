@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
-import ThirdPlaceSelector from '../components/ThirdPlaceSelector.jsx';
 import TeamFlag from '../components/TeamFlag.jsx';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
-import { getThirdPlaceCandidates } from '../utils/bracket.js';
 import { FINAL_MATCH } from '../data/tournamentData.js';
 
 export default function ViewBracket() {
@@ -183,17 +181,7 @@ export default function ViewBracket() {
       </div>
 
       {tab === 'groups' && (
-        <>
-          <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly wildcards={wildcards} />
-          {wildcards.length > 0 && (
-            <ThirdPlaceSelector
-              candidates={getThirdPlaceCandidates(groupPicks)}
-              wildcards={wildcards}
-              onToggle={() => {}}
-              readOnly
-            />
-          )}
-        </>
+        <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly wildcards={wildcards} />
       )}
 
       {tab === 'knockout' && (

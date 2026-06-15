@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
-import ThirdPlaceSelector from '../components/ThirdPlaceSelector.jsx';
 import ShareModal from '../components/ShareModal.jsx';
 import AutofillPanel from '../components/AutofillPanel.jsx';
 import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
-import { countCompletedGroups, getThirdPlaceCandidates, groupOfTeam } from '../utils/bracket.js';
+import { countCompletedGroups, groupOfTeam } from '../utils/bracket.js';
 import { FINAL_MATCH } from '../data/tournamentData.js';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
 
@@ -161,22 +160,33 @@ export default function CreateBracket() {
             </div>
           )}
 
-          <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} onThirdPick={toggleWildcard} readOnly={false} wildcards={wildcards} />
+          <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} onThirdPick={toggleWildcard} readOnly={false} wildcards={wildcards} wildcardsFull={wildcards.length >= 8} />
 
           {allGroupsDone && (
-            <ThirdPlaceSelector
-              candidates={getThirdPlaceCandidates(groupPicks)}
-              wildcards={wildcards}
-              onToggle={toggleWildcard}
-              readOnly={false}
-            />
-          )}
-
-          {canProceed && (
-            <div className="mt-8 text-center">
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-1 border border-emerald-800/40 rounded-lg px-5 py-2.5 bg-emerald-900/20">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600">3rd-Place Wildcards</span>
+                  <span className={`font-black text-base tabular-nums ${
+                    wildcards.length === 8 ? 'text-grass-400' : 'text-emerald-500'
+                  }`}>
+                    {wildcards.length}/8
+                  </span>
+                </div>
+                {wildcards.length < 8 && (
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">
+                    Select a 3rd-place team in {8 - wildcards.length} more group{8 - wildcards.length !== 1 ? 's' : ''} above
+                  </span>
+                )}
+              </div>
               <button
-                onClick={() => setStep('knockout')}
-                className="px-8 py-3 rounded-xl bg-grass-500 text-pitch-950 font-black text-base hover:bg-grass-400 transition-all hover:scale-105"
+                onClick={() => canProceed && setStep('knockout')}
+                disabled={!canProceed}
+                className={`px-8 py-3 rounded-xl font-black text-base transition-all ${
+                  canProceed
+                    ? 'bg-grass-500 text-pitch-950 hover:bg-grass-400 hover:scale-105 cursor-pointer'
+                    : 'bg-emerald-900/30 text-emerald-700 border border-emerald-800/40 cursor-not-allowed'
+                }`}
               >
                 Next: Knockout Bracket →
               </button>

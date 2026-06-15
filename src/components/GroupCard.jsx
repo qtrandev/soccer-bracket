@@ -12,7 +12,7 @@ const POSITION_COLORS = [
   'text-emerald-800',
 ];
 
-export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null }) {
+export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null, wildcardsFull = false }) {
   const teams = GROUPS[letter].teams;
   const games = GROUP_MATCHES[letter] ?? [];
 
@@ -38,16 +38,18 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
           const isFirst = pos === 0;
           const isSecond = pos === 1;
           const isThirdPick = picks.length >= 2 && !isPicked && code === wildcard;
-          const isEliminated = picks.length >= 2 && !isPicked && !isThirdPick;
+          const isLocked = picks.length >= 2 && !isPicked && !isThirdPick && wildcardsFull;
+          const isEliminated = picks.length >= 2 && !isPicked && !isThirdPick && !isLocked;
 
           let pillClass = 'team-pill';
           if (isFirst) pillClass += ' selected-1st';
           else if (isSecond) pillClass += ' selected-2nd';
           else if (isThirdPick) pillClass += ' selected-3rd';
+          else if (isLocked) pillClass += ' eliminated cursor-not-allowed';
           else if (isEliminated) pillClass += ' eliminated';
 
           const handleClick = () => {
-            if (readOnly) return;
+            if (readOnly || isLocked) return;
             if (picks.length >= 2 && !isPicked) onThirdPick(code);
             else onPick(letter, code);
           };
@@ -55,6 +57,7 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
           const tooltipText = readOnly ? undefined
             : isPicked ? 'Click to deselect'
             : isThirdPick ? 'Click to remove 3rd place pick'
+            : isLocked ? '8 wildcards already picked — deselect another group first'
             : picks.length >= 2 ? 'Click to pick as 3rd place wildcard'
             : 'Click to pick as qualifier';
 
@@ -97,8 +100,15 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
           {wildcard && (
             <>
               <span>·</span>
-              <span className="text-amber-600 font-semibold">[3RD]</span>
-              <span className="text-amber-500">{wildcard}</span>
+              <button
+                onClick={() => !readOnly && onThirdPick(wildcard)}
+                className={`flex items-center gap-1 ${readOnly ? '' : 'hover:opacity-75 transition-opacity'}`}
+                title={readOnly ? undefined : 'Click to remove 3rd place pick'}
+              >
+                <span className="text-amber-600 font-semibold">[3RD]</span>
+                <span className="text-amber-500">{wildcard}</span>
+                {!readOnly && <span className="text-red-500 font-bold text-sm leading-none">×</span>}
+              </button>
             </>
           )}
         </div>
