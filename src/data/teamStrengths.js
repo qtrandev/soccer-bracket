@@ -113,5 +113,5 @@ export function getStrength(teamCode, strategy) {
   if (strategy === 'chaos') return Math.random() * 100;
   const base = STRENGTHS[teamCode] ?? 50;
   const boost = (STRATEGY_BOOSTS[strategy] ?? {})[teamCode] ?? 0;
-  return Math.min(100, base + boost);
+  return base + boost;
 }
