@@ -31,7 +31,7 @@ export default function ThirdPlaceSelector({ candidates, wildcards, onToggle, re
 
             return (
               <button
-                key={group}
+                key={`${group}-${team}`}
                 onClick={() => !readOnly && !isDisabled && onToggle(team)}
                 disabled={isDisabled}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all text-left w-full ${

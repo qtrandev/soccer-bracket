@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GROUPS, GROUP_LETTERS } from '../data/tournamentData.js';
-import { deriveWildcards } from '../utils/bracket.js';
+import { deriveWildcards, groupOfTeam } from '../utils/bracket.js';
 import { generateSlug } from '../data/slugWords.js';
 
 const STORAGE_KEY = 'bracketwebb_draft';
@@ -117,8 +117,10 @@ export function useBracket(initialData = null) {
     if (readOnly) return;
     setWildcards(prev => {
       if (prev.includes(teamCode)) return prev.filter(t => t !== teamCode);
-      if (prev.length >= 8) return prev;
-      return [...prev, teamCode];
+      const group = groupOfTeam(teamCode);
+      const withoutSameGroup = prev.filter(t => groupOfTeam(t) !== group);
+      if (withoutSameGroup.length >= 8) return withoutSameGroup;
+      return [...withoutSameGroup, teamCode];
     });
   }, [readOnly]);
 

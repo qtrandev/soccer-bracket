@@ -7,7 +7,7 @@ import ShareModal from '../components/ShareModal.jsx';
 import AutofillPanel from '../components/AutofillPanel.jsx';
 import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
-import { countCompletedGroups, getThirdPlaceCandidates } from '../utils/bracket.js';
+import { countCompletedGroups, getThirdPlaceCandidates, groupOfTeam } from '../utils/bracket.js';
 import { FINAL_MATCH } from '../data/tournamentData.js';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
 
@@ -37,7 +37,7 @@ export default function CreateBracket() {
 
   const completedGroups = countCompletedGroups(groupPicks);
   const allGroupsDone = completedGroups >= 12;
-  const canProceed = allGroupsDone && wildcards.length === 8;
+  const canProceed = allGroupsDone && wildcards.length === 8 && new Set(wildcards.map(groupOfTeam)).size === 8;
   const hasChampion = Boolean(knockoutPicks?.[FINAL_MATCH.id]);
 
   function handleAutofill(strategyId) {
@@ -219,7 +219,9 @@ export default function CreateBracket() {
         </div>
       )}
 
-      <UpcomingMatches dark />
+      <div className="mt-10 -mx-4">
+        <UpcomingMatches dark />
+      </div>
 
       {showShare && (
         <ShareModal

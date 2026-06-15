@@ -22,7 +22,7 @@ export function resolveSlot(slot, groupPicks) {
 }
 
 // Returns the group letter (A–L) that a team code belongs to.
-function groupOfTeam(code) {
+export function groupOfTeam(code) {
   for (const [letter, group] of Object.entries(GROUPS)) {
     if (group.teams.includes(code)) return letter;
   }
