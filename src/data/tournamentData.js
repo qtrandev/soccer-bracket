@@ -207,7 +207,7 @@ export const GROUP_MATCHES = {
   ],
   F: [
     { id: 'm11', home: 'NED', away: 'JPN', venue: 'ATT',      date: '2026-06-14', time: '16:00' },
-    { id: 'm12', home: 'TUN', away: 'SWE', venue: 'BBVA',     date: '2026-06-14', time: '22:00' },
+    { id: 'm12', home: 'SWE', away: 'TUN', venue: 'BBVA',     date: '2026-06-14', time: '22:00' },
     { id: 'm35', home: 'NED', away: 'SWE', venue: 'NRG',      date: '2026-06-20', time: '13:00' },
     { id: 'm36', home: 'TUN', away: 'JPN', venue: 'BBVA',     date: '2026-06-21', time: '00:00' },
     { id: 'm57', home: 'JPN', away: 'SWE', venue: 'ATT',      date: '2026-06-25', time: '19:00' },
