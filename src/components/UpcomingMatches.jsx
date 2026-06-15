@@ -154,7 +154,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {isGroup ? (
                             <>
                               {STRENGTH_RANKS[m.home] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.home]}</span>}
-                              <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
+                              <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ring-black/10" />
                               <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
                             </>
                           ) : (
@@ -190,7 +190,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {isGroup ? (
                             <>
                               <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
-                              <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0" />
+                              <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ring-black/10" />
                               {STRENGTH_RANKS[m.away] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.away]}</span>}
                             </>
                           ) : (
@@ -221,7 +221,9 @@ export default function UpcomingMatches({ dark = false }) {
                       {/* Row 3: group/badge | city | ↗ link */}
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`text-[10px] font-bold flex-1 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
-                        <span className={`text-xs text-center flex-shrink-0 ${t.venueName}`}>{venue.city}</span>
+                        <span className={`text-xs text-center flex-shrink-0 ${t.venueName}`}>
+                          {venue.city}{venue.country ? `, ${venue.country}` : ''}
+                        </span>
                         <div className="flex-1 flex justify-end">
                           {searchUrl && (
                             <span className={`text-xs transition-colors ${t.arrow}`}>↗</span>

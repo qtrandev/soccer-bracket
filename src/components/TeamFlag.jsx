@@ -22,7 +22,7 @@ export default function TeamFlag({ code, size = 'sm', showName = true, showCode 
         alt={team.name}
         width={w}
         height={flagSize}
-        className="rounded-sm object-cover flex-shrink-0"
+        className="rounded-sm object-cover flex-shrink-0 ring-1 ring-black/10"
         style={{ width: w, height: flagSize }}
         onError={e => { e.target.style.display = 'none'; }}
       />

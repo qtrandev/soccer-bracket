@@ -29,14 +29,18 @@ function parseEvents(events, into) {
     const away = comp.competitors?.find(c => c.homeAway === 'away');
     if (!home || !away) continue;
     const status = comp.status?.type ?? {};
-    const key = `${home.team.abbreviation.toUpperCase()}-${away.team.abbreviation.toUpperCase()}`;
-    into[key] = {
-      homeScore: home.score != null ? Number(home.score) : null,
-      awayScore: away.score != null ? Number(away.score) : null,
+    const homeCode = home.team.abbreviation.toUpperCase();
+    const awayCode = away.team.abbreviation.toUpperCase();
+    const homeScore = home.score != null ? Number(home.score) : null;
+    const awayScore = away.score != null ? Number(away.score) : null;
+    const base = {
       state: status.state ?? 'pre',       // 'pre' | 'in' | 'post'
       completed: status.completed ?? false,
       detail: status.detail ?? '',         // "82'", "HT", "Final", "FT"
     };
+    // Store under both orderings so our home/away assignment never has to match ESPN's
+    into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore };
+    into[`${awayCode}-${homeCode}`] = { ...base, homeScore: awayScore, awayScore: homeScore };
   }
 }
 

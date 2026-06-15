@@ -200,7 +200,7 @@ export default function Home() {
         <button
           onClick={() => {
             const el = document.getElementById('power-rankings');
-            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 5, behavior: 'smooth' });
+            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 10, behavior: 'smooth' });
           }}
           className="mt-4 text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
         >
@@ -208,7 +208,9 @@ export default function Home() {
         </button>
       </section>
 
-      <UpcomingMatches />
+      <div id="upcoming-matches">
+        <UpcomingMatches />
+      </div>
 
       {/* ── Features ── */}
       <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
@@ -261,7 +263,19 @@ export default function Home() {
       </section>
 
       {/* ── Power Rankings ── */}
-      <section id="power-rankings" className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
+      <div id="power-rankings" className="relative" style={{ scrollMarginTop: '10px' }} />
+      <section className="max-w-3xl mx-auto px-6 py-12 border-b border-neutral-200">
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => {
+              const el = document.getElementById('upcoming-matches');
+              if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110, behavior: 'smooth' });
+            }}
+            className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
+          >
+            ↑ Upcoming Matches
+          </button>
+        </div>
         <h2 className="text-xl font-bold text-neutral-900 mb-1">Team Power Rankings</h2>
         <p className="text-sm text-neutral-400 mb-6">
           Ratings (0–100) based on FIFA rankings, betting odds, squad quality, and recent form.
