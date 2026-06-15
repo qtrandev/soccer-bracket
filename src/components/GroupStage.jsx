@@ -29,6 +29,7 @@ export default function GroupStage({ groupPicks, onPick, onThirdPick = () => {},
         {GROUP_LETTERS.map(letter => (
           <GroupCard
             key={letter}
+            id={`group-${letter}`}
             letter={letter}
             picks={groupPicks[letter] ?? []}
             onPick={onPick}

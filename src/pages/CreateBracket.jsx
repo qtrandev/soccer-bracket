@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import GroupStage from '../components/GroupStage.jsx';
 import KnockoutBracket from '../components/KnockoutBracket.jsx';
@@ -7,7 +7,7 @@ import AutofillPanel from '../components/AutofillPanel.jsx';
 import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
 import { countCompletedGroups, groupOfTeam } from '../utils/bracket.js';
-import { FINAL_MATCH } from '../data/tournamentData.js';
+import { FINAL_MATCH, GROUP_LETTERS } from '../data/tournamentData.js';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
 
 const STEPS = [
@@ -38,6 +38,13 @@ export default function CreateBracket() {
   const allGroupsDone = completedGroups >= 12;
   const canProceed = allGroupsDone && wildcards.length === 8 && new Set(wildcards.map(groupOfTeam)).size === 8;
   const hasChampion = Boolean(knockoutPicks?.[FINAL_MATCH.id]);
+
+  const proceedRef = useRef(null);
+  useEffect(() => {
+    if (wildcards.length === 8 && allGroupsDone) {
+      setTimeout(() => proceedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+    }
+  }, [wildcards.length]);
 
   function handleAutofill(strategyId) {
     const result = autofillBracket(strategyId);
@@ -128,6 +135,24 @@ export default function CreateBracket() {
       {/* ── Group stage ── */}
       {step === 'groups' && (
         <div>
+          <div className="sticky top-0 z-20 -mx-4 px-4 py-2 bg-pitch-950/95 backdrop-blur border-b border-emerald-900/30 flex items-center gap-1.5 flex-wrap mb-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mr-1">Group</span>
+            {['A','B','C','D','E','F','G','H','I','J','K','L'].map(l => (
+              <button
+                key={l}
+                onClick={() => document.getElementById(`group-${l}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                className="w-7 h-7 rounded-md border border-emerald-800/50 bg-emerald-900/30 text-emerald-400 text-xs font-black hover:border-grass-500/60 hover:text-grass-400 hover:bg-grass-500/10 transition-all"
+              >
+                {l}
+              </button>
+            ))}
+            <button
+              onClick={() => document.getElementById('upcoming-games')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="px-2.5 h-7 rounded-md border border-emerald-800/50 bg-emerald-900/30 text-emerald-400 text-[10px] font-black uppercase tracking-wide hover:border-grass-500/60 hover:text-grass-400 hover:bg-grass-500/10 transition-all whitespace-nowrap"
+            >
+              📅 Upcoming
+            </button>
+          </div>
           <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-2xl font-black text-emerald-100">Group Stage Picks</h1>
@@ -163,22 +188,28 @@ export default function CreateBracket() {
           <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} onThirdPick={toggleWildcard} readOnly={false} wildcards={wildcards} wildcardsFull={wildcards.length >= 8} />
 
           {allGroupsDone && (
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <div className="flex flex-col items-center gap-1 border border-emerald-800/40 rounded-lg px-5 py-2.5 bg-emerald-900/20">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600">3rd-Place Wildcards</span>
-                  <span className={`font-black text-base tabular-nums ${
-                    wildcards.length === 8 ? 'text-grass-400' : 'text-emerald-500'
-                  }`}>
-                    {wildcards.length}/8
-                  </span>
-                </div>
-                {wildcards.length < 8 && (
-                  <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">
-                    Select a 3rd-place team in {8 - wildcards.length} more group{8 - wildcards.length !== 1 ? 's' : ''} above
-                  </span>
-                )}
+            <div ref={proceedRef} className="mt-8 flex flex-col items-center gap-3">
+              <div className={`flex items-center gap-2 border border-emerald-800/40 rounded-lg px-5 py-2.5 bg-emerald-900/20 text-sm font-black uppercase tracking-widest tabular-nums ${
+                wildcards.length === 8 ? 'text-grass-400' : 'text-emerald-500'
+              }`}>
+                3rd-Place Wildcards: {wildcards.length}/8
+                {wildcards.length === 8
+                  ? <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  : <svg className="w-4 h-4 flex-shrink-0 text-red-500" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></svg>
+                }
               </div>
+              {wildcards.length < 8 && (
+                <button
+                  onClick={() => {
+                    const first = GROUP_LETTERS.find(l => !wildcards.some(w => groupOfTeam(w) === l));
+                    if (first) document.getElementById(`group-${first}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                  className="flex items-center gap-1.5 border border-emerald-800/40 rounded-lg px-5 py-2.5 bg-emerald-900/20 text-[11px] font-black uppercase tracking-wide text-emerald-600 hover:text-grass-400 hover:border-grass-500/40 transition-colors"
+                >
+                  <span>↑</span>
+                  <span>Go to Group missing 3rd pick ({8 - wildcards.length} left)</span>
+                </button>
+              )}
               <button
                 onClick={() => canProceed && setStep('knockout')}
                 disabled={!canProceed}
@@ -229,7 +260,7 @@ export default function CreateBracket() {
         </div>
       )}
 
-      <div className="mt-10 -mx-4">
+      <div id="upcoming-games" className="mt-10 -mx-4">
         <UpcomingMatches dark />
       </div>
 

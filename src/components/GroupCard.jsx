@@ -12,7 +12,7 @@ const POSITION_COLORS = [
   'text-emerald-800',
 ];
 
-export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null, wildcardsFull = false }) {
+export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null, wildcardsFull = false, id }) {
   const teams = GROUPS[letter].teams;
   const games = GROUP_MATCHES[letter] ?? [];
 
@@ -21,7 +21,7 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
   }
 
   return (
-    <div className="glass-card p-4 animate-fade-in">
+    <div id={id} className="glass-card p-4 animate-fade-in">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-base text-emerald-100">
           Group <span className="text-grass-400">{letter}</span>
