@@ -162,6 +162,20 @@ export default function Home() {
           Free · Saves to a link like{' '}
           <Link to={`/${history[0]?.slug ?? 'blazing-striker'}`} className="font-mono text-neutral-500 hover:text-green-600 underline underline-offset-2 transition-colors">bracketwebb.com/<span className="text-neutral-700">{history[0]?.slug ?? 'blazing-striker'}</span></Link>
         </p>
+        <a
+          href="#upcoming-matches"
+          onClick={(e) => {
+            e.preventDefault();
+            const el = document.querySelector('[data-next-upcoming="true"]') ?? document.getElementById('upcoming-matches');
+            if (el) {
+              const y = el.getBoundingClientRect().top + window.scrollY - 200;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+          }}
+          className="mt-4 inline-flex items-center gap-1.5 text-sm text-green-600 font-semibold hover:text-green-700 transition-colors"
+        >
+          ↓ View live scores &amp; upcoming matches
+        </a>
       </section>
 
       {/* ── Team flags ── */}

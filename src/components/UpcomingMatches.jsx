@@ -558,14 +558,14 @@ export default function UpcomingMatches({ dark = false }) {
                   ) : null;
                   const cardFlash = anyGoalAnim ? <div className="absolute inset-0 rounded-lg pointer-events-none animate-goal-card-flash" /> : null;
                   return searchUrl ? (
-                    <div key={m.id} id={`match-${matchKey}`} className="relative">
+                    <div key={m.id} id={`match-${matchKey}`} className="relative" {...(isNextUp ? { 'data-next-upcoming': 'true' } : {})}>
                       {liveOverlay}{cardFlash}
                       <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                         {inner}
                       </a>
                     </div>
                   ) : (
-                    <div key={m.id} id={`match-${matchKey}`} className="relative">
+                    <div key={m.id} id={`match-${matchKey}`} className="relative" {...(isNextUp ? { 'data-next-upcoming': 'true' } : {})}>
                       {liveOverlay}{cardFlash}
                       <div className={cls}>
                         {inner}
