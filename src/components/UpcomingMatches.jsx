@@ -234,7 +234,7 @@ export default function UpcomingMatches({ dark = false }) {
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           <span className={`text-[10px] font-bold flex-shrink-0 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
-                          {parsedOdds && score.state !== 'post' && (
+                          {parsedOdds && (
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {parsedOdds.team} {parsedOdds.pct}%</span>
                           )}
                         </div>
@@ -242,7 +242,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {venue.city}{venue.country ? `, ${venue.country}` : ''}
                         </span>
                         <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
-                          {score?.broadcast?.length > 0 && score.state !== 'post' && (
+                          {score?.broadcast?.length > 0 && (
                             <span className={`text-[10px] truncate ${t.badge}`}>📺 {score.broadcast.slice(0, 2).join(' · ')}</span>
                           )}
                           {searchUrl && (
