@@ -18,7 +18,7 @@ function useScores() {
 
     function startPolling() {
       clearInterval(timerRef.current);
-      timerRef.current = setInterval(load, 15_000);
+      timerRef.current = setInterval(load, 10_000);
     }
 
     function stopPolling() {
@@ -34,14 +34,19 @@ function useScores() {
     // Re-fetch on bfcache restore — the event Chrome fires instead of a real reload
     const handlePageShow = (e) => { if (e.persisted) { load(); startPolling(); } };
 
+    // Re-fetch when the browser window regains focus (user returns from another app/tab)
+    const handleFocus = () => { load(); startPolling(); };
+
     load();
     startPolling();
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('focus', handleFocus);
     return () => {
       stopPolling();
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
