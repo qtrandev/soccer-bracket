@@ -33,16 +33,48 @@ function parseEvents(events, into) {
     const awayCode = away.team.abbreviation.toUpperCase();
     const homeScore = home.score != null ? Number(home.score) : null;
     const awayScore = away.score != null ? Number(away.score) : null;
-    const base = {
-      state: status.state ?? 'pre',       // 'pre' | 'in' | 'post'
-      completed: status.completed ?? false,
-      detail: status.detail ?? '',         // "82'", "HT", "Final", "FT"
-      broadcast: (comp.broadcasts?.[0]?.names ?? []).slice(0, 3), // US networks only
-      oddsDetail: comp.odds?.[0]?.details ?? null,                 // e.g. "ESP -1200"
+
+    // Goals only (scoringPlay=true excludes yellow/red cards)
+    const goals = (comp.details ?? [])
+      .filter(d => d.scoringPlay)
+      .map(d => ({
+        side: d.team?.id === home.team.id ? 'home' : 'away',
+        name: d.athletesInvolved?.[0]?.shortName ?? '',
+        min:  d.clock?.displayValue ?? '',
+        og:   d.ownGoal     ?? false,
+        pk:   d.penaltyKick ?? false,
+      }));
+
+    // Per-team possession + shot stats (null when not yet available, e.g. pre-game)
+    const sv = (arr, name) => {
+      const v = arr?.find(s => s.name === name)?.displayValue;
+      return v != null ? parseFloat(v) : null;
     };
+    const hp = sv(home.statistics, 'possessionPct');
+    const stats = hp != null ? {
+      home: { poss: Math.round(hp),                                         shots: sv(home.statistics, 'totalShots') ?? 0, sog: sv(home.statistics, 'shotsOnTarget') ?? 0 },
+      away: { poss: Math.round(sv(away.statistics, 'possessionPct') ?? 0), shots: sv(away.statistics, 'totalShots') ?? 0, sog: sv(away.statistics, 'shotsOnTarget') ?? 0 },
+    } : null;
+
+    const base = {
+      state:      status.state      ?? 'pre',
+      completed:  status.completed  ?? false,
+      detail:     status.detail     ?? '',
+      broadcast:  (comp.broadcasts?.[0]?.names ?? []).slice(0, 3),
+      oddsDetail: comp.odds?.[0]?.details ?? null,
+      goals,
+      stats,
+    };
+
     // Store under both orderings so our home/away assignment never has to match ESPN's
     into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore };
-    into[`${awayCode}-${homeCode}`] = { ...base, homeScore: awayScore, awayScore: homeScore };
+    into[`${awayCode}-${homeCode}`] = {
+      ...base,
+      homeScore: awayScore,
+      awayScore: homeScore,
+      goals: goals.map(g => ({ ...g, side: g.side === 'home' ? 'away' : 'home' })),
+      stats: stats ? { home: stats.away, away: stats.home } : null,
+    };
   }
 }
 

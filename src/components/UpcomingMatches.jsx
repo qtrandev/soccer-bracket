@@ -186,6 +186,11 @@ export default function UpcomingMatches({ dark = false }) {
                   const isFinal = score?.completed || (isLive && (now - matchStart) > 130 * 60 * 1000);
                   const homeWon = isFinal && score.homeScore > score.awayScore;
                   const awayWon = isFinal && score.awayScore > score.homeScore;
+                  const homeGoals = score?.goals?.filter(g => g.side === 'home') ?? [];
+                  const awayGoals = score?.goals?.filter(g => g.side === 'away') ?? [];
+                  const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
+                  const showScorers = (isLive || isFinal) && (homeGoals.length > 0 || awayGoals.length > 0);
+                  const showStats   = (isLive || isFinal) && score?.stats != null;
 
                   const inner = (
                     <div className="flex flex-col flex-1 min-w-0">
@@ -279,6 +284,46 @@ export default function UpcomingMatches({ dark = false }) {
                           )}
                         </div>
                       </div>
+
+                      {/* Rows 4+5: goal scorers + possession/shots (live and finished games) */}
+                      {(showScorers || showStats) && (
+                        <div className={`mt-1.5 pt-1.5 border-t space-y-1 ${dark ? 'border-emerald-900/30' : 'border-neutral-100'}`}>
+                          {showScorers && (
+                            <div className="flex items-start gap-2">
+                              <div className={`flex-1 min-w-0 text-[10px] leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
+                                {homeGoals.map(fmtGoal).join(' · ')}
+                              </div>
+                              <span className="flex-shrink-0 text-[10px] text-emerald-700">⚽</span>
+                              <div className={`flex-1 min-w-0 text-[10px] text-right leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
+                                {awayGoals.map(fmtGoal).join(' · ')}
+                              </div>
+                            </div>
+                          )}
+                          {showStats && (
+                            <div className="flex items-center gap-2">
+                              <span className={`flex-1 text-[10px] ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
+                                {score.stats.home.shots} shots · {score.stats.home.sog}🎯
+                              </span>
+                              <div className="flex-shrink-0 w-20">
+                                <div className={`h-1 rounded-full overflow-hidden ${dark ? 'bg-emerald-900/50' : 'bg-neutral-200'}`}>
+                                  <div
+                                    className={`h-full rounded-l-full ${dark ? 'bg-grass-500/60' : 'bg-green-500/60'}`}
+                                    style={{ width: `${score.stats.home.poss}%` }}
+                                  />
+                                </div>
+                                <div className={`flex justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
+                                  <span>{score.stats.home.poss}%</span>
+                                  <span>poss</span>
+                                  <span>{score.stats.away.poss}%</span>
+                                </div>
+                              </div>
+                              <span className={`flex-1 text-[10px] text-right ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
+                                {score.stats.away.sog}🎯 · {score.stats.away.shots} shots
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
 
