@@ -6,6 +6,7 @@ import TeamFlag from '../components/TeamFlag.jsx';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
 import GroupJumpNav from '../components/GroupJumpNav.jsx';
 import { FINAL_MATCH } from '../data/tournamentData.js';
+import { useStandings } from '../hooks/useStandings.js';
 
 export default function ViewBracket() {
   const { slug } = useParams();
@@ -62,6 +63,7 @@ export default function ViewBracket() {
     load();
   }, [slug]);
 
+  const standings = useStandings();
   const navigate = useNavigate();
 
   async function handleCopy() {
@@ -184,7 +186,7 @@ export default function ViewBracket() {
       {tab === 'groups' && (
         <>
           <GroupJumpNav />
-          <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly wildcards={wildcards} />
+          <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly wildcards={wildcards} standings={standings} />
         </>
       )}
 

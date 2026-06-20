@@ -7,6 +7,7 @@ import AutofillPanel from '../components/AutofillPanel.jsx';
 import { useBracket } from '../hooks/useBracket.js';
 import { autofillBracket, STRATEGIES } from '../utils/autofill.js';
 import { countCompletedGroups, groupOfTeam } from '../utils/bracket.js';
+import { useStandings } from '../hooks/useStandings.js';
 import { FINAL_MATCH, GROUP_LETTERS } from '../data/tournamentData.js';
 import UpcomingMatches from '../components/UpcomingMatches.jsx';
 import GroupJumpNav from '../components/GroupJumpNav.jsx';
@@ -35,6 +36,7 @@ export default function CreateBracket() {
   const [appliedStrategy, setAppliedStrategy] = useState(null);
   const [autofillFlash, setAutofillFlash] = useState(false);
 
+  const standings = useStandings();
   const completedGroups = countCompletedGroups(groupPicks);
   const allGroupsDone = completedGroups >= 12;
   const canProceed = allGroupsDone && wildcards.length === 8 && new Set(wildcards.map(groupOfTeam)).size === 8;
@@ -172,7 +174,7 @@ export default function CreateBracket() {
             </div>
           )}
 
-          <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} onThirdPick={toggleWildcard} readOnly={false} wildcards={wildcards} wildcardsFull={wildcards.length >= 8} />
+          <GroupStage groupPicks={groupPicks} onPick={pickGroupTeam} onThirdPick={toggleWildcard} readOnly={false} wildcards={wildcards} wildcardsFull={wildcards.length >= 8} standings={standings} />
 
           {allGroupsDone && (
             <div ref={proceedRef} className="mt-8 flex flex-col items-center gap-3">

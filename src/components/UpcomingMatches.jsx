@@ -15,10 +15,34 @@ function useScores() {
         if (res.ok) setScores(await res.json());
       } catch {}
     }
+
+    function startPolling() {
+      clearInterval(timerRef.current);
+      timerRef.current = setInterval(load, 15_000);
+    }
+
+    function stopPolling() {
+      clearInterval(timerRef.current);
+    }
+
+    // Re-fetch + restart poll when tab comes back into view (covers background → foreground)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') { load(); startPolling(); }
+      else stopPolling();
+    };
+
+    // Re-fetch on bfcache restore — the event Chrome fires instead of a real reload
+    const handlePageShow = (e) => { if (e.persisted) { load(); startPolling(); } };
+
     load();
-    // refresh every 60 s — short enough to catch live updates
-    timerRef.current = setInterval(load, 15_000);
-    return () => clearInterval(timerRef.current);
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pageshow', handlePageShow);
+    };
   }, []);
 
   return scores;

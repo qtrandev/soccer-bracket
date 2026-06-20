@@ -12,7 +12,7 @@ const POSITION_COLORS = [
   'text-emerald-800',
 ];
 
-export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null, wildcardsFull = false, id }) {
+export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {}, readOnly, wildcard = null, wildcardsFull = false, id, standings = {} }) {
   const teams = GROUPS[letter].teams;
   const games = GROUP_MATCHES[letter] ?? [];
 
@@ -83,6 +83,11 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
                 #{STRENGTH_RANKS[code]}
               </span>
               <TeamFlag code={code} size="sm" showName showCode />
+              {standings[code]?.gp > 0 && (
+                <span className="text-[10px] text-emerald-600 flex-shrink-0 whitespace-nowrap">
+                  · {standings[code].pts}pts GD{standings[code].gd > 0 ? '+' : ''}{standings[code].gd}
+                </span>
+              )}
               <StrengthStars strength={STRENGTHS[code]} className="ml-auto text-xs flex-shrink-0" />
             </div>
           );
