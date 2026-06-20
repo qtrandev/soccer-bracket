@@ -247,6 +247,10 @@ export default function UpcomingMatches({ dark = false }) {
 
   if (allRelevant.length === 0) return null;
 
+  const anyLiveGames = Object.values(scores).some(s => s.state === 'in');
+  const nextUpcomingMatch = allRelevant.find(m => m.dt > now && !scores[`${m.home}-${m.away}`]?.completed);
+  const nextUpcomingKey = nextUpcomingMatch ? `${nextUpcomingMatch.home}-${nextUpcomingMatch.away}` : null;
+
   const byDate = {};
   for (const m of allRelevant) {
     const key = localDateKey(m.dt);
@@ -533,14 +537,21 @@ export default function UpcomingMatches({ dark = false }) {
                   );
 
                   const isLiveActive = isLive && !isFinal;
+                  const isNextUp = !anyLiveGames && matchKey === nextUpcomingKey;
                   const pastCls = dark
                     ? 'border-emerald-900/20 opacity-50 hover:opacity-100'
                     : 'border-neutral-100 opacity-50 hover:opacity-100';
                   const liveRowCls = dark
                     ? 'border-grass-600/50 bg-grass-500/5 animate-pulse-green'
                     : 'border-green-400 bg-green-50/50 animate-pulse-green';
-                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-all ${
-                    isLiveActive ? liveRowCls : isPast ? pastCls : t.row
+                  const nextUpCls = dark
+                    ? 'border-grass-500 bg-grass-500/5'
+                    : 'border-green-500 bg-green-50/40';
+                  const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg transition-all ${
+                    isLiveActive ? `border ${liveRowCls}`
+                    : isPast     ? `border ${pastCls}`
+                    : isNextUp   ? `border-2 ${nextUpCls}`
+                    :              `border ${t.row}`
                   }`;
                   const liveOverlay = isLiveActive ? (
                     <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none ${dark ? 'border-grass-400' : 'border-green-400'}`} />
