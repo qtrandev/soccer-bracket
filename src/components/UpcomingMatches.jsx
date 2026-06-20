@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { TEAMS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
 import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
@@ -89,9 +89,148 @@ function parseOdds(detail) {
   return { team: m[1], pct, line: m[2] };
 }
 
+function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey }) {
+  const pieces = useMemo(() =>
+    Array.from({ length: 34 }, (_, i) => ({
+      id: i,
+      left: `${(i * 11 + 4) % 100}%`,
+      delay: (i * 0.08).toFixed(2),
+      color: ['#22c55e','#4ade80','#fbbf24','#f59e0b','#ffffff','#86efac','#34d399','#a3e635'][i % 8],
+      size: 6 + (i % 5) * 2,
+      dur: (1.5 + (i % 5) * 0.32).toFixed(2),
+    }))
+  , []);
+
+  function scrollToMatch() {
+    document.getElementById(`match-${matchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-pitch-950/90 backdrop-blur-sm animate-overlay-lifecycle cursor-pointer select-none"
+         onClick={scrollToMatch}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {pieces.map(p => (
+          <div key={p.id} className="absolute rounded-sm" style={{
+            left: p.left, top: '-10px',
+            width: `${p.size}px`, height: `${p.size}px`,
+            backgroundColor: p.color,
+            animation: `confettiFall ${p.dur}s ${p.delay}s linear both`,
+          }} />
+        ))}
+      </div>
+      <div className="relative text-center px-6">
+        {iso2 && (
+          <div className="flex justify-center mb-5 animate-goal-flag-drop">
+            <img
+              src={`https://flagcdn.com/w160/${iso2}.png`}
+              alt={teamCode}
+              className="h-28 w-auto rounded-xl"
+              style={{ boxShadow: '0 0 60px rgba(34,197,94,0.6), 0 0 120px rgba(34,197,94,0.25)' }}
+            />
+          </div>
+        )}
+        <div className="animate-goal-text-in">
+          <div className="text-7xl sm:text-8xl font-black text-white leading-none tracking-tight"
+               style={{ textShadow: '0 0 40px rgba(34,197,94,1), 0 0 100px rgba(34,197,94,0.5)' }}>
+            ⚽ GOAL!
+          </div>
+          {scorer && (
+            <div className="text-2xl font-bold text-grass-400 mt-4">
+              {scorer}
+              {minute && <span className="text-emerald-600 text-lg ml-2">{minute}</span>}
+            </div>
+          )}
+          <div className="text-sm tracking-widest uppercase text-emerald-700 mt-1 font-semibold">{TEAMS[teamCode]?.name ?? teamCode}</div>
+        </div>
+        <div className="mt-8 text-emerald-600 text-sm font-semibold animate-pulse tracking-wide">Tap to view match ↓</div>
+      </div>
+    </div>
+  );
+}
+
 export default function UpcomingMatches({ dark = false }) {
   const scores = useScores();
   const standings = useStandings();
+
+  const [goalEvents, setGoalEvents] = useState({});
+  const [statBumps, setStatBumps] = useState(new Set());
+  const [shotBumpVersion, setShotBumpVersion] = useState(0);
+  const [shotLabel, setShotLabel] = useState('');
+  const [shotMatchKey, setShotMatchKey] = useState('');
+  const [goalOverlay, setGoalOverlay] = useState(null);
+  const prevScoresRef = useRef(null);
+
+
+  useEffect(() => {
+    if (prevScoresRef.current === null) { prevScoresRef.current = scores; return; }
+    const prev = prevScoresRef.current;
+    const newGoals = {};
+    const newBumps = new Set();
+    let overlayData = null;
+    for (const [key, score] of Object.entries(scores)) {
+      const p = prev[key];
+      if (!p || score.state !== 'in') continue;
+      if (score.homeScore > p.homeScore) {
+        newGoals[`${key}-home`] = true;
+        if (!overlayData) {
+          const [hc] = key.split('-');
+          const g = score.goals?.filter(g => g.side === 'home').at(-1);
+          overlayData = { iso2: TEAMS[hc]?.iso2 ?? '', teamCode: hc, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key };
+        }
+      }
+      if (score.awayScore > p.awayScore) {
+        newGoals[`${key}-away`] = true;
+        if (!overlayData) {
+          const ac = key.slice(key.indexOf('-') + 1);
+          const g = score.goals?.filter(g => g.side === 'away').at(-1);
+          overlayData = { iso2: TEAMS[ac]?.iso2 ?? '', teamCode: ac, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key };
+        }
+      }
+      if (p.stats && score.stats) {
+        if (score.stats.home.shots > p.stats.home.shots) newBumps.add(`${key}-home-shots`);
+        if (score.stats.home.sog   > p.stats.home.sog)   newBumps.add(`${key}-home-sog`);
+        if (score.stats.away.shots > p.stats.away.shots) newBumps.add(`${key}-away-shots`);
+        if (score.stats.away.sog   > p.stats.away.sog)   newBumps.add(`${key}-away-sog`);
+      }
+    }
+    prevScoresRef.current = scores;
+    if (Object.keys(newGoals).length > 0) {
+      setGoalEvents(g => ({ ...g, ...newGoals }));
+      setTimeout(() => setGoalEvents(g => { const n = { ...g }; for (const k of Object.keys(newGoals)) delete n[k]; return n; }), 3500);
+    }
+    if (newBumps.size > 0) {
+      // Build a label and extract the match key from the first detected bump
+      let label = '';
+      let bumpMatchKey = '';
+      for (const bump of newBumps) {
+        for (const [side, stat] of [['home','shots'],['away','shots'],['home','sog'],['away','sog']]) {
+          const suffix = `-${side}-${stat}`;
+          if (bump.endsWith(suffix)) {
+            const mk = bump.slice(0, -suffix.length);
+            const tc = side === 'home' ? mk.split('-')[0] : mk.slice(mk.indexOf('-') + 1);
+            const sc = scores[mk];
+            if (sc?.stats) {
+              const val = sc.stats[side][stat];
+              label = `${TEAMS[tc]?.name ?? tc} · ${val} ${stat === 'sog' ? 'shots on target' : 'shots'}`;
+              bumpMatchKey = mk;
+            }
+            break;
+          }
+        }
+        if (label) break;
+      }
+      if (label) setShotLabel(label);
+      if (bumpMatchKey) setShotMatchKey(bumpMatchKey);
+      setShotBumpVersion(v => v + 1);
+      setStatBumps(b => new Set([...b, ...newBumps]));
+      setTimeout(() => { setStatBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }); setShotLabel(''); setShotMatchKey(''); }, 3000);
+    }
+    if (overlayData) {
+      setGoalOverlay(overlayData);
+      setTimeout(() => setGoalOverlay(null), 4500);
+    }
+  }, [scores]);
+
   const now = new Date();
   const windowEnd = new Date(now.getTime() + WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const todayStr = localDateKey(now);
@@ -148,6 +287,27 @@ export default function UpcomingMatches({ dark = false }) {
   };
 
   return (
+    <>
+    {goalOverlay && <GoalOverlay {...goalOverlay} />}
+    {statBumps.size > 0 && (
+      <div key={shotBumpVersion} className="fixed inset-0 overflow-hidden cursor-pointer" style={{ zIndex: 45 }}
+           onClick={() => document.getElementById(`match-${shotMatchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: 'shotKickScreen 3s ease-out forwards' }}>👟</span>
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '10rem', lineHeight: 1, animation: 'kickedBallScreen 3s ease-out forwards' }}>⚽</span>
+        {shotLabel && (
+          <div className="absolute left-0 right-0 text-center font-black text-white pointer-events-none"
+            style={{ top: 'calc(50% + 6rem)', fontSize: '2.2rem', lineHeight: 1.2,
+              textShadow: '0 0 24px rgba(34,197,94,0.9), 0 2px 8px rgba(0,0,0,0.8)',
+              animation: 'shotLabelPop 3s ease-out forwards' }}>
+            {shotLabel}
+          </div>
+        )}
+        <div className="absolute left-0 right-0 text-center text-emerald-500 text-sm font-semibold animate-pulse pointer-events-none"
+             style={{ top: 'calc(50% + 10rem)' }}>
+          Tap to view match ↓
+        </div>
+      </div>
+    )}
     <section id="upcoming-matches" className={`max-w-3xl mx-auto px-4 py-10 border-b ${t.section}`}>
       <h2 className={`text-xl font-bold mb-1 ${t.title}`}>Upcoming Matches</h2>
       <p className={`text-sm mb-6 ${t.subtitle}`}>
@@ -180,24 +340,34 @@ export default function UpcomingMatches({ dark = false }) {
                     ? `https://www.google.com/search?q=${encodeURIComponent(`${home.name} vs ${away.name} 2026 FIFA World Cup`)}`
                     : null;
 
-                  const score = isGroup ? scores[`${m.home}-${m.away}`] : null;
+                  const matchKey = `${m.home}-${m.away}`;
+                  const score = isGroup ? scores[matchKey] : null;
                   const parsedOdds = score ? parseOdds(score.oddsDetail) : null;
                   const isLive = score?.state === 'in';
                   // ESPN sometimes keeps state='in' past the final whistle; treat as done after 130 min
                   const matchStart = new Date(`${m.date}T${m.time}:00-04:00`);
                   const isFinal = score?.completed || (isLive && (now - matchStart) > 130 * 60 * 1000);
-                  const homeWon = isFinal && score.homeScore > score.awayScore;
-                  const awayWon = isFinal && score.awayScore > score.homeScore;
+                  const homeWon = isFinal && (score?.homeScore ?? 0) > (score?.awayScore ?? 0);
+                  const awayWon = isFinal && (score?.awayScore ?? 0) > (score?.homeScore ?? 0);
                   const homeGoals = score?.goals?.filter(g => g.side === 'home') ?? [];
                   const awayGoals = score?.goals?.filter(g => g.side === 'away') ?? [];
                   const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
                   const showScorers = (isLive || isFinal) && (homeGoals.length > 0 || awayGoals.length > 0);
-                  const showStats   = (isLive || isFinal) && score?.stats != null;
+                  const effectiveStats = score?.stats ?? null;
+                  const showStats   = (isLive || isFinal) && effectiveStats != null;
                   const fmtStandings = s => s?.gp > 0
                     ? `${s.w}W ${s.d}D ${s.l}L · ${s.pts}pts · GD${s.gd > 0 ? '+' : ''}${s.gd}`
                     : null;
                   const homeStandStr = isGroup ? fmtStandings(standings[m.home]) : null;
                   const awayStandStr = isGroup ? fmtStandings(standings[m.away]) : null;
+
+                  const homeGoalAnim = !!goalEvents[`${matchKey}-home`];
+                  const awayGoalAnim = !!goalEvents[`${matchKey}-away`];
+                  const anyGoalAnim = homeGoalAnim || awayGoalAnim;
+                  const shotBumpActive = (
+                    statBumps.has(`${matchKey}-home-shots`) || statBumps.has(`${matchKey}-away-shots`) ||
+                    statBumps.has(`${matchKey}-home-sog`)   || statBumps.has(`${matchKey}-away-sog`)
+                  );
 
                   const inner = (
                     <div className="flex flex-col flex-1 min-w-0">
@@ -215,14 +385,25 @@ export default function UpcomingMatches({ dark = false }) {
                           )}
                         </div>
 
-                        <div className="flex-shrink-0 text-center w-20">
+                        <div className="flex-shrink-0 text-center w-20 relative">
                           {isLive ? (
                             <>
-                              <span className={`text-sm font-bold tabular-nums ${dark ? 'text-grass-400' : 'text-green-600'}`}>
-                                {score.homeScore} – {score.awayScore}
+                              {homeGoalAnim && (<>
+                                <span key={`${goalEvents[`${matchKey}-home`]}-a`} className="absolute pointer-events-none z-10 text-2xl leading-none animate-ball-from-left" style={{ top: '50%', left: '50%' }}>⚽</span>
+                                <span key={`${goalEvents[`${matchKey}-home`]}-b`} className="absolute pointer-events-none z-10 text-base leading-none animate-ball-from-left-alt" style={{ top: '50%', left: '50%' }}>⚽</span>
+                              </>)}
+                              {awayGoalAnim && (<>
+                                <span key={`${goalEvents[`${matchKey}-away`]}-a`} className="absolute pointer-events-none z-10 text-2xl leading-none animate-ball-from-right" style={{ top: '50%', left: '50%' }}>⚽</span>
+                                <span key={`${goalEvents[`${matchKey}-away`]}-b`} className="absolute pointer-events-none z-10 text-base leading-none animate-ball-from-right-alt" style={{ top: '50%', left: '50%' }}>⚽</span>
+                              </>)}
+
+                              <span className={`text-sm font-bold tabular-nums ${anyGoalAnim ? 'animate-goal-pop' : ''} ${dark ? 'text-grass-400' : 'text-green-600'}`}>
+                                {score?.homeScore ?? '-'} – {score?.awayScore ?? '-'}
                               </span>
-                              <span className={`block text-[10px] font-semibold animate-pulse ${dark ? 'text-grass-500' : 'text-green-500'}`}>
-                                {score.detail || 'LIVE'}
+                              <span className={`block text-[10px] font-semibold ${anyGoalAnim ? '' : 'animate-pulse'} ${dark ? 'text-grass-500' : 'text-green-500'}`}>
+                                {anyGoalAnim
+                                  ? <span className="animate-goal-toast inline-block font-black">⚽ GOAL!</span>
+                                  : (score?.detail || 'LIVE')}
                               </span>
                             </>
                           ) : isFinal ? (
@@ -314,29 +495,38 @@ export default function UpcomingMatches({ dark = false }) {
                               </div>
                             </div>
                           )}
-                          {showStats && (
+                          {showStats && (() => {
+                            const possChanging = statBumps.has(`${matchKey}-home-shots`) || statBumps.has(`${matchKey}-away-shots`);
+                            const bumpStyle = key => statBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
+                            return (
                             <div className="flex items-center gap-2">
                               <span className={`flex-1 text-[10px] ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
-                                {score.stats.home.shots} shots · {score.stats.home.sog}🎯
+                                <span style={bumpStyle('home-shots')}>{effectiveStats.home.shots}</span>{' shots · '}<span style={bumpStyle('home-sog')}>{effectiveStats.home.sog}</span>🎯
                               </span>
                               <div className="flex-shrink-0 w-20">
-                                <div className={`h-1 rounded-full overflow-hidden ${dark ? 'bg-emerald-900/50' : 'bg-neutral-200'}`}>
+                                <div
+                                  className={`rounded-full ${possChanging ? '' : 'overflow-hidden'} ${dark ? 'bg-emerald-900/50' : 'bg-neutral-200'}`}
+                                  style={possChanging
+                                    ? { height: '4px', animation: 'possBarGrow 1.0s ease-out', transformOrigin: 'bottom' }
+                                    : { height: '4px' }}
+                                >
                                   <div
                                     className={`h-full rounded-l-full ${dark ? 'bg-grass-500/60' : 'bg-green-500/60'}`}
-                                    style={{ width: `${score.stats.home.poss}%` }}
+                                    style={{ width: `${effectiveStats.home.poss}%`, transition: 'width 1.2s ease-out' }}
                                   />
                                 </div>
                                 <div className={`flex justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
-                                  <span>{score.stats.home.poss}%</span>
+                                  <span style={possChanging ? { display: 'inline-block', animation: 'statBumpGlow 0.9s ease-out' } : undefined}>{effectiveStats.home.poss}%</span>
                                   <span>poss</span>
-                                  <span>{score.stats.away.poss}%</span>
+                                  <span style={possChanging ? { display: 'inline-block', animation: 'statBumpGlow 0.9s ease-out' } : undefined}>{effectiveStats.away.poss}%</span>
                                 </div>
                               </div>
                               <span className={`flex-1 text-[10px] text-right ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
-                                {score.stats.away.shots} shots · {score.stats.away.sog}🎯
+                                <span style={bumpStyle('away-shots')}>{effectiveStats.away.shots}</span>{' shots · '}<span style={bumpStyle('away-sog')}>{effectiveStats.away.sog}</span>🎯
                               </span>
                             </div>
-                          )}
+                            );
+                          })()}
                         </div>
                       )}
                     </div>
@@ -347,24 +537,25 @@ export default function UpcomingMatches({ dark = false }) {
                     ? 'border-emerald-900/20 opacity-50 hover:opacity-100'
                     : 'border-neutral-100 opacity-50 hover:opacity-100';
                   const liveRowCls = dark
-                    ? 'border-grass-600/50 bg-grass-500/5'
-                    : 'border-green-400 bg-green-50/50';
+                    ? 'border-grass-600/50 bg-grass-500/5 animate-pulse-green'
+                    : 'border-green-400 bg-green-50/50 animate-pulse-green';
                   const cls = `flex items-start sm:items-center gap-2 py-2 px-3 rounded-lg border transition-all ${
                     isLiveActive ? liveRowCls : isPast ? pastCls : t.row
                   }`;
                   const liveOverlay = isLiveActive ? (
                     <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none ${dark ? 'border-grass-400' : 'border-green-400'}`} />
                   ) : null;
+                  const cardFlash = anyGoalAnim ? <div className="absolute inset-0 rounded-lg pointer-events-none animate-goal-card-flash" /> : null;
                   return searchUrl ? (
-                    <div key={m.id} className="relative">
-                      {liveOverlay}
+                    <div key={m.id} id={`match-${matchKey}`} className="relative">
+                      {liveOverlay}{cardFlash}
                       <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                         {inner}
                       </a>
                     </div>
                   ) : (
-                    <div key={m.id} className="relative">
-                      {liveOverlay}
+                    <div key={m.id} id={`match-${matchKey}`} className="relative">
+                      {liveOverlay}{cardFlash}
                       <div className={cls}>
                         {inner}
                       </div>
@@ -377,5 +568,6 @@ export default function UpcomingMatches({ dark = false }) {
         })}
       </div>
     </section>
+    </>
   );
 }
