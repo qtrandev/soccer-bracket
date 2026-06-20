@@ -23,9 +23,12 @@ export default async () => {
         const sm = {};
         for (const s of entry.stats ?? []) sm[s.name] = s.value ?? 0;
         standings[code] = {
-          pts: Math.round(sm.points ?? 0),
+          pts: Math.round(sm.points          ?? 0),
           gd:  Math.round(sm.pointDifferential ?? 0),
-          gp:  Math.round(sm.gamesPlayed ?? 0),
+          gp:  Math.round(sm.gamesPlayed     ?? 0),
+          w:   Math.round(sm.wins            ?? 0),
+          d:   Math.round(sm.ties            ?? 0),
+          l:   Math.round(sm.losses          ?? 0),
         };
       }
     }

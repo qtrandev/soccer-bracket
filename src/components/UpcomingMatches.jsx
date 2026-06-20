@@ -3,6 +3,7 @@ import { TEAMS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_
 import { formatMatchTime } from '../utils/bracket.js';
 import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
+import { useStandings } from '../hooks/useStandings.js';
 
 function useScores() {
   const [scores, setScores] = useState({});
@@ -90,6 +91,7 @@ function parseOdds(detail) {
 
 export default function UpcomingMatches({ dark = false }) {
   const scores = useScores();
+  const standings = useStandings();
   const now = new Date();
   const windowEnd = new Date(now.getTime() + WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const todayStr = localDateKey(now);
@@ -191,6 +193,11 @@ export default function UpcomingMatches({ dark = false }) {
                   const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
                   const showScorers = (isLive || isFinal) && (homeGoals.length > 0 || awayGoals.length > 0);
                   const showStats   = (isLive || isFinal) && score?.stats != null;
+                  const fmtStandings = s => s?.gp > 0
+                    ? `${s.w}W ${s.d}D ${s.l}L · ${s.pts}pts · GD${s.gd > 0 ? '+' : ''}${s.gd}`
+                    : null;
+                  const homeStandStr = isGroup ? fmtStandings(standings[m.home]) : null;
+                  const awayStandStr = isGroup ? fmtStandings(standings[m.away]) : null;
 
                   const inner = (
                     <div className="flex flex-col flex-1 min-w-0">
@@ -285,6 +292,14 @@ export default function UpcomingMatches({ dark = false }) {
                         </div>
                       </div>
 
+                      {/* Row 3.5: group standings per team */}
+                      {(homeStandStr || awayStandStr) && (
+                        <div className={`flex items-center justify-between gap-2 mt-0.5 text-[10px] ${dark ? 'text-emerald-700' : 'text-neutral-400'}`}>
+                          <span>{homeStandStr ?? ''}</span>
+                          <span className="text-right">{awayStandStr ?? ''}</span>
+                        </div>
+                      )}
+
                       {/* Rows 4+5: goal scorers + possession/shots (live and finished games) */}
                       {(showScorers || showStats) && (
                         <div className={`mt-1.5 pt-1.5 border-t space-y-1 ${dark ? 'border-emerald-900/30' : 'border-neutral-100'}`}>
@@ -318,7 +333,7 @@ export default function UpcomingMatches({ dark = false }) {
                                 </div>
                               </div>
                               <span className={`flex-1 text-[10px] text-right ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
-                                {score.stats.away.sog}🎯 · {score.stats.away.shots} shots
+                                {score.stats.away.shots} shots · {score.stats.away.sog}🎯
                               </span>
                             </div>
                           )}
