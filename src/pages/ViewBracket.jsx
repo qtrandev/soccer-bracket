@@ -183,7 +183,7 @@ export default function ViewBracket() {
 
       {tab === 'groups' && (
         <>
-          <GroupJumpNav offset={160} upcomingOffset={100} />
+          <GroupJumpNav />
           <GroupStage groupPicks={groupPicks} onPick={() => {}} readOnly wildcards={wildcards} />
         </>
       )}

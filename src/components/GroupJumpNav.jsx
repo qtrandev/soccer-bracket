@@ -1,21 +1,24 @@
-export default function GroupJumpNav({ offset = null, upcomingOffset = 80 }) {
+import { useRef } from 'react';
+
+export default function GroupJumpNav() {
+  const navRef = useRef(null);
+
+  // Always use explicit coordinates — avoids Android Chrome's visual-vs-layout
+  // viewport mismatch that causes scrollIntoView({ block:'center' }) to overshoot.
+  const getOffset = () => 56 + (navRef.current?.offsetHeight ?? 40) + 8;
+
   const scrollToGroup = (id) => {
     const el = document.getElementById(id);
-    if (!el) return;
-    if (offset !== null) {
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
-    } else {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - getOffset(), behavior: 'smooth' });
   };
 
   const scrollToUpcoming = () => {
     const el = document.getElementById('upcoming-games');
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - upcomingOffset, behavior: 'smooth' });
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - getOffset(), behavior: 'smooth' });
   };
 
   return (
-    <div className="sticky top-14 z-20 -mx-4 px-4 py-2 bg-pitch-950/95 backdrop-blur border-b border-emerald-900/30 flex items-center gap-1.5 flex-wrap mb-4">
+    <div ref={navRef} className="sticky top-14 z-20 -mx-4 px-4 py-2 bg-pitch-950/95 backdrop-blur border-b border-emerald-900/30 flex items-center gap-1.5 flex-wrap mb-4">
       <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mr-1">Group</span>
       {['A','B','C','D','E','F','G','H','I','J','K','L'].map(l => (
         <button
