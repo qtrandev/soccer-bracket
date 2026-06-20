@@ -68,7 +68,7 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
               onClick={handleClick}
               title={tooltipText}
             >
-              <span className="w-6 text-center flex-shrink-0">
+              <span className="w-5 text-center flex-shrink-0">
                 {isPicked ? (
                   <span className={`text-xs font-bold ${isFirst ? 'text-gold-400' : 'text-slate-400'}`}>
                     {isFirst ? '🥇' : '🥈'}
@@ -84,8 +84,8 @@ export default function GroupCard({ letter, picks, onPick, onThirdPick = () => {
               </span>
               <TeamFlag code={code} size="sm" showName showCode />
               {standings[code]?.gp > 0 && (
-                <span className="text-[10px] text-emerald-600 flex-shrink-0 whitespace-nowrap">
-                  · {standings[code].pts}pts GD{standings[code].gd > 0 ? '+' : ''}{standings[code].gd}
+                <span className="text-[10px] text-emerald-600 truncate min-w-0">
+                  {standings[code].pts}pts {standings[code].gd > 0 ? '+' : ''}{standings[code].gd}
                 </span>
               )}
               <StrengthStars strength={STRENGTHS[code]} className="ml-auto text-xs flex-shrink-0" />
