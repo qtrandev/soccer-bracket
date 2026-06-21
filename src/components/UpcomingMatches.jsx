@@ -187,10 +187,12 @@ export default function UpcomingMatches({ dark = false }) {
         }
       }
       if (p.stats && score.stats) {
-        if (score.stats.home.shots > p.stats.home.shots) newBumps.add(`${key}-home-shots`);
-        if (score.stats.home.sog   > p.stats.home.sog)   newBumps.add(`${key}-home-sog`);
-        if (score.stats.away.shots > p.stats.away.shots) newBumps.add(`${key}-away-shots`);
-        if (score.stats.away.sog   > p.stats.away.sog)   newBumps.add(`${key}-away-sog`);
+        if (score.stats.home.shots !== p.stats.home.shots) newBumps.add(`${key}-home-shots`);
+        if (score.stats.home.sog   !== p.stats.home.sog)   newBumps.add(`${key}-home-sog`);
+        if (score.stats.away.shots !== p.stats.away.shots) newBumps.add(`${key}-away-shots`);
+        if (score.stats.away.sog   !== p.stats.away.sog)   newBumps.add(`${key}-away-sog`);
+        if (score.stats.home.poss  !== p.stats.home.poss)  newBumps.add(`${key}-home-poss`);
+        if (score.stats.away.poss  !== p.stats.away.poss)  newBumps.add(`${key}-away-poss`);
       }
     }
     prevScoresRef.current = scores;
@@ -210,8 +212,9 @@ export default function UpcomingMatches({ dark = false }) {
             const tc = side === 'home' ? mk.split('-')[0] : mk.slice(mk.indexOf('-') + 1);
             const sc = scores[mk];
             if (sc?.stats) {
-              const val = sc.stats[side][stat];
-              label = `${TEAMS[tc]?.name ?? tc} · ${val} ${stat === 'sog' ? 'shots on target' : 'shots'}`;
+              const shots = sc.stats[side].shots;
+              const sog   = sc.stats[side].sog;
+              label = `${TEAMS[tc]?.name ?? tc} · ${shots} shots · ${sog} 🎯`;
               bumpMatchKey = mk;
             }
             break;
@@ -500,7 +503,7 @@ export default function UpcomingMatches({ dark = false }) {
                             </div>
                           )}
                           {showStats && (() => {
-                            const possChanging = statBumps.has(`${matchKey}-home-shots`) || statBumps.has(`${matchKey}-away-shots`);
+                            const possChanging = statBumps.has(`${matchKey}-home-poss`) || statBumps.has(`${matchKey}-away-poss`);
                             const bumpStyle = key => statBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
                             return (
                             <div className="flex items-center gap-2">
