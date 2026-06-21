@@ -192,6 +192,13 @@
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
   }
 
+  @keyframes minuteBumpGrow {
+    0%   { transform: scale(1);    color: inherit; }
+    30%  { transform: scale(2.85); color: #4ade80; }
+    60%  { transform: scale(1.88); color: #22c55e; }
+    100% { transform: scale(1);    color: inherit; }
+  }
+
   @keyframes statBumpGlow {
     0%   { transform: scale(1);    color: inherit; }
     30%  { transform: scale(1.9);  color: #4ade80; }
@@ -200,10 +207,10 @@
   }
 
   @keyframes possBarGrow {
-    0%   { transform: scaleY(1);   }
-    20%  { transform: scaleY(6);   }
-    55%  { transform: scaleY(3.5); }
-    100% { transform: scaleY(1);   }
+    0%   { transform: scaleY(1);    }
+    20%  { transform: scaleY(7.5);  }
+    55%  { transform: scaleY(4.38); }
+    100% { transform: scaleY(1);    }
   }
 
   @keyframes shotLabelPop {

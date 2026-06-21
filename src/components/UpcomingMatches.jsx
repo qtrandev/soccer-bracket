@@ -173,6 +173,7 @@ export default function UpcomingMatches({ dark = false }) {
   const [goalOverlay, setGoalOverlay] = useState(null);
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
+  const firedGoalAnimsRef = useRef(new Set());
 
   // Once scores load, scroll to the first live card (200px above it)
   useEffect(() => {
@@ -201,18 +202,30 @@ export default function UpcomingMatches({ dark = false }) {
       if (!CANONICAL_KEYS.has(key)) continue;
       const [hc, ...acParts] = key.split('-');
       const ac = acParts.join('-');
-      if (score.homeScore > p.homeScore) {
-        newGoals[`${key}-home`] = Date.now();
-        if (!overlayData) {
-          const g = score.goals?.filter(g => g.side === 'home').at(-1);
-          overlayData = { iso2: TEAMS[hc]?.iso2 ?? '', teamCode: hc, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key, cardInView: isCardInView(key) };
+      const hgc = score.goals?.filter(g => g.side === 'home').length ?? 0;
+      const phgc = p.goals?.filter(g => g.side === 'home').length ?? 0;
+      const agc = score.goals?.filter(g => g.side === 'away').length ?? 0;
+      const pagc = p.goals?.filter(g => g.side === 'away').length ?? 0;
+      if ((hgc > phgc || score.homeScore > p.homeScore)) {
+        const animKey = `${key}-home-${Math.max(hgc, score.homeScore ?? 0)}`;
+        if (!firedGoalAnimsRef.current.has(animKey)) {
+          firedGoalAnimsRef.current.add(animKey);
+          newGoals[`${key}-home`] = Date.now();
+          if (!overlayData) {
+            const g = score.goals?.filter(g => g.side === 'home').at(-1);
+            overlayData = { iso2: TEAMS[hc]?.iso2 ?? '', teamCode: hc, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key, cardInView: isCardInView(key) };
+          }
         }
       }
-      if (score.awayScore > p.awayScore) {
-        newGoals[`${key}-away`] = Date.now();
-        if (!overlayData) {
-          const g = score.goals?.filter(g => g.side === 'away').at(-1);
-          overlayData = { iso2: TEAMS[ac]?.iso2 ?? '', teamCode: ac, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key, cardInView: isCardInView(key) };
+      if ((agc > pagc || score.awayScore > p.awayScore)) {
+        const animKey = `${key}-away-${Math.max(agc, score.awayScore ?? 0)}`;
+        if (!firedGoalAnimsRef.current.has(animKey)) {
+          firedGoalAnimsRef.current.add(animKey);
+          newGoals[`${key}-away`] = Date.now();
+          if (!overlayData) {
+            const g = score.goals?.filter(g => g.side === 'away').at(-1);
+            overlayData = { iso2: TEAMS[ac]?.iso2 ?? '', teamCode: ac, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key, cardInView: isCardInView(key) };
+          }
         }
       }
       if (p.stats && score.stats) {
@@ -401,6 +414,8 @@ export default function UpcomingMatches({ dark = false }) {
                   const awayWon = isFinal && (score?.awayScore ?? 0) > (score?.homeScore ?? 0);
                   const homeGoals = score?.goals?.filter(g => g.side === 'home') ?? [];
                   const awayGoals = score?.goals?.filter(g => g.side === 'away') ?? [];
+                  const displayHomeScore = isLive ? Math.max(score?.homeScore ?? 0, homeGoals.length) : (score?.homeScore ?? '-');
+                  const displayAwayScore = isLive ? Math.max(score?.awayScore ?? 0, awayGoals.length) : (score?.awayScore ?? '-');
                   const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
                   const showScorers = (isLive || isFinal) && (homeGoals.length > 0 || awayGoals.length > 0);
                   const effectiveStats = score?.stats ?? null;
@@ -448,12 +463,12 @@ export default function UpcomingMatches({ dark = false }) {
                               </>)}
 
                               <span className={`text-sm font-bold tabular-nums ${anyGoalAnim ? 'animate-goal-pop' : ''} ${dark ? 'text-grass-400' : 'text-green-600'}`}>
-                                {score?.homeScore ?? '-'} – {score?.awayScore ?? '-'}
+                                {displayHomeScore} – {displayAwayScore}
                               </span>
                               <span className={`block text-[10px] font-semibold ${anyGoalAnim ? '' : 'animate-pulse'} ${dark ? 'text-grass-500' : 'text-green-500'}`}>
                                 {anyGoalAnim
                                   ? <span className="animate-goal-toast inline-block font-black">⚽ GOAL!</span>
-                                  : <span key={score?.detail} style={minuteBumps.has(matchKey) ? { display: 'inline-block', animation: 'statBumpGlow 0.8s ease-out' } : undefined}>{score?.detail || 'LIVE'}</span>}
+                                  : <span key={score?.detail} style={minuteBumps.has(matchKey) ? { display: 'inline-block', animation: 'minuteBumpGrow 0.8s ease-out' } : undefined}>{score?.detail || 'LIVE'}</span>}
                               </span>
                             </>
                           ) : isFinal ? (
@@ -541,7 +556,7 @@ export default function UpcomingMatches({ dark = false }) {
                               <div className={`flex-1 min-w-0 text-[10px] leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
                                 {homeGoals.map(fmtGoal).join(' · ')}
                               </div>
-                              <span className="flex-shrink-0 text-[10px] text-emerald-700">⚽</span>
+                              <span className="flex-shrink-0 text-[10px]">{'⚽'.repeat(homeGoals.length + awayGoals.length)}</span>
                               <div className={`flex-1 min-w-0 text-[10px] text-right leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
                                 {awayGoals.map(fmtGoal).join(' · ')}
                               </div>
