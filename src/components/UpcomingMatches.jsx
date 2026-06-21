@@ -64,6 +64,8 @@ const ALL_MATCHES = [
 
 const CANONICAL_KEYS = new Set(ALL_MATCHES.map(m => `${m.home}-${m.away}`));
 
+const PAID_CHANNELS = new Set(['FS1', 'FS2', 'ESPN', 'ESPN2', 'ESPN+']);
+
 const WINDOW_DAYS = 10;
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -362,8 +364,18 @@ export default function UpcomingMatches({ dark = false }) {
       <div key={shotBumpVersion} className="fixed inset-0 overflow-hidden cursor-pointer" style={{ zIndex: 45 }}
            onClick={() => document.getElementById(`match-${shotMatchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
         <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'shotKickScreenRTL' : 'shotKickScreen'} 3s ease-out forwards` }}>👟</span>
-        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenRTL' : 'kickedBallScreen'} 3s ease-out forwards` }}>
-          {shotInfo?.side === 'away' ? <>{shotInfo?.isOnTarget && '🎯'}⚽</> : <>⚽{shotInfo?.isOnTarget && '🎯'}</>}
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenMoveRTL' : 'kickedBallScreenMove'} 3s ease-out forwards` }}>
+          {shotInfo?.side === 'away' ? (
+            <>
+              {shotInfo?.isOnTarget && <span style={{ display: 'inline-block' }}>🎯</span>}
+              <span style={{ display: 'inline-block', animation: 'ballSpinRTL 3s ease-out forwards' }}>⚽</span>
+            </>
+          ) : (
+            <>
+              <span style={{ display: 'inline-block', animation: 'ballSpinLTR 3s ease-out forwards' }}>⚽</span>
+              {shotInfo?.isOnTarget && <span style={{ display: 'inline-block' }}>🎯</span>}
+            </>
+          )}
         </span>
         {shotInfo && (
           <div className="absolute left-0 right-0 text-center font-black text-white pointer-events-none"
@@ -546,7 +558,16 @@ export default function UpcomingMatches({ dark = false }) {
                         </span>
                         <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
                           {score?.broadcast?.length > 0 && (
-                            <span className={`text-[10px] truncate ${t.badge}`}>📺 {score.broadcast.slice(0, 2).join(' · ')}</span>
+                            <span className={`text-[10px] truncate ${t.badge}`}>
+                              <span style={{ position: 'relative', top: '-1px' }}>📺</span>{' '}
+                              {score.broadcast.slice(0, 2).map((ch, i) => (
+                                <span key={ch}>
+                                  {i > 0 && ' · '}
+                                  {ch}
+                                  {PAID_CHANNELS.has(ch) && <span className="text-amber-400 font-bold" style={{ fontSize: '10px', position: 'relative', top: '0px', marginLeft: '1px' }}>$</span>}
+                                </span>
+                              ))}
+                            </span>
                           )}
                           {searchUrl && (
                             <span className={`text-xs flex-shrink-0 transition-colors ${t.arrow}`}>↗</span>

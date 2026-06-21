@@ -256,4 +256,40 @@
     76%  { transform: translateX(20vw) translateY(calc(-50% - 90px)) scale(1.1) rotate(-390deg); opacity: 0.8; }
     100% { transform: translateX(-8vw) translateY(calc(-50% - 25px)) scale(0.4) rotate(-540deg); opacity: 0; }
   }
+
+  /* Move-only (no rotation) — container that carries both ball and target icon */
+  @keyframes kickedBallScreenMove {
+    0%   { transform: translateX(45vw) translateY(-50%) scale(1.0); opacity: 0; }
+    10%  { transform: translateX(45vw) translateY(-50%) scale(1.0); opacity: 1; }
+    38%  { transform: translateX(45vw) translateY(-50%) scale(1.1); opacity: 1; }
+    52%  { transform: translateX(60vw) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
+    76%  { transform: translateX(80vw) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
+    100% { transform: translateX(108vw) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+  }
+
+  @keyframes kickedBallScreenMoveRTL {
+    0%   { transform: translateX(55vw) translateY(-50%) scale(1.0); opacity: 0; }
+    10%  { transform: translateX(55vw) translateY(-50%) scale(1.0); opacity: 1; }
+    38%  { transform: translateX(55vw) translateY(-50%) scale(1.1); opacity: 1; }
+    52%  { transform: translateX(40vw) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
+    76%  { transform: translateX(20vw) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
+    100% { transform: translateX(-8vw) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+  }
+
+  /* Spin-only for the ball child — rotation independent of the target sibling */
+  @keyframes ballSpinLTR {
+    0%   { transform: rotate(0deg); }
+    38%  { transform: rotate(30deg); }
+    52%  { transform: rotate(200deg); }
+    76%  { transform: rotate(390deg); }
+    100% { transform: rotate(540deg); }
+  }
+
+  @keyframes ballSpinRTL {
+    0%   { transform: rotate(0deg); }
+    38%  { transform: rotate(-30deg); }
+    52%  { transform: rotate(-200deg); }
+    76%  { transform: rotate(-390deg); }
+    100% { transform: rotate(-540deg); }
+  }
 }
