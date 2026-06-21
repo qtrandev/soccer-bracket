@@ -95,14 +95,14 @@ function isCardInView(matchKey) {
   return r.top < window.innerHeight && r.bottom > 0;
 }
 
-function JerseyIcon({ color }) {
+function JerseyIcon({ color, dark }) {
   return (
-    <svg viewBox="0 0 20 18" width="12" height="11" style={{ flexShrink: 0, display: 'block', marginTop: '-3px' }}>
+    <svg viewBox="0 0 24 24" width="16" height="16" style={{ flexShrink: 0, display: 'block', marginTop: '-3px' }}>
       <path
-        d="M5,2 Q10,5 15,2 L19,4 L19,8 L14,7 L14,18 L6,18 L6,7 L1,8 L1,4 Z"
+        d="M9,2 Q12,6 15,2 L19,4 L21,9 L17,11 L17,22 L7,22 L7,11 L3,9 L5,4 Z"
         fill={color}
-        stroke="rgba(0,0,0,0.25)"
-        strokeWidth="1.2"
+        stroke={dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.35)'}
+        strokeWidth="1"
         strokeLinejoin="round"
       />
     </svg>
@@ -517,15 +517,15 @@ export default function UpcomingMatches({ dark = false }) {
                         {isGroup ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {score?.homeKit && <JerseyIcon color={score.homeKit} />}
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${score?.homeKit ? (dark ? 'bg-emerald-900/60' : 'bg-neutral-200') : t.badge}`} style={score?.homeKit ? { color: score.homeKit } : undefined}>{m.home}</span>
+                              {score?.homeKit && <JerseyIcon color={score.homeKit} dark={dark} />}
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.homeKit ? { background: score.homeKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.home}</span>
                               <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px]" />
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${score?.awayKit ? (dark ? 'bg-emerald-900/60' : 'bg-neutral-200') : t.badge}`} style={score?.awayKit ? { color: score.awayKit } : undefined}>{m.away}</span>
-                              {score?.awayKit && <JerseyIcon color={score.awayKit} />}
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.awayKit ? { background: score.awayKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.away}</span>
+                              {score?.awayKit && <JerseyIcon color={score.awayKit} dark={dark} />}
                             </div>
                           </>
                         ) : (
