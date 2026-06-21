@@ -41,6 +41,7 @@ export default {
         'ball-from-left-alt': 'ballFromLeftAlt 1.1s 0.28s ease-in-out both',
         'ball-from-right-alt': 'ballFromRightAlt 1.1s 0.28s ease-in-out both',
         'goal-card-flash': 'goalCardFlash 1.8s ease-out forwards',
+        'score-pop': 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards',
       },
       keyframes: {
         fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
@@ -126,6 +127,13 @@ export default {
           '18%':  { backgroundColor: 'rgba(34,197,94,0.18)' },
           '60%':  { backgroundColor: 'rgba(34,197,94,0.06)' },
           '100%': { backgroundColor: 'transparent' },
+        },
+        scorePop: {
+          '0%':   { transform: 'scale(1)',   color: 'inherit', textShadow: 'none' },
+          '18%':  { transform: 'scale(3.2)', color: '#4ade80', textShadow: '0 0 28px rgba(34,197,94,1), 0 0 56px rgba(34,197,94,0.5)' },
+          '45%':  { transform: 'scale(2.1)', color: '#22c55e', textShadow: '0 0 16px rgba(34,197,94,0.7)' },
+          '68%':  { transform: 'scale(1.4)',                   textShadow: '0 0 8px rgba(34,197,94,0.3)' },
+          '100%': { transform: 'scale(1)',                     textShadow: 'none' },
         },
       },
     },

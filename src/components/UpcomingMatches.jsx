@@ -190,7 +190,7 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView }) {
         </div>
       </div>
       {!cardInView && (
-        <div className="absolute bottom-8 left-0 right-0 text-center text-emerald-600 text-sm font-semibold animate-pulse tracking-wide pointer-events-none">
+        <div className={`absolute bottom-8 left-0 right-0 text-center text-sm font-semibold animate-pulse tracking-wide pointer-events-none ${dark ? 'text-emerald-400' : 'text-emerald-600'}`}>
           Tap to view match →
         </div>
       )}
@@ -211,7 +211,8 @@ export default function UpcomingMatches({ dark = false }) {
   const [shotMatchKey, setShotMatchKey] = useState('');
   const [shotCardVisible, setShotCardVisible] = useState(false);
   const [goalOverlay, setGoalOverlay] = useState(null);
-  const [cardBumps, setCardBumps] = useState(new Map()); // key → { type, iso2 }
+  const [cardBumps, setCardBumps] = useState(new Map());      // key → { type, iso2 }
+  const [cardFlashBumps, setCardFlashBumps] = useState(new Map()); // matchKey → { type }
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
   const firedGoalAnimsRef = useRef(new Set());
@@ -329,12 +330,26 @@ export default function UpcomingMatches({ dark = false }) {
       setTimeout(() => setMinuteBumps(b => { const n = new Set(b); for (const k of newMinuteBumps) n.delete(k); return n; }), 800);
     }
     if (overlayData) {
-      setGoalOverlay(overlayData);
-      setTimeout(() => setGoalOverlay(null), 4500);
+      setTimeout(() => {
+        setGoalOverlay(overlayData);
+        setTimeout(() => setGoalOverlay(null), 4500);
+      }, 750);
     }
     if (newCardBumps.size > 0) {
-      setCardBumps(b => new Map([...b, ...newCardBumps]));
-      setTimeout(() => setCardBumps(b => { const n = new Map(b); for (const k of newCardBumps.keys()) n.delete(k); return n; }), 3200);
+      // Build per-match flash map (deduplicated by matchKey, uses first card type)
+      const flashMap = new Map();
+      for (const [k, v] of newCardBumps) {
+        const mk = k.slice(0, -5); // strip '-home' or '-away'
+        if (!flashMap.has(mk)) flashMap.set(mk, { type: v.type });
+      }
+      // Step 1: flash the card border immediately
+      setCardFlashBumps(b => new Map([...b, ...flashMap]));
+      setTimeout(() => setCardFlashBumps(b => { const n = new Map(b); for (const k of flashMap.keys()) n.delete(k); return n; }), 2500);
+      // Step 2: card fly animation after flash peaks
+      setTimeout(() => {
+        setCardBumps(b => new Map([...b, ...newCardBumps]));
+        setTimeout(() => setCardBumps(b => { const n = new Map(b); for (const k of newCardBumps.keys()) n.delete(k); return n; }), 3200);
+      }, 500);
     }
   }, [scores]);
 
@@ -420,9 +435,9 @@ export default function UpcomingMatches({ dark = false }) {
               <span style={{ fontSize: '2rem', ...(shotInfo.kitColor ? { color: shotInfo.kitColor, textShadow: `0 0 20px ${shotInfo.kitColor}cc, 0 0 2px #fff, 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff` } : {}) }}>{shotInfo.name}</span>
               {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
             </div>
-            <div style={{ fontSize: '1.6rem' }}>Shots: {shotInfo.shots} · on target: {shotInfo.sog} 🎯</div>
+            <div style={{ fontSize: '1.6rem' }}>Shots: {shotInfo.shots} · on target: {shotInfo.sog}{shotInfo.isOnTarget ? ' 🎯' : ''}</div>
             {!shotCardVisible && (
-              <div className="text-emerald-500 text-sm font-semibold animate-pulse mt-3">
+              <div className={`text-sm font-semibold animate-pulse mt-3 ${dark ? 'text-emerald-400' : 'text-emerald-500'}`}>
                 Tap to view match →
               </div>
             )}
@@ -528,8 +543,10 @@ export default function UpcomingMatches({ dark = false }) {
                                 <span key={`${goalEvents[`${matchKey}-away`]}-b`} className="absolute pointer-events-none z-10 text-base leading-none animate-ball-from-right-alt" style={{ top: '50%', left: '50%' }}>⚽</span>
                               </>)}
 
-                              <span className={`text-sm font-bold tabular-nums ${anyGoalAnim ? 'animate-goal-pop' : ''} ${dark ? 'text-grass-400' : 'text-green-600'}`}>
-                                {displayHomeScore} – {displayAwayScore}
+                              <span className={`text-sm font-bold tabular-nums ${dark ? 'text-grass-400' : 'text-green-600'}`}>
+                                <span key={goalEvents[`${matchKey}-home`] || 'h'} style={homeGoalAnim ? { display: 'inline-block', animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : undefined}>{displayHomeScore}</span>
+                                {' – '}
+                                <span key={goalEvents[`${matchKey}-away`] || 'a'} style={awayGoalAnim ? { display: 'inline-block', animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : undefined}>{displayAwayScore}</span>
                               </span>
                               <span className={`block text-[10px] font-semibold ${anyGoalAnim ? '' : 'animate-pulse'} ${dark ? 'text-grass-500' : 'text-green-500'}`}>
                                 {anyGoalAnim
@@ -632,7 +649,7 @@ export default function UpcomingMatches({ dark = false }) {
                                 {homeGoals.map(fmtGoal).join(' · ')}
                               </div>
                               <div className="flex-shrink-0 flex flex-col items-center text-[10px] tabular-nums leading-snug" style={{ position: 'relative' }}>
-                                <span>{homeGoals.length ? '⚽'.repeat(homeGoals.length) : ''} | {awayGoals.length ? '⚽'.repeat(awayGoals.length) : ''}</span>
+                                <span>{homeGoals.length ? '⚽'.repeat(homeGoals.length) : '0'} | {awayGoals.length ? '⚽'.repeat(awayGoals.length) : '0'}</span>
                                 {(homeCards.length > 0 || awayCards.length > 0) && (
                                   <span className="inline-flex items-center gap-0.5">
                                     <CardIcons yellows={homeYellows} reds={homeReds} compact={compactCards} />
@@ -669,39 +686,31 @@ export default function UpcomingMatches({ dark = false }) {
                               </span>
                               <div className="flex-shrink-0 w-20" style={{ position: 'relative' }}>
                                 {possStatBumps.has(`${matchKey}-home-poss`) && home?.iso2 && (
-                                  <img
-                                    src={`https://flagcdn.com/w160/${home.iso2}.png`}
-                                    alt=""
-                                    className="absolute pointer-events-none"
-                                    style={{
-                                      width: '200px', height: 'auto',
-                                      left: '0', bottom: '0', zIndex: 30,
-                                      borderRadius: '6px',
-                                      boxShadow: '0 4px 24px rgba(0,0,0,0.45)',
-                                      animation: 'possHomeFlagFly 2.8s ease-out forwards',
-                                    }}
-                                  />
+                                  <div className="absolute pointer-events-none flex flex-col items-start"
+                                    style={{ left: '0', bottom: '0', zIndex: 30, animation: 'possHomeFlagFly 2.8s ease-out forwards' }}>
+                                    <img src={`https://flagcdn.com/w160/${home.iso2}.png`} alt=""
+                                      style={{ width: '200px', height: 'auto', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.45)', display: 'block' }} />
+                                    <span style={{ fontSize: '2rem', lineHeight: 1, marginTop: '2px', alignSelf: 'center',
+                                      color: score?.homeKit ?? '#22c55e',
+                                      textShadow: dark ? '0 0 12px rgba(34,197,94,0.9), 0 0 4px rgba(34,197,94,0.5)' : '0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)' }}>--&gt;</span>
+                                  </div>
                                 )}
                                 {possStatBumps.has(`${matchKey}-away-poss`) && away?.iso2 && (
-                                  <img
-                                    src={`https://flagcdn.com/w160/${away.iso2}.png`}
-                                    alt=""
-                                    className="absolute pointer-events-none"
-                                    style={{
-                                      width: '200px', height: 'auto',
-                                      right: '0', bottom: '0', zIndex: 30,
-                                      borderRadius: '6px',
-                                      boxShadow: '0 4px 24px rgba(0,0,0,0.45)',
-                                      animation: 'possAwayFlagFly 2.8s ease-out forwards',
-                                    }}
-                                  />
+                                  <div className="absolute pointer-events-none flex flex-col items-end"
+                                    style={{ right: '0', bottom: '0', zIndex: 30, animation: 'possAwayFlagFly 2.8s ease-out forwards' }}>
+                                    <img src={`https://flagcdn.com/w160/${away.iso2}.png`} alt=""
+                                      style={{ width: '200px', height: 'auto', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.45)', display: 'block' }} />
+                                    <span style={{ fontSize: '2rem', lineHeight: 1, marginTop: '2px', alignSelf: 'center',
+                                      color: score?.awayKit ?? '#22c55e',
+                                      textShadow: dark ? '0 0 12px rgba(34,197,94,0.9), 0 0 4px rgba(34,197,94,0.5)' : '0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)' }}>&lt;--</span>
+                                  </div>
                                 )}
                                 <div
                                   className={`rounded-full ${possChanging ? '' : 'overflow-hidden'}`}
                                   style={{
                                     height: '4px',
                                     background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb'),
-                                    boxShadow: '0 0 0 1px rgba(0,0,0,0.15)',
+                                    boxShadow: dark ? '0 0 0 1px rgba(34,197,94,0.25)' : '0 0 0 1px rgba(0,0,0,0.15)',
                                     ...(possChanging ? { animation: 'possBarGrow 1.0s ease-out', transformOrigin: 'bottom' } : {}),
                                   }}
                                 >
@@ -747,7 +756,12 @@ export default function UpcomingMatches({ dark = false }) {
                   const liveOverlay = isLiveActive ? (
                     <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none ${dark ? 'border-grass-400' : 'border-green-400'}`} />
                   ) : null;
-                  const cardFlash = anyGoalAnim ? <div className="absolute inset-0 rounded-lg pointer-events-none animate-goal-card-flash" /> : null;
+                  const cardFlashInfo = cardFlashBumps.get(matchKey);
+                  const cardFlash = anyGoalAnim
+                    ? <div className="absolute inset-0 rounded-lg pointer-events-none animate-goal-card-flash" />
+                    : cardFlashInfo
+                    ? <div key={`cf-${matchKey}`} className="absolute inset-0 rounded-lg pointer-events-none" style={{ animation: `cardFlash${cardFlashInfo.type === 'red' ? 'Red' : 'Yellow'} 2.5s ease-out forwards` }} />
+                    : null;
                   const cardAttrs = {
                     ...(isLiveActive        ? { 'data-live-game':     'true' } : {}),
                     ...(isNextUp            ? { 'data-next-upcoming': 'true' } : {}),
