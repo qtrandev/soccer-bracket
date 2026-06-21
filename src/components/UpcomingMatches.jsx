@@ -902,7 +902,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {showStats && (() => {
                             const possChanging = possStatBumps.has(`${matchKey}-home-poss`) || possStatBumps.has(`${matchKey}-away-poss`);
                             const bumpStyle = key => statBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
-                            const cfBump = key => cornerFoulBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBump 0.5s ease-out' } : undefined;
+                            const cfBump = key => cornerFoulBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
                             return (
                             <>
                             <div className="flex items-center gap-2">
