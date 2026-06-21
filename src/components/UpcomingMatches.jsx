@@ -62,6 +62,8 @@ const ALL_MATCHES = [
   { ...FINAL_MATCH, badge: '🏆', type: 'knockout' },
 ].sort((a, b) => new Date(`${a.date}T${a.time}:00-04:00`) - new Date(`${b.date}T${b.time}:00-04:00`));
 
+const CANONICAL_KEYS = new Set(ALL_MATCHES.map(m => `${m.home}-${m.away}`));
+
 const WINDOW_DAYS = 10;
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -150,7 +152,8 @@ export default function UpcomingMatches({ dark = false }) {
   const standings = useStandings();
 
   const [goalEvents, setGoalEvents] = useState({});
-  const [statBumps, setStatBumps] = useState(new Set());
+  const [statBumps, setStatBumps] = useState(new Set());     // shot/sog only → triggers shoe/ball overlay
+  const [possStatBumps, setPossStatBumps] = useState(new Set()); // poss only → animates the bar in-card
   const [shotBumpVersion, setShotBumpVersion] = useState(0);
   const [shotLabel, setShotLabel] = useState('');
   const [shotMatchKey, setShotMatchKey] = useState('');
@@ -172,15 +175,18 @@ export default function UpcomingMatches({ dark = false }) {
     if (prevScoresRef.current === null) { prevScoresRef.current = scores; return; }
     const prev = prevScoresRef.current;
     const newGoals = {};
-    const newBumps = new Set();
+    const newBumps = new Set();     // shot / sog → shoe+ball overlay
+    const newPossBumps = new Set(); // possession → bar animation only
     let overlayData = null;
     for (const [key, score] of Object.entries(scores)) {
       const p = prev[key];
       if (!p || score.state !== 'in') continue;
-      // Skip reversed-ordering duplicates — only process canonical home-away key from tournament data
+      // Only process canonical home-away keys from our tournament data.
+      // scores.js stores both orderings (ECU-CUW and CUW-ECU); the old TEAMS[] check
+      // failed whenever both teams are in TEAMS (e.g. all Group E teams).
+      if (!CANONICAL_KEYS.has(key)) continue;
       const [hc, ...acParts] = key.split('-');
       const ac = acParts.join('-');
-      if (!TEAMS[hc] || !TEAMS[ac]) continue;
       if (score.homeScore > p.homeScore) {
         newGoals[`${key}-home`] = Date.now();
         if (!overlayData) {
@@ -200,8 +206,8 @@ export default function UpcomingMatches({ dark = false }) {
         if (score.stats.home.sog   !== p.stats.home.sog)   newBumps.add(`${key}-home-sog`);
         if (score.stats.away.shots !== p.stats.away.shots) newBumps.add(`${key}-away-shots`);
         if (score.stats.away.sog   !== p.stats.away.sog)   newBumps.add(`${key}-away-sog`);
-        if (score.stats.home.poss  !== p.stats.home.poss)  newBumps.add(`${key}-home-poss`);
-        if (score.stats.away.poss  !== p.stats.away.poss)  newBumps.add(`${key}-away-poss`);
+        if (score.stats.home.poss  !== p.stats.home.poss)  newPossBumps.add(`${key}-home-poss`);
+        if (score.stats.away.poss  !== p.stats.away.poss)  newPossBumps.add(`${key}-away-poss`);
       }
     }
     prevScoresRef.current = scores;
@@ -210,7 +216,7 @@ export default function UpcomingMatches({ dark = false }) {
       setTimeout(() => setGoalEvents(g => { const n = { ...g }; for (const k of Object.keys(newGoals)) delete n[k]; return n; }), 3500);
     }
     if (newBumps.size > 0) {
-      // Build a label and extract the match key from the first detected bump
+      // Build a label and extract the match key from the first detected shot/sog bump
       let label = '';
       let bumpMatchKey = '';
       for (const bump of newBumps) {
@@ -236,6 +242,10 @@ export default function UpcomingMatches({ dark = false }) {
       setShotBumpVersion(v => v + 1);
       setStatBumps(b => new Set([...b, ...newBumps]));
       setTimeout(() => { setStatBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }); setShotLabel(''); setShotMatchKey(''); }, 3000);
+    }
+    if (newPossBumps.size > 0) {
+      setPossStatBumps(b => new Set([...b, ...newPossBumps]));
+      setTimeout(() => setPossStatBumps(b => { const n = new Set(b); for (const k of newPossBumps) n.delete(k); return n; }), 1500);
     }
     if (overlayData) {
       setGoalOverlay(overlayData);
@@ -512,7 +522,7 @@ export default function UpcomingMatches({ dark = false }) {
                             </div>
                           )}
                           {showStats && (() => {
-                            const possChanging = statBumps.has(`${matchKey}-home-poss`) || statBumps.has(`${matchKey}-away-poss`);
+                            const possChanging = possStatBumps.has(`${matchKey}-home-poss`) || possStatBumps.has(`${matchKey}-away-poss`);
                             const bumpStyle = key => statBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
                             return (
                             <div className="flex items-center gap-2">
