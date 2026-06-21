@@ -365,18 +365,11 @@ export default function UpcomingMatches({ dark = false }) {
            onClick={() => document.getElementById(`match-${shotMatchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
         <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'shotKickScreenRTL' : 'shotKickScreen'} 3s ease-out forwards` }}>👟</span>
         <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenMoveRTL' : 'kickedBallScreenMove'} 3s ease-out forwards` }}>
-          {shotInfo?.side === 'away' ? (
-            <>
-              {shotInfo?.isOnTarget && <span style={{ display: 'inline-block' }}>🎯</span>}
-              <span style={{ display: 'inline-block', animation: 'ballSpinRTL 3s ease-out forwards' }}>⚽</span>
-            </>
-          ) : (
-            <>
-              <span style={{ display: 'inline-block', animation: 'ballSpinLTR 3s ease-out forwards' }}>⚽</span>
-              {shotInfo?.isOnTarget && <span style={{ display: 'inline-block' }}>🎯</span>}
-            </>
-          )}
+          <span style={{ display: 'inline-block', animation: `${shotInfo?.side === 'away' ? 'ballSpinRTL' : 'ballSpinLTR'} 3s ease-out forwards` }}>⚽</span>
         </span>
+        {shotInfo?.isOnTarget && (
+          <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedTargetScreenMoveRTL' : 'kickedTargetScreenMoveLTR'} 3s ease-out forwards` }}>🎯</span>
+        )}
         {shotInfo && (
           <div className="absolute left-0 right-0 text-center font-black text-white pointer-events-none"
             style={{ top: 'calc(50% + 6rem)', lineHeight: 1.4,
