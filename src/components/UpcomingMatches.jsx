@@ -249,8 +249,8 @@ export default function UpcomingMatches({ dark = false }) {
         if (score.stats.home.sog   !== p.stats.home.sog)   newBumps.add(`${key}-home-sog`);
         if (score.stats.away.shots !== p.stats.away.shots) newBumps.add(`${key}-away-shots`);
         if (score.stats.away.sog   !== p.stats.away.sog)   newBumps.add(`${key}-away-sog`);
-        if (score.stats.home.poss  !== p.stats.home.poss)  newPossBumps.add(`${key}-home-poss`);
-        if (score.stats.away.poss  !== p.stats.away.poss)  newPossBumps.add(`${key}-away-poss`);
+        if (score.stats.home.poss  > p.stats.home.poss)  newPossBumps.add(`${key}-home-poss`);
+        if (score.stats.away.poss  > p.stats.away.poss)  newPossBumps.add(`${key}-away-poss`);
       }
       if (score.detail !== p.detail) newMinuteBumps.add(key);
     }
@@ -286,7 +286,7 @@ export default function UpcomingMatches({ dark = false }) {
     }
     if (newPossBumps.size > 0) {
       setPossStatBumps(b => new Set([...b, ...newPossBumps]));
-      setTimeout(() => setPossStatBumps(b => { const n = new Set(b); for (const k of newPossBumps) n.delete(k); return n; }), 1500);
+      setTimeout(() => setPossStatBumps(b => { const n = new Set(b); for (const k of newPossBumps) n.delete(k); return n; }), 2800);
     }
     if (newMinuteBumps.size > 0) {
       setMinuteBumps(b => new Set([...b, ...newMinuteBumps]));
@@ -363,13 +363,13 @@ export default function UpcomingMatches({ dark = false }) {
     {statBumps.size > 0 && (
       <div key={shotBumpVersion} className="fixed inset-0 overflow-hidden cursor-pointer" style={{ zIndex: 45 }}
            onClick={() => document.getElementById(`match-${shotMatchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
-        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'shotKickScreenRTL' : 'shotKickScreen'} 3s ease-out forwards` }}>👟</span>
-        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenMoveRTL' : 'kickedBallScreenMove'} 3s ease-out forwards` }}>
+        {shotInfo?.isOnTarget && (
+          <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, zIndex: 0, animation: `${shotInfo?.side === 'away' ? 'kickedTargetScreenMoveRTL' : 'kickedTargetScreenMoveLTR'} 3s ease-out forwards` }}>🎯</span>
+        )}
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, zIndex: 1, animation: `${shotInfo?.side === 'away' ? 'shotKickScreenRTL' : 'shotKickScreen'} 3s ease-out forwards` }}>👟</span>
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, zIndex: 2, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenMoveRTL' : 'kickedBallScreenMove'} 3s ease-out forwards` }}>
           <span style={{ display: 'inline-block', animation: `${shotInfo?.side === 'away' ? 'ballSpinRTL' : 'ballSpinLTR'} 3s ease-out forwards` }}>⚽</span>
         </span>
-        {shotInfo?.isOnTarget && (
-          <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedTargetScreenMoveRTL' : 'kickedTargetScreenMoveLTR'} 3s ease-out forwards` }}>🎯</span>
-        )}
         {shotInfo && (
           <div className="absolute left-0 right-0 text-center font-black text-white pointer-events-none"
             style={{ top: 'calc(50% + 6rem)', lineHeight: 1.4,
@@ -600,7 +600,35 @@ export default function UpcomingMatches({ dark = false }) {
                               <span className={`flex-1 text-[10px] ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
                                 <span style={bumpStyle('home-shots')}>{effectiveStats.home.shots}</span>{' shots · '}<span style={bumpStyle('home-sog')}>{effectiveStats.home.sog}</span>🎯
                               </span>
-                              <div className="flex-shrink-0 w-20">
+                              <div className="flex-shrink-0 w-20" style={{ position: 'relative' }}>
+                                {possStatBumps.has(`${matchKey}-home-poss`) && home?.iso2 && (
+                                  <img
+                                    src={`https://flagcdn.com/w160/${home.iso2}.png`}
+                                    alt=""
+                                    className="absolute pointer-events-none"
+                                    style={{
+                                      width: '200px', height: 'auto',
+                                      left: '0', bottom: '0', zIndex: 30,
+                                      borderRadius: '6px',
+                                      boxShadow: '0 4px 24px rgba(0,0,0,0.45)',
+                                      animation: 'possHomeFlagFly 2.8s ease-out forwards',
+                                    }}
+                                  />
+                                )}
+                                {possStatBumps.has(`${matchKey}-away-poss`) && away?.iso2 && (
+                                  <img
+                                    src={`https://flagcdn.com/w160/${away.iso2}.png`}
+                                    alt=""
+                                    className="absolute pointer-events-none"
+                                    style={{
+                                      width: '200px', height: 'auto',
+                                      right: '0', bottom: '0', zIndex: 30,
+                                      borderRadius: '6px',
+                                      boxShadow: '0 4px 24px rgba(0,0,0,0.45)',
+                                      animation: 'possAwayFlagFly 2.8s ease-out forwards',
+                                    }}
+                                  />
+                                )}
                                 <div
                                   className={`rounded-full ${possChanging ? '' : 'overflow-hidden'}`}
                                   style={{

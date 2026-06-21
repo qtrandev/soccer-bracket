@@ -222,11 +222,11 @@
   }
 
   @keyframes shotKickScreen {
-    0%   { transform: translateX(5vw)  translateY(-50%) scale(0.4) rotate(-65deg); opacity: 0; }
+    0%   { transform: translateX(calc(5vw  - 200px)) translateY(-50%) scale(0.4) rotate(-65deg); opacity: 0; }
     12%  { opacity: 1; }
-    38%  { transform: translateX(30vw) translateY(calc(-50% - 30px)) scale(1.8) rotate(22deg); opacity: 1; }
-    65%  { transform: translateX(55vw) translateY(calc(-50% + 8px))  scale(1.3) rotate(12deg); opacity: 0.5; }
-    100% { transform: translateX(82vw) translateY(calc(-50% + 20px)) scale(0.7) rotate(5deg);  opacity: 0; }
+    38%  { transform: translateX(calc(30vw - 200px)) translateY(calc(-50% - 30px)) scale(1.8) rotate(22deg); opacity: 1; }
+    65%  { transform: translateX(calc(55vw - 200px)) translateY(calc(-50% + 8px))  scale(1.3) rotate(12deg); opacity: 0.5; }
+    100% { transform: translateX(calc(82vw - 200px)) translateY(calc(-50% + 20px)) scale(0.7) rotate(5deg);  opacity: 0; }
   }
 
   @keyframes kickedBallScreen {
@@ -240,59 +240,73 @@
   }
 
   @keyframes shotKickScreenRTL {
-    0%   { transform: translateX(95vw)  translateY(-50%) scale(0.4) scaleX(-1) rotate(65deg);  opacity: 0; }
+    0%   { transform: translateX(calc(95vw - 100px)) translateY(-50%) scale(0.4) scaleX(-1) rotate(65deg);  opacity: 0; }
     12%  { opacity: 1; }
-    38%  { transform: translateX(70vw) translateY(calc(-50% - 30px)) scale(1.8) scaleX(-1) rotate(-22deg); opacity: 1; }
-    60%  { transform: translateX(60vw) translateY(calc(-50% + 8px))  scale(1.2) scaleX(-1) rotate(-8deg);  opacity: 0.6; }
-    100% { transform: translateX(58vw) translateY(calc(-50% + 22px)) scale(0.7) scaleX(-1) rotate(0deg);   opacity: 0; }
+    38%  { transform: translateX(calc(70vw - 100px)) translateY(calc(-50% - 30px)) scale(1.8) scaleX(-1) rotate(-22deg); opacity: 1; }
+    60%  { transform: translateX(calc(60vw - 100px)) translateY(calc(-50% + 8px))  scale(1.2) scaleX(-1) rotate(-8deg);  opacity: 0.6; }
+    100% { transform: translateX(calc(58vw - 100px)) translateY(calc(-50% + 22px)) scale(0.7) scaleX(-1) rotate(0deg);   opacity: 0; }
   }
 
   @keyframes kickedBallScreenRTL {
     /* Ball sits to the left of where shoe will peak, then launches left on impact */
-    0%   { transform: translateX(55vw) translateY(-50%) scale(1.0) rotate(0deg);                opacity: 0; }
-    10%  { transform: translateX(55vw) translateY(-50%) scale(1.0) rotate(0deg);                opacity: 1; }
-    38%  { transform: translateX(55vw) translateY(-50%) scale(1.1) rotate(-30deg);              opacity: 1; }
-    52%  { transform: translateX(40vw) translateY(calc(-50% - 55px)) scale(1.4) rotate(-200deg); opacity: 1; }
-    76%  { transform: translateX(20vw) translateY(calc(-50% - 90px)) scale(1.1) rotate(-390deg); opacity: 0.8; }
-    100% { transform: translateX(-8vw) translateY(calc(-50% - 25px)) scale(0.4) rotate(-540deg); opacity: 0; }
+    0%   { transform: translateX(calc(55vw - 300px)) translateY(-50%) scale(1.0) rotate(0deg);                opacity: 0; }
+    10%  { transform: translateX(calc(55vw - 300px)) translateY(-50%) scale(1.0) rotate(0deg);                opacity: 1; }
+    38%  { transform: translateX(calc(55vw - 300px)) translateY(-50%) scale(1.1) rotate(-30deg);              opacity: 1; }
+    52%  { transform: translateX(calc(40vw - 300px)) translateY(calc(-50% - 55px)) scale(1.4) rotate(-200deg); opacity: 1; }
+    76%  { transform: translateX(calc(20vw - 300px)) translateY(calc(-50% - 90px)) scale(1.1) rotate(-390deg); opacity: 0.8; }
+    100% { transform: translateX(calc(-8vw - 300px)) translateY(calc(-50% - 25px)) scale(0.4) rotate(-540deg); opacity: 0; }
   }
 
   /* Move-only (no rotation) — container that carries both ball and target icon */
   @keyframes kickedBallScreenMove {
-    0%   { transform: translateX(45vw) translateY(-50%) scale(1.0); opacity: 0; }
-    10%  { transform: translateX(45vw) translateY(-50%) scale(1.0); opacity: 1; }
-    38%  { transform: translateX(45vw) translateY(-50%) scale(1.1); opacity: 1; }
-    52%  { transform: translateX(60vw) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
-    76%  { transform: translateX(80vw) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
-    100% { transform: translateX(108vw) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+    0%   { transform: translateX(calc(45vw  - 200px)) translateY(-50%) scale(1.0); opacity: 0; }
+    10%  { transform: translateX(calc(45vw  - 200px)) translateY(-50%) scale(1.0); opacity: 1; }
+    38%  { transform: translateX(calc(45vw  - 200px)) translateY(-50%) scale(1.1); opacity: 1; }
+    52%  { transform: translateX(calc(60vw  - 200px)) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
+    76%  { transform: translateX(calc(80vw  - 200px)) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
+    100% { transform: translateX(calc(108vw - 200px)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
   }
 
   @keyframes kickedBallScreenMoveRTL {
-    0%   { transform: translateX(55vw) translateY(-50%) scale(1.0); opacity: 0; }
-    10%  { transform: translateX(55vw) translateY(-50%) scale(1.0); opacity: 1; }
-    38%  { transform: translateX(55vw) translateY(-50%) scale(1.1); opacity: 1; }
-    52%  { transform: translateX(28vw) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
-    76%  { transform: translateX(5vw)  translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
-    100% { transform: translateX(-22vw) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+    0%   { transform: translateX(calc(55vw  - 100px)) translateY(-50%) scale(1.0); opacity: 0; }
+    10%  { transform: translateX(calc(55vw  - 100px)) translateY(-50%) scale(1.0); opacity: 1; }
+    38%  { transform: translateX(calc(55vw  - 100px)) translateY(-50%) scale(1.1); opacity: 1; }
+    52%  { transform: translateX(calc(28vw  - 100px)) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
+    76%  { transform: translateX(calc(5vw   - 100px)) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
+    100% { transform: translateX(calc(-22vw - 100px)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
   }
 
   /* Target icon — same path as ball but offset by one emoji width so they never overlap */
   @keyframes kickedTargetScreenMoveLTR {
-    0%   { transform: translateX(calc(45vw + 9rem)) translateY(-50%) scale(1.0); opacity: 0; }
-    10%  { transform: translateX(calc(45vw + 9rem)) translateY(-50%) scale(1.0); opacity: 1; }
-    38%  { transform: translateX(calc(45vw + 9rem)) translateY(-50%) scale(1.1); opacity: 1; }
-    52%  { transform: translateX(calc(60vw + 9rem)) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
-    76%  { transform: translateX(calc(80vw + 9rem)) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
-    100% { transform: translateX(calc(108vw + 9rem)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+    0%   { transform: translateX(calc(45vw  + 9rem - 200px)) translateY(-50%) scale(1.0); opacity: 0; }
+    10%  { transform: translateX(calc(45vw  + 9rem - 200px)) translateY(-50%) scale(1.0); opacity: 1; }
+    38%  { transform: translateX(calc(45vw  + 9rem - 200px)) translateY(-50%) scale(1.1); opacity: 1; }
+    52%  { transform: translateX(calc(60vw  + 9rem - 200px)) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
+    76%  { transform: translateX(calc(80vw  + 9rem - 200px)) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
+    100% { transform: translateX(calc(108vw + 9rem - 200px)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
   }
 
   @keyframes kickedTargetScreenMoveRTL {
-    0%   { transform: translateX(calc(55vw - 9rem)) translateY(-50%) scale(1.0); opacity: 0; }
-    10%  { transform: translateX(calc(55vw - 9rem)) translateY(-50%) scale(1.0); opacity: 1; }
-    38%  { transform: translateX(calc(55vw - 9rem)) translateY(-50%) scale(1.1); opacity: 1; }
-    52%  { transform: translateX(calc(28vw - 9rem)) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
-    76%  { transform: translateX(calc(5vw  - 9rem)) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
-    100% { transform: translateX(calc(-22vw - 9rem)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+    0%   { transform: translateX(calc(55vw  - 9rem - 100px)) translateY(-50%) scale(1.0); opacity: 0; }
+    10%  { transform: translateX(calc(55vw  - 9rem - 100px)) translateY(-50%) scale(1.0); opacity: 1; }
+    38%  { transform: translateX(calc(55vw  - 9rem - 100px)) translateY(-50%) scale(1.1); opacity: 1; }
+    52%  { transform: translateX(calc(28vw  - 9rem - 100px)) translateY(calc(-50% - 55px)) scale(1.4); opacity: 1; }
+    76%  { transform: translateX(calc(5vw   - 9rem - 100px)) translateY(calc(-50% - 90px)) scale(1.1); opacity: 0.8; }
+    100% { transform: translateX(calc(-22vw - 9rem - 100px)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
+  }
+
+  @keyframes possHomeFlagFly {
+    0%   { transform: translate(0px, 0px) scale(0.35); opacity: 0; }
+    10%  { transform: translate(30px, -14px) scale(1); opacity: 1; }
+    65%  { transform: translate(185px, -85px) scale(0.75); opacity: 0.8; }
+    100% { transform: translate(255px, -118px) scale(0.35); opacity: 0; }
+  }
+
+  @keyframes possAwayFlagFly {
+    0%   { transform: translate(0px, 0px) scale(0.35); opacity: 0; }
+    10%  { transform: translate(-30px, -14px) scale(1); opacity: 1; }
+    65%  { transform: translate(-185px, -85px) scale(0.75); opacity: 0.8; }
+    100% { transform: translate(-255px, -118px) scale(0.35); opacity: 0; }
   }
 
   /* Spin-only for the ball child — rotation independent of the target sibling */
