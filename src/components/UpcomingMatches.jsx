@@ -241,7 +241,7 @@ export default function UpcomingMatches({ dark = false }) {
             const tc = side === 'home' ? mk.split('-')[0] : mk.slice(mk.indexOf('-') + 1);
             const sc = scores[mk];
             if (sc?.stats) {
-              info = { iso2: TEAMS[tc]?.iso2 ?? '', name: TEAMS[tc]?.name ?? tc, shots: sc.stats[side].shots, sog: sc.stats[side].sog, kitColor: (side === 'home' ? sc.homeKit : sc.awayKit) ?? null };
+              info = { iso2: TEAMS[tc]?.iso2 ?? '', name: TEAMS[tc]?.name ?? tc, shots: sc.stats[side].shots, sog: sc.stats[side].sog, kitColor: (side === 'home' ? sc.homeKit : sc.awayKit) ?? null, isOnTarget: newBumps.has(`${mk}-${side}-sog`), side };
               bumpMatchKey = mk;
             }
             break;
@@ -334,8 +334,10 @@ export default function UpcomingMatches({ dark = false }) {
     {statBumps.size > 0 && (
       <div key={shotBumpVersion} className="fixed inset-0 overflow-hidden cursor-pointer" style={{ zIndex: 45 }}
            onClick={() => document.getElementById(`match-${shotMatchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
-        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: 'shotKickScreen 3s ease-out forwards' }}>👟</span>
-        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '10rem', lineHeight: 1, animation: 'kickedBallScreen 3s ease-out forwards' }}>⚽</span>
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'shotKickScreenRTL' : 'shotKickScreen'} 3s ease-out forwards` }}>👟</span>
+        <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenRTL' : 'kickedBallScreen'} 3s ease-out forwards` }}>
+          {shotInfo?.side === 'away' ? <>{shotInfo?.isOnTarget && '🎯'}⚽</> : <>⚽{shotInfo?.isOnTarget && '🎯'}</>}
+        </span>
         {shotInfo && (
           <div className="absolute left-0 right-0 text-center font-black text-white pointer-events-none"
             style={{ top: 'calc(50% + 6rem)', lineHeight: 1.4,
@@ -555,14 +557,17 @@ export default function UpcomingMatches({ dark = false }) {
                               </span>
                               <div className="flex-shrink-0 w-20">
                                 <div
-                                  className={`rounded-full ${possChanging ? '' : 'overflow-hidden'} ${dark ? 'bg-emerald-900/50' : 'bg-neutral-200'}`}
-                                  style={possChanging
-                                    ? { height: '4px', animation: 'possBarGrow 1.0s ease-out', transformOrigin: 'bottom' }
-                                    : { height: '4px' }}
+                                  className={`rounded-full ${possChanging ? '' : 'overflow-hidden'}`}
+                                  style={{
+                                    height: '4px',
+                                    background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb'),
+                                    boxShadow: '0 0 0 1px rgba(0,0,0,0.15)',
+                                    ...(possChanging ? { animation: 'possBarGrow 1.0s ease-out', transformOrigin: 'bottom' } : {}),
+                                  }}
                                 >
                                   <div
-                                    className={`h-full rounded-l-full ${dark ? 'bg-grass-500/60' : 'bg-green-500/60'}`}
-                                    style={{ width: `${effectiveStats.home.poss}%`, transition: 'width 1.2s ease-out' }}
+                                    className="h-full rounded-l-full"
+                                    style={{ width: `${effectiveStats.home.poss}%`, transition: 'width 1.2s ease-out', background: score?.homeKit ?? (dark ? 'rgba(74,222,128,0.6)' : 'rgba(34,197,94,0.6)') }}
                                   />
                                 </div>
                                 <div className={`flex justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
