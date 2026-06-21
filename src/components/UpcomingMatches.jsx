@@ -10,36 +10,33 @@ function useScores() {
   const timerRef = useRef(null);
 
   useEffect(() => {
+    function scheduleNext(data) {
+      clearInterval(timerRef.current);
+      const hasLive = Object.values(data).some(s => s.state === 'in');
+      timerRef.current = setInterval(load, hasLive ? 3000 : 10000);
+    }
+
     async function load() {
       try {
         const res = await fetch('/.netlify/functions/scores');
-        if (res.ok) setScores(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setScores(data);
+          scheduleNext(data);
+        }
       } catch {}
     }
 
-    function startPolling() {
-      clearInterval(timerRef.current);
-      timerRef.current = setInterval(load, 10_000);
-    }
+    function stopPolling() { clearInterval(timerRef.current); }
 
-    function stopPolling() {
-      clearInterval(timerRef.current);
-    }
-
-    // Re-fetch + restart poll when tab comes back into view (covers background → foreground)
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') { load(); startPolling(); }
+      if (document.visibilityState === 'visible') load();
       else stopPolling();
     };
-
-    // Re-fetch on bfcache restore — the event Chrome fires instead of a real reload
-    const handlePageShow = (e) => { if (e.persisted) { load(); startPolling(); } };
-
-    // Re-fetch when the browser window regains focus (user returns from another app/tab)
-    const handleFocus = () => { load(); startPolling(); };
+    const handlePageShow = (e) => { if (e.persisted) load(); };
+    const handleFocus = () => load();
 
     load();
-    startPolling();
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('focus', handleFocus);
@@ -159,7 +156,17 @@ export default function UpcomingMatches({ dark = false }) {
   const [shotMatchKey, setShotMatchKey] = useState('');
   const [goalOverlay, setGoalOverlay] = useState(null);
   const prevScoresRef = useRef(null);
+  const didAutoScrollRef = useRef(false);
 
+  // Once scores load, scroll to the first live card (200px above it)
+  useEffect(() => {
+    if (didAutoScrollRef.current) return;
+    const liveEl = document.querySelector('[data-live-game="true"]');
+    if (!liveEl) return;
+    didAutoScrollRef.current = true;
+    const y = liveEl.getBoundingClientRect().top + window.scrollY - 200;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }, [scores]);
 
   useEffect(() => {
     if (prevScoresRef.current === null) { prevScoresRef.current = scores; return; }
@@ -562,15 +569,19 @@ export default function UpcomingMatches({ dark = false }) {
                     <div className={`absolute inset-0 rounded-lg border-2 pointer-events-none ${dark ? 'border-grass-400' : 'border-green-400'}`} />
                   ) : null;
                   const cardFlash = anyGoalAnim ? <div className="absolute inset-0 rounded-lg pointer-events-none animate-goal-card-flash" /> : null;
+                  const cardAttrs = {
+                    ...(isLiveActive        ? { 'data-live-game':     'true' } : {}),
+                    ...(isNextUp            ? { 'data-next-upcoming': 'true' } : {}),
+                  };
                   return searchUrl ? (
-                    <div key={m.id} id={`match-${matchKey}`} className="relative" {...(isNextUp ? { 'data-next-upcoming': 'true' } : {})}>
+                    <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
                       {liveOverlay}{cardFlash}
                       <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                         {inner}
                       </a>
                     </div>
                   ) : (
-                    <div key={m.id} id={`match-${matchKey}`} className="relative" {...(isNextUp ? { 'data-next-upcoming': 'true' } : {})}>
+                    <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
                       {liveOverlay}{cardFlash}
                       <div className={cls}>
                         {inner}

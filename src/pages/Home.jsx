@@ -106,13 +106,14 @@ export default function Home() {
 
   useEffect(() => {
     if (hasLiveGame()) {
+      // Try to land on the live card; fall back to today header if scores haven't loaded yet
       setTimeout(() => {
-        const el = document.getElementById('today-games');
+        const el = document.querySelector('[data-live-game="true"]') ?? document.getElementById('today-games');
         if (el) {
-          const top = el.getBoundingClientRect().top + window.scrollY - 72;
+          const top = el.getBoundingClientRect().top + window.scrollY - 200;
           window.scrollTo({ top, behavior: 'smooth' });
         }
-      }, 100);
+      }, 600);
     } else {
       window.scrollTo(0, 0);
     }
@@ -166,7 +167,9 @@ export default function Home() {
           href="#upcoming-matches"
           onClick={(e) => {
             e.preventDefault();
-            const el = document.querySelector('[data-next-upcoming="true"]') ?? document.getElementById('upcoming-matches');
+            const el = document.querySelector('[data-live-game="true"]')
+                     ?? document.querySelector('[data-next-upcoming="true"]')
+                     ?? document.getElementById('upcoming-matches');
             if (el) {
               const y = el.getBoundingClientRect().top + window.scrollY - 200;
               window.scrollTo({ top: y, behavior: 'smooth' });
