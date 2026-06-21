@@ -13,8 +13,8 @@ function datesFrom(startIso) {
   const dates = [];
   const start = new Date(startIso + 'T00:00:00Z');
   const today = new Date();
-  // fetch up through tomorrow so in-progress matches on late dates are caught
-  const end = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  // fetch 10 days ahead so upcoming matches have kit colors + pre-game data
+  const end = new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000);
   for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     dates.push(dateStr(new Date(d)));
   }
@@ -56,8 +56,11 @@ function parseEvents(events, into) {
       away: { poss: Math.round(sv(away.statistics, 'possessionPct') ?? 0), shots: sv(away.statistics, 'totalShots') ?? 0, sog: sv(away.statistics, 'shotsOnTarget') ?? 0 },
     } : null;
 
-    const homeKit = home.team.color ? `#${home.team.color}` : null;
-    const awayKit = away.team.color ? `#${away.team.color}` : null;
+    const kit    = c => (c && c !== '000000') ? `#${c}` : null;
+    const homeKit    = kit(home.team.color);
+    const awayKit    = kit(away.team.color);
+    const homeAltKit = kit(home.team.alternateColor);
+    const awayAltKit = kit(away.team.alternateColor);
 
     const base = {
       state:      status.state      ?? 'pre',
@@ -70,13 +73,15 @@ function parseEvents(events, into) {
     };
 
     // Store under both orderings so our home/away assignment never has to match ESPN's
-    into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore, homeKit, awayKit };
+    into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore, homeKit, awayKit, homeAltKit, awayAltKit };
     into[`${awayCode}-${homeCode}`] = {
       ...base,
       homeScore: awayScore,
       awayScore: homeScore,
       homeKit: awayKit,
       awayKit: homeKit,
+      homeAltKit: awayAltKit,
+      awayAltKit: homeAltKit,
       goals: goals.map(g => ({ ...g, side: g.side === 'home' ? 'away' : 'home' })),
       stats: stats ? { home: stats.away, away: stats.home } : null,
     };

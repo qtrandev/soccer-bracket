@@ -436,7 +436,7 @@ export default function UpcomingMatches({ dark = false }) {
                   const displayHomeScore = isLive ? Math.max(score?.homeScore ?? 0, homeGoals.length) : (score?.homeScore ?? '-');
                   const displayAwayScore = isLive ? Math.max(score?.awayScore ?? 0, awayGoals.length) : (score?.awayScore ?? '-');
                   const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
-                  const showScorers = (isLive || isFinal) && (homeGoals.length > 0 || awayGoals.length > 0);
+                  const showScorers = isLive || isFinal;
                   const effectiveStats = score?.stats ?? null;
                   const showStats   = (isLive || isFinal) && effectiveStats != null;
                   const fmtStandings = s => s?.gp > 0
@@ -523,13 +523,13 @@ export default function UpcomingMatches({ dark = false }) {
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               {score?.homeKit && <JerseyIcon color={score.homeKit} dark={dark} />}
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.homeKit ? { background: score.homeKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.home}</span>
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.homeKit ? { background: score.homeAltKit ?? score.homeKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.home}</span>
                               <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px]" />
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.awayKit ? { background: score.awayKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.away}</span>
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.awayKit ? { background: score.awayAltKit ?? score.awayKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.away}</span>
                               {score?.awayKit && <JerseyIcon color={score.awayKit} dark={dark} />}
                             </div>
                           </>
@@ -584,7 +584,9 @@ export default function UpcomingMatches({ dark = false }) {
                               <div className={`flex-1 min-w-0 text-[10px] leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
                                 {homeGoals.map(fmtGoal).join(' · ')}
                               </div>
-                              <span className="flex-shrink-0 text-[10px]">{'⚽'.repeat(homeGoals.length + awayGoals.length)}</span>
+                              <span className="flex-shrink-0 text-[10px] tabular-nums">
+                                {homeGoals.length ? '⚽'.repeat(homeGoals.length) : '0'} | {awayGoals.length ? '⚽'.repeat(awayGoals.length) : '0'}
+                              </span>
                               <div className={`flex-1 min-w-0 text-[10px] text-right leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
                                 {awayGoals.map(fmtGoal).join(' · ')}
                               </div>
