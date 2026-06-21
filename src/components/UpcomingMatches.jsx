@@ -346,6 +346,21 @@ export default function UpcomingMatches({ dark = false }) {
   const firedVARAnimsRef = useRef(new Set());
   const firedSubAnimsRef = useRef(new Set());
 
+  // Reset prevScoresRef on return so stale diffs don't fire a burst of old animations
+  useEffect(() => {
+    const reset = () => { prevScoresRef.current = null; };
+    const onVisibility = () => { if (document.visibilityState === 'visible') reset(); };
+    const onPageShow = (e) => { if (e.persisted) reset(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('focus', reset);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pageshow', onPageShow);
+      window.removeEventListener('focus', reset);
+    };
+  }, []);
+
   // Once scores load, scroll to the first live card (200px above it)
   useEffect(() => {
     if (didAutoScrollRef.current) return;
