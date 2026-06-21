@@ -170,18 +170,20 @@ export default function UpcomingMatches({ dark = false }) {
     for (const [key, score] of Object.entries(scores)) {
       const p = prev[key];
       if (!p || score.state !== 'in') continue;
+      // Skip reversed-ordering duplicates — only process canonical home-away key from tournament data
+      const [hc, ...acParts] = key.split('-');
+      const ac = acParts.join('-');
+      if (!TEAMS[hc] || !TEAMS[ac]) continue;
       if (score.homeScore > p.homeScore) {
-        newGoals[`${key}-home`] = true;
+        newGoals[`${key}-home`] = Date.now();
         if (!overlayData) {
-          const [hc] = key.split('-');
           const g = score.goals?.filter(g => g.side === 'home').at(-1);
           overlayData = { iso2: TEAMS[hc]?.iso2 ?? '', teamCode: hc, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key };
         }
       }
       if (score.awayScore > p.awayScore) {
-        newGoals[`${key}-away`] = true;
+        newGoals[`${key}-away`] = Date.now();
         if (!overlayData) {
-          const ac = key.slice(key.indexOf('-') + 1);
           const g = score.goals?.filter(g => g.side === 'away').at(-1);
           overlayData = { iso2: TEAMS[ac]?.iso2 ?? '', teamCode: ac, scorer: g?.name ?? '', minute: g?.min ?? '', matchKey: key };
         }
