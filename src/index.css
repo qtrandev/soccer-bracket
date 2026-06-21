@@ -339,6 +339,41 @@
     100% { transform: translate(-255px, -118px) scale(0.35); opacity: 0; }
   }
 
+  @keyframes varOverlayLifecycle {
+    0%   { opacity: 0; }
+    6%   { opacity: 1; }
+    82%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes varTextIn {
+    0%   { opacity: 0; transform: scale(0.5); letter-spacing: 0rem; }
+    18%  { opacity: 1; transform: scale(1.12); letter-spacing: 0.8rem; }
+    32%  { transform: scale(1); letter-spacing: 0.6rem; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; letter-spacing: 0.6rem; }
+  }
+
+  @keyframes varScanLine {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(110vh); }
+  }
+
+  @keyframes varFlagIn {
+    0%   { opacity: 0; transform: translateY(14px) scale(0.85); }
+    22%  { opacity: 1; transform: translateY(0) scale(1); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes varFlashBorder {
+    0%   { background: transparent; box-shadow: none; }
+    10%  { background: rgba(59,130,246,0.20); box-shadow: inset 0 0 0 2px rgba(59,130,246,0.90); }
+    50%  { background: rgba(59,130,246,0.10); box-shadow: inset 0 0 0 2px rgba(59,130,246,0.55); }
+    85%  { background: rgba(59,130,246,0.04); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.20); }
+    100% { background: transparent; box-shadow: none; }
+  }
+
   /* Spin-only for the ball child — rotation independent of the target sibling */
   @keyframes ballSpinLTR {
     0%   { transform: rotate(0deg); }

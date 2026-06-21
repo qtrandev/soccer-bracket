@@ -35,7 +35,7 @@ export default {
         'ball-from-left': 'ballFromLeft 1.2s ease-in-out forwards',
         'ball-from-right': 'ballFromRight 1.2s ease-in-out forwards',
         'stat-bump': 'statBump 0.5s ease-out',
-        'overlay-lifecycle': 'overlayLifecycle 4.5s ease-in-out forwards',
+        'overlay-lifecycle': 'overlayLifecycle 6.5s ease-in-out forwards',
         'goal-flag-drop': 'goalFlagDrop 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards',
         'goal-text-in': 'goalTextIn 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.4s both',
         'ball-from-left-alt': 'ballFromLeftAlt 1.1s 0.28s ease-in-out both',
@@ -91,8 +91,8 @@ export default {
         },
         overlayLifecycle: {
           '0%':   { opacity: '0' },
-          '8%':   { opacity: '1' },
-          '78%':  { opacity: '1' },
+          '5%':   { opacity: '1' },
+          '85%':  { opacity: '1' },
           '100%': { opacity: '0' },
         },
         goalFlagDrop: {

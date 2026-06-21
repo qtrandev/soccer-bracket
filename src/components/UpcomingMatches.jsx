@@ -135,7 +135,62 @@ function JerseyIcon({ color, dark }) {
   );
 }
 
-function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView }) {
+function VAROverlay({ iso2, min, matchKey, onDismiss }) {
+  function handleTap() {
+    document.getElementById(`match-${matchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    onDismiss?.();
+  }
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none overflow-hidden"
+      style={{ background: 'rgba(0,4,20,0.96)', backdropFilter: 'blur(6px)', animation: 'varOverlayLifecycle 5.5s ease-out forwards' }}
+      onClick={handleTap}
+    >
+      <div className="absolute pointer-events-none" style={{
+        left: 0, right: 0, height: '3px', top: 0,
+        background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.7), rgba(147,197,253,1), rgba(59,130,246,0.7), transparent)',
+        boxShadow: '0 0 28px rgba(59,130,246,0.9), 0 0 60px rgba(59,130,246,0.4)',
+        animation: 'varScanLine 5.5s linear forwards',
+      }} />
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(59,130,246,0.025) 3px, rgba(59,130,246,0.025) 4px)',
+      }} />
+      <div className="relative text-center px-6">
+        <div style={{ fontSize: '4.5rem', lineHeight: 1, marginBottom: '0.75rem', animation: 'varOverlayLifecycle 5.5s ease-out forwards' }}>📺</div>
+        <div style={{
+          fontSize: '7rem', fontWeight: 900, color: '#fff',
+          fontFamily: 'monospace',
+          animation: 'varTextIn 5.5s ease-out forwards',
+          textShadow: '0 0 40px rgba(59,130,246,1), 0 0 80px rgba(59,130,246,0.6), 0 0 160px rgba(59,130,246,0.25)',
+        }}>VAR</div>
+        <div style={{
+          fontSize: '1rem', letterSpacing: '0.5rem', fontWeight: 700,
+          color: 'rgba(147,197,253,0.9)', fontFamily: 'monospace',
+          marginTop: '-0.25rem',
+          animation: 'varOverlayLifecycle 5.5s ease-out forwards',
+        }}>VIDEO REVIEW{min ? <span style={{ letterSpacing: '0.1rem', opacity: 0.7, marginLeft: '0.5rem' }}>— {min}</span> : ''}</div>
+        {iso2 && (
+          <div style={{ marginTop: '1.5rem', animation: 'varFlagIn 5.5s ease-out forwards' }}>
+            <img
+              src={`https://flagcdn.com/w80/${iso2}.png`} alt=""
+              style={{ borderRadius: '6px', height: '48px', width: 'auto', boxShadow: '0 0 30px rgba(59,130,246,0.7), 0 2px 12px rgba(0,0,0,0.6)' }}
+            />
+          </div>
+        )}
+      </div>
+      <button
+        className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full text-blue-200/60 hover:text-blue-100 hover:bg-blue-400/20 transition-colors text-4xl font-thin leading-none"
+        onClick={e => { e.stopPropagation(); onDismiss?.(); }}
+        aria-label="Dismiss"
+      >×</button>
+      <div className="absolute bottom-8 left-0 right-0 text-center text-blue-400 text-sm font-semibold animate-pulse tracking-wide pointer-events-none">
+        Tap to view match →
+      </div>
+    </div>
+  );
+}
+
+function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView, onDismiss }) {
   const pieces = useMemo(() =>
     Array.from({ length: 34 }, (_, i) => ({
       id: i,
@@ -147,13 +202,14 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView }) {
     }))
   , []);
 
-  function scrollToMatch() {
+  function handleTap() {
     document.getElementById(`match-${matchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    onDismiss?.();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-pitch-950/90 backdrop-blur-sm animate-overlay-lifecycle cursor-pointer select-none"
-         onClick={scrollToMatch}>
+         onClick={handleTap}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {pieces.map(p => (
           <div key={p.id} className="absolute rounded-sm" style={{
@@ -189,8 +245,13 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView }) {
           <div className="text-sm tracking-widest uppercase text-emerald-700 mt-1 font-semibold">{TEAMS[teamCode]?.name ?? teamCode}</div>
         </div>
       </div>
+      <button
+        className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/15 transition-colors text-4xl font-thin leading-none"
+        onClick={e => { e.stopPropagation(); onDismiss?.(); }}
+        aria-label="Dismiss"
+      >×</button>
       {!cardInView && (
-        <div className={`absolute bottom-8 left-0 right-0 text-center text-sm font-semibold animate-pulse tracking-wide pointer-events-none ${dark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+        <div className="absolute bottom-8 left-0 right-0 text-center text-emerald-400 text-sm font-semibold animate-pulse tracking-wide pointer-events-none">
           Tap to view match →
         </div>
       )}
@@ -213,9 +274,11 @@ export default function UpcomingMatches({ dark = false }) {
   const [goalOverlay, setGoalOverlay] = useState(null);
   const [cardBumps, setCardBumps] = useState(new Map());      // key → { type, iso2 }
   const [cardFlashBumps, setCardFlashBumps] = useState(new Map()); // matchKey → { type }
+  const [varOverlay, setVarOverlay] = useState(null);          // { matchKey, iso2 }
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
   const firedGoalAnimsRef = useRef(new Set());
+  const firedVARAnimsRef = useRef(new Set());
 
   // Once scores load, scroll to the first live card (200px above it)
   useEffect(() => {
@@ -236,6 +299,7 @@ export default function UpcomingMatches({ dark = false }) {
     const newMinuteBumps = new Set();  // minute clock tick
     const newCardBumps = new Map();    // card given → flag+card fly animation
     let overlayData = null;
+    let newVAROverlay = null;
     for (const [key, score] of Object.entries(scores)) {
       const p = prev[key];
       if (!p || score.state !== 'in') continue;
@@ -290,6 +354,26 @@ export default function UpcomingMatches({ dark = false }) {
         if (sAwayCards.length > pAwayLen)
           newCardBumps.set(`${key}-away`, { type: sAwayCards.at(-1)?.type ?? 'yellow', iso2: TEAMS[ac]?.iso2 ?? '' });
       }
+      if (score.varReviews && p.varReviews) {
+        const sHomeVAR = score.varReviews.filter(v => v.side === 'home').length;
+        const pHomeVAR = p.varReviews.filter(v => v.side === 'home').length;
+        const sAwayVAR = score.varReviews.filter(v => v.side === 'away').length;
+        const pAwayVAR = p.varReviews.filter(v => v.side === 'away').length;
+        if (sHomeVAR > pHomeVAR) {
+          const vk = `${key}-home-var-${sHomeVAR}`;
+          if (!firedVARAnimsRef.current.has(vk)) {
+            firedVARAnimsRef.current.add(vk);
+            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[hc]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'home').at(-1)?.min ?? '' };
+          }
+        }
+        if (sAwayVAR > pAwayVAR) {
+          const vk = `${key}-away-var-${sAwayVAR}`;
+          if (!firedVARAnimsRef.current.has(vk)) {
+            firedVARAnimsRef.current.add(vk);
+            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[ac]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'away').at(-1)?.min ?? '' };
+          }
+        }
+      }
     }
     prevScoresRef.current = scores;
     if (Object.keys(newGoals).length > 0) {
@@ -332,7 +416,7 @@ export default function UpcomingMatches({ dark = false }) {
     if (overlayData) {
       setTimeout(() => {
         setGoalOverlay(overlayData);
-        setTimeout(() => setGoalOverlay(null), 4500);
+        setTimeout(() => setGoalOverlay(null), 6500);
       }, 750);
     }
     if (newCardBumps.size > 0) {
@@ -350,6 +434,12 @@ export default function UpcomingMatches({ dark = false }) {
         setCardBumps(b => new Map([...b, ...newCardBumps]));
         setTimeout(() => setCardBumps(b => { const n = new Map(b); for (const k of newCardBumps.keys()) n.delete(k); return n; }), 3200);
       }, 500);
+    }
+    if (newVAROverlay) {
+      setTimeout(() => {
+        setVarOverlay(newVAROverlay);
+        setTimeout(() => setVarOverlay(null), 5500);
+      }, 300);
     }
   }, [scores]);
 
@@ -414,7 +504,8 @@ export default function UpcomingMatches({ dark = false }) {
 
   return (
     <>
-    {goalOverlay && <GoalOverlay {...goalOverlay} />}
+    {varOverlay && <VAROverlay {...varOverlay} onDismiss={() => setVarOverlay(null)} />}
+    {goalOverlay && <GoalOverlay {...goalOverlay} onDismiss={() => setGoalOverlay(null)} />}
     {statBumps.size > 0 && (
       <div key={shotBumpVersion} className="fixed inset-0 overflow-hidden cursor-pointer" style={{ zIndex: 45 }}
            onClick={() => document.getElementById(`match-${shotMatchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
