@@ -79,6 +79,30 @@ function localDateLabel(dt) {
   }).format(dt);
 }
 
+const CARD_Y = '#fde047';
+const CARD_R = '#ef4444';
+const cardShape = (color, key) => (
+  <span key={key} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: '10px', height: '14px', background: color, borderRadius: '1.5px', verticalAlign: 'middle', margin: '0 0.5px', flexShrink: 0, overflow: 'hidden', paddingTop: '1px' }}>
+    <span style={{ fontSize: '3.5px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', lineHeight: 1, letterSpacing: '0px', display: 'block', width: '100%', textAlign: 'center', transform: 'scaleX(1.3)', transformOrigin: 'center', padding: '0 1px', boxSizing: 'border-box' }}>FIFA</span>
+  </span>
+);
+
+function CardIcons({ yellows, reds, compact }) {
+  if (yellows === 0 && reds === 0) return null;
+  if (compact) return (
+    <span className="inline-flex items-center gap-0.5">
+      {yellows > 0 && <>{cardShape(CARD_Y, 'y')}<span style={{ fontSize: '8px' }}>×{yellows}</span></>}
+      {reds > 0 && <>{cardShape(CARD_R, 'r')}<span style={{ fontSize: '8px' }}>×{reds}</span></>}
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center">
+      {Array.from({ length: yellows }, (_, i) => cardShape(CARD_Y, `y${i}`))}
+      {Array.from({ length: reds },    (_, i) => cardShape(CARD_R, `r${i}`))}
+    </span>
+  );
+}
+
 function parseOdds(detail) {
   if (!detail) return null;
   const m = detail.match(/^([A-Z]+)\s+([+-]?\d+)$/);
@@ -187,6 +211,7 @@ export default function UpcomingMatches({ dark = false }) {
   const [shotMatchKey, setShotMatchKey] = useState('');
   const [shotCardVisible, setShotCardVisible] = useState(false);
   const [goalOverlay, setGoalOverlay] = useState(null);
+  const [cardBumps, setCardBumps] = useState(new Map()); // key → { type, iso2 }
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
   const firedGoalAnimsRef = useRef(new Set());
@@ -208,6 +233,7 @@ export default function UpcomingMatches({ dark = false }) {
     const newBumps = new Set();        // shot / sog → shoe+ball overlay
     const newPossBumps = new Set();    // possession → bar animation only
     const newMinuteBumps = new Set();  // minute clock tick
+    const newCardBumps = new Map();    // card given → flag+card fly animation
     let overlayData = null;
     for (const [key, score] of Object.entries(scores)) {
       const p = prev[key];
@@ -253,6 +279,16 @@ export default function UpcomingMatches({ dark = false }) {
         if (score.stats.away.poss  > p.stats.away.poss)  newPossBumps.add(`${key}-away-poss`);
       }
       if (score.detail !== p.detail) newMinuteBumps.add(key);
+      if (score.cards && p.cards) {
+        const pHomeLen = p.cards.filter(c => c.side === 'home').length;
+        const sHomeCards = score.cards.filter(c => c.side === 'home');
+        const pAwayLen = p.cards.filter(c => c.side === 'away').length;
+        const sAwayCards = score.cards.filter(c => c.side === 'away');
+        if (sHomeCards.length > pHomeLen)
+          newCardBumps.set(`${key}-home`, { type: sHomeCards.at(-1)?.type ?? 'yellow', iso2: TEAMS[hc]?.iso2 ?? '' });
+        if (sAwayCards.length > pAwayLen)
+          newCardBumps.set(`${key}-away`, { type: sAwayCards.at(-1)?.type ?? 'yellow', iso2: TEAMS[ac]?.iso2 ?? '' });
+      }
     }
     prevScoresRef.current = scores;
     if (Object.keys(newGoals).length > 0) {
@@ -295,6 +331,10 @@ export default function UpcomingMatches({ dark = false }) {
     if (overlayData) {
       setGoalOverlay(overlayData);
       setTimeout(() => setGoalOverlay(null), 4500);
+    }
+    if (newCardBumps.size > 0) {
+      setCardBumps(b => new Map([...b, ...newCardBumps]));
+      setTimeout(() => setCardBumps(b => { const n = new Map(b); for (const k of newCardBumps.keys()) n.delete(k); return n; }), 3200);
     }
   }, [scores]);
 
@@ -433,6 +473,13 @@ export default function UpcomingMatches({ dark = false }) {
                   const awayWon = isFinal && (score?.awayScore ?? 0) > (score?.homeScore ?? 0);
                   const homeGoals = score?.goals?.filter(g => g.side === 'home') ?? [];
                   const awayGoals = score?.goals?.filter(g => g.side === 'away') ?? [];
+                  const homeCards = score?.cards?.filter(c => c.side === 'home') ?? [];
+                  const awayCards = score?.cards?.filter(c => c.side === 'away') ?? [];
+                  const homeYellows = homeCards.filter(c => c.type === 'yellow').length;
+                  const homeReds    = homeCards.filter(c => c.type === 'red').length;
+                  const awayYellows = awayCards.filter(c => c.type === 'yellow').length;
+                  const awayReds    = awayCards.filter(c => c.type === 'red').length;
+                  const compactCards = homeCards.length > 5 || awayCards.length > 5;
                   const displayHomeScore = isLive ? Math.max(score?.homeScore ?? 0, homeGoals.length) : (score?.homeScore ?? '-');
                   const displayAwayScore = isLive ? Math.max(score?.awayScore ?? 0, awayGoals.length) : (score?.awayScore ?? '-');
                   const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
@@ -584,9 +631,29 @@ export default function UpcomingMatches({ dark = false }) {
                               <div className={`flex-1 min-w-0 text-[10px] leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
                                 {homeGoals.map(fmtGoal).join(' · ')}
                               </div>
-                              <span className="flex-shrink-0 text-[10px] tabular-nums">
-                                {homeGoals.length ? '⚽'.repeat(homeGoals.length) : '0'} | {awayGoals.length ? '⚽'.repeat(awayGoals.length) : '0'}
-                              </span>
+                              <div className="flex-shrink-0 flex flex-col items-center text-[10px] tabular-nums leading-snug" style={{ position: 'relative' }}>
+                                <span>{homeGoals.length ? '⚽'.repeat(homeGoals.length) : ''} | {awayGoals.length ? '⚽'.repeat(awayGoals.length) : ''}</span>
+                                {(homeCards.length > 0 || awayCards.length > 0) && (
+                                  <span className="inline-flex items-center gap-0.5">
+                                    <CardIcons yellows={homeYellows} reds={homeReds} compact={compactCards} />
+                                    <span>|</span>
+                                    <CardIcons yellows={awayYellows} reds={awayReds} compact={compactCards} />
+                                  </span>
+                                )}
+                                {['home', 'away'].map(side => {
+                                  const info = cardBumps.get(`${matchKey}-${side}`);
+                                  if (!info) return null;
+                                  const cardColor = info.type === 'red' ? CARD_R : CARD_Y;
+                                  return (
+                                    <div key={side} className="absolute pointer-events-none flex flex-col items-center gap-1" style={{ bottom: 0, left: '50%', marginLeft: '-12px', zIndex: 20, animation: `${side === 'home' ? 'cardBumpFlyHome' : 'cardBumpFlyAway'} 3.2s ease-out forwards` }}>
+                                      <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: '42px', height: '60px', background: cardColor, borderRadius: '4px', overflow: 'hidden', paddingTop: '3px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', lineHeight: 1, display: 'block', width: '100%', textAlign: 'center', transform: 'scaleX(1.3)', transformOrigin: 'center', padding: '0 3px', boxSizing: 'border-box' }}>FIFA</span>
+                                      </span>
+                                      {info.iso2 && <img src={`https://flagcdn.com/w40/${info.iso2}.png`} alt="" style={{ width: '29px', height: 'auto', borderRadius: '3px', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }} />}
+                                    </div>
+                                  );
+                                })}
+                              </div>
                               <div className={`flex-1 min-w-0 text-[10px] text-right leading-relaxed ${dark ? 'text-emerald-500' : 'text-neutral-500'}`}>
                                 {awayGoals.map(fmtGoal).join(' · ')}
                               </div>

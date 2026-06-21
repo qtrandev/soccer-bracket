@@ -295,6 +295,20 @@
     100% { transform: translateX(calc(-22vw - 9rem - 100px)) translateY(calc(-50% - 25px)) scale(0.4); opacity: 0; }
   }
 
+  @keyframes cardBumpFlyHome {
+    0%   { transform: translate(0px, 0px) scale(0.4); opacity: 0; }
+    10%  { transform: translate(-5px, -12px) scale(1.2); opacity: 1; }
+    75%  { transform: translate(-65px, -180px) scale(1.05); opacity: 0.9; }
+    100% { transform: translate(-76px, -210px) scale(0.4); opacity: 0; }
+  }
+
+  @keyframes cardBumpFlyAway {
+    0%   { transform: translate(0px, 0px) scale(0.4); opacity: 0; }
+    10%  { transform: translate(5px, -12px) scale(1.2); opacity: 1; }
+    75%  { transform: translate(65px, -180px) scale(1.05); opacity: 0.9; }
+    100% { transform: translate(76px, -210px) scale(0.4); opacity: 0; }
+  }
+
   @keyframes possHomeFlagFly {
     0%   { transform: translate(0px, 0px) scale(0.35); opacity: 0; }
     10%  { transform: translate(30px, -14px) scale(1); opacity: 1; }
