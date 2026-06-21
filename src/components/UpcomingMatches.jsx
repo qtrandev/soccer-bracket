@@ -121,9 +121,9 @@ function isCardInView(matchKey) {
   return r.top < window.innerHeight && r.bottom > 0;
 }
 
-function JerseyIcon({ color, dark }) {
+function JerseyIcon({ color, dark, size = 16 }) {
   return (
-    <svg viewBox="0 0 24 24" width="16" height="16" style={{ flexShrink: 0, display: 'block', marginTop: '-3px' }}>
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, display: 'block', marginTop: size > 20 ? 0 : '-3px' }}>
       <path
         d="M9,2 Q12,6 15,2 L19,4 L21,9 L17,11 L17,22 L7,22 L7,11 L3,9 L5,4 Z"
         fill={color}
@@ -135,7 +135,65 @@ function JerseyIcon({ color, dark }) {
   );
 }
 
-function VAROverlay({ iso2, min, matchKey, onDismiss }) {
+function SubOverlay({ side, kitColor, iso2, teamName, on, off, min, matchKey, cardInView, onDismiss }) {
+  function handleTap() {
+    document.getElementById(`match-${matchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    onDismiss?.();
+  }
+  const jersey = col => <JerseyIcon color={col ?? '#555'} dark size={72} />;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none"
+      style={{ background: 'rgba(2,6,10,0.95)', backdropFilter: 'blur(6px)', animation: 'subOverlayLifecycle 4s ease-out forwards' }}
+      onClick={handleTap}
+    >
+      <div className="relative text-center px-6">
+        {/* Header */}
+        <div className="flex items-center justify-center gap-2 mb-2" style={{ animation: 'subOverlayLifecycle 4s ease-out forwards' }}>
+          {iso2 && <img src={`https://flagcdn.com/w40/${iso2}.png`} alt="" style={{ height: '18px', width: 'auto', borderRadius: '3px' }} />}
+          <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.15rem' }}>
+            {teamName?.toUpperCase()}{min ? ` — ${min}` : ''}
+          </span>
+        </div>
+        <div style={{ fontSize: '0.65rem', letterSpacing: '0.5rem', color: 'rgba(255,255,255,0.3)', marginBottom: '1.75rem', animation: 'subOverlayLifecycle 4s ease-out forwards' }}>
+          SUBSTITUTION
+        </div>
+
+        {/* Jersey swap row */}
+        <div className="flex items-center justify-center gap-8">
+          {/* OFF jersey */}
+          <div style={{ textAlign: 'center', animation: 'subJerseyOff 4s ease-out forwards' }}>
+            <div style={{ filter: 'grayscale(50%) brightness(0.7)' }}>{jersey(kitColor)}</div>
+            <div style={{ marginTop: '0.5rem', color: 'rgba(248,113,113,0.9)', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12rem' }}>OUT</div>
+            {off && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', fontWeight: 600, marginTop: '0.1rem', maxWidth: '90px' }}>{off}</div>}
+          </div>
+
+          {/* Arrow */}
+          <div style={{ fontSize: '2.25rem', color: 'rgba(255,255,255,0.45)', animation: 'subArrow 4s ease-out forwards' }}>→</div>
+
+          {/* ON jersey */}
+          <div style={{ textAlign: 'center', animation: 'subJerseyOn 4s ease-out forwards' }}>
+            {jersey(kitColor)}
+            <div style={{ marginTop: '0.5rem', color: 'rgba(74,222,128,0.9)', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12rem' }}>IN</div>
+            {on && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', fontWeight: 600, marginTop: '0.1rem', maxWidth: '90px' }}>{on}</div>}
+          </div>
+        </div>
+      </div>
+      <button
+        className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/15 transition-colors text-4xl font-thin leading-none"
+        onClick={e => { e.stopPropagation(); onDismiss?.(); }}
+        aria-label="Dismiss"
+      >×</button>
+      {!cardInView && (
+        <div className="absolute bottom-8 left-0 right-0 text-center text-white/30 text-sm font-semibold animate-pulse tracking-wide pointer-events-none">
+          Tap to view match →
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VAROverlay({ iso2, min, matchKey, cardInView, onDismiss }) {
   function handleTap() {
     document.getElementById(`match-${matchKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     onDismiss?.();
@@ -183,9 +241,11 @@ function VAROverlay({ iso2, min, matchKey, onDismiss }) {
         onClick={e => { e.stopPropagation(); onDismiss?.(); }}
         aria-label="Dismiss"
       >×</button>
-      <div className="absolute bottom-8 left-0 right-0 text-center text-blue-400 text-sm font-semibold animate-pulse tracking-wide pointer-events-none">
-        Tap to view match →
-      </div>
+      {!cardInView && (
+        <div className="absolute bottom-8 left-0 right-0 text-center text-blue-400 text-sm font-semibold animate-pulse tracking-wide pointer-events-none">
+          Tap to view match →
+        </div>
+      )}
     </div>
   );
 }
@@ -274,11 +334,13 @@ export default function UpcomingMatches({ dark = false }) {
   const [goalOverlay, setGoalOverlay] = useState(null);
   const [cardBumps, setCardBumps] = useState(new Map());      // key → { type, iso2 }
   const [cardFlashBumps, setCardFlashBumps] = useState(new Map()); // matchKey → { type }
-  const [varOverlay, setVarOverlay] = useState(null);          // { matchKey, iso2 }
+  const [varOverlay, setVarOverlay] = useState(null);
+  const [subOverlay, setSubOverlay] = useState(null);
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
   const firedGoalAnimsRef = useRef(new Set());
   const firedVARAnimsRef = useRef(new Set());
+  const firedSubAnimsRef = useRef(new Set());
 
   // Once scores load, scroll to the first live card (200px above it)
   useEffect(() => {
@@ -300,6 +362,7 @@ export default function UpcomingMatches({ dark = false }) {
     const newCardBumps = new Map();    // card given → flag+card fly animation
     let overlayData = null;
     let newVAROverlay = null;
+    let newSubOverlay = null;
     for (const [key, score] of Object.entries(scores)) {
       const p = prev[key];
       if (!p || score.state !== 'in') continue;
@@ -354,6 +417,32 @@ export default function UpcomingMatches({ dark = false }) {
         if (sAwayCards.length > pAwayLen)
           newCardBumps.set(`${key}-away`, { type: sAwayCards.at(-1)?.type ?? 'yellow', iso2: TEAMS[ac]?.iso2 ?? '' });
       }
+      if (score.subs && p.subs) {
+        const sHomeSubs = score.subs.filter(s => s.side === 'home');
+        const pHomeSubs = p.subs.filter(s => s.side === 'home');
+        const sAwaySubs = score.subs.filter(s => s.side === 'away');
+        const pAwaySubs = p.subs.filter(s => s.side === 'away');
+        if (sHomeSubs.length > pHomeSubs.length) {
+          const sk = `${key}-home-sub-${sHomeSubs.length}`;
+          if (!firedSubAnimsRef.current.has(sk)) {
+            firedSubAnimsRef.current.add(sk);
+            if (!newSubOverlay) {
+              const sub = sHomeSubs.at(-1);
+              newSubOverlay = { matchKey: key, side: 'home', kitColor: score.homeKit ?? '#555', iso2: TEAMS[hc]?.iso2 ?? '', teamName: TEAMS[hc]?.name ?? hc, on: sub?.on ?? '', off: sub?.off ?? '', min: sub?.min ?? '', cardInView: isCardInView(key) };
+            }
+          }
+        }
+        if (sAwaySubs.length > pAwaySubs.length) {
+          const sk = `${key}-away-sub-${sAwaySubs.length}`;
+          if (!firedSubAnimsRef.current.has(sk)) {
+            firedSubAnimsRef.current.add(sk);
+            if (!newSubOverlay) {
+              const sub = sAwaySubs.at(-1);
+              newSubOverlay = { matchKey: key, side: 'away', kitColor: score.awayKit ?? '#555', iso2: TEAMS[ac]?.iso2 ?? '', teamName: TEAMS[ac]?.name ?? ac, on: sub?.on ?? '', off: sub?.off ?? '', min: sub?.min ?? '', cardInView: isCardInView(key) };
+            }
+          }
+        }
+      }
       if (score.varReviews && p.varReviews) {
         const sHomeVAR = score.varReviews.filter(v => v.side === 'home').length;
         const pHomeVAR = p.varReviews.filter(v => v.side === 'home').length;
@@ -363,14 +452,14 @@ export default function UpcomingMatches({ dark = false }) {
           const vk = `${key}-home-var-${sHomeVAR}`;
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
-            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[hc]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'home').at(-1)?.min ?? '' };
+            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[hc]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'home').at(-1)?.min ?? '', cardInView: isCardInView(key) };
           }
         }
         if (sAwayVAR > pAwayVAR) {
           const vk = `${key}-away-var-${sAwayVAR}`;
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
-            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[ac]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'away').at(-1)?.min ?? '' };
+            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[ac]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'away').at(-1)?.min ?? '', cardInView: isCardInView(key) };
           }
         }
       }
@@ -399,11 +488,14 @@ export default function UpcomingMatches({ dark = false }) {
         }
         if (info) break;
       }
-      if (info) setShotInfo(info);
-      if (bumpMatchKey) { setShotMatchKey(bumpMatchKey); setShotCardVisible(isCardInView(bumpMatchKey)); }
-      setShotBumpVersion(v => v + 1);
-      setStatBumps(b => new Set([...b, ...newBumps]));
-      setTimeout(() => { setStatBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }); setShotInfo(null); setShotMatchKey(''); setShotCardVisible(false); }, 3000);
+      if (bumpMatchKey && isCardInView(bumpMatchKey)) {
+        if (info) setShotInfo(info);
+        setShotMatchKey(bumpMatchKey);
+        setShotCardVisible(true);
+        setShotBumpVersion(v => v + 1);
+        setStatBumps(b => new Set([...b, ...newBumps]));
+        setTimeout(() => { setStatBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }); setShotInfo(null); setShotMatchKey(''); setShotCardVisible(false); }, 3000);
+      }
     }
     if (newPossBumps.size > 0) {
       setPossStatBumps(b => new Set([...b, ...newPossBumps]));
@@ -435,10 +527,16 @@ export default function UpcomingMatches({ dark = false }) {
         setTimeout(() => setCardBumps(b => { const n = new Map(b); for (const k of newCardBumps.keys()) n.delete(k); return n; }), 3200);
       }, 500);
     }
-    if (newVAROverlay) {
+    if (newVAROverlay && isCardInView(newVAROverlay.matchKey)) {
       setTimeout(() => {
         setVarOverlay(newVAROverlay);
         setTimeout(() => setVarOverlay(null), 5500);
+      }, 300);
+    }
+    if (newSubOverlay && isCardInView(newSubOverlay.matchKey)) {
+      setTimeout(() => {
+        setSubOverlay(newSubOverlay);
+        setTimeout(() => setSubOverlay(null), 4000);
       }, 300);
     }
   }, [scores]);
@@ -504,6 +602,7 @@ export default function UpcomingMatches({ dark = false }) {
 
   return (
     <>
+    {subOverlay && <SubOverlay {...subOverlay} onDismiss={() => setSubOverlay(null)} />}
     {varOverlay && <VAROverlay {...varOverlay} onDismiss={() => setVarOverlay(null)} />}
     {goalOverlay && <GoalOverlay {...goalOverlay} onDismiss={() => setGoalOverlay(null)} />}
     {statBumps.size > 0 && (
@@ -783,7 +882,7 @@ export default function UpcomingMatches({ dark = false }) {
                                       style={{ width: '200px', height: 'auto', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.45)', display: 'block' }} />
                                     <span style={{ fontSize: '2rem', lineHeight: 1, marginTop: '2px', alignSelf: 'center',
                                       color: score?.homeKit ?? '#22c55e',
-                                      textShadow: dark ? '0 0 12px rgba(34,197,94,0.9), 0 0 4px rgba(34,197,94,0.5)' : '0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)' }}>--&gt;</span>
+                                      textShadow: dark ? '0 0 12px rgba(34,197,94,0.9), 0 0 4px rgba(34,197,94,0.5)' : '0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)' }}>→</span>
                                   </div>
                                 )}
                                 {possStatBumps.has(`${matchKey}-away-poss`) && away?.iso2 && (
@@ -793,7 +892,7 @@ export default function UpcomingMatches({ dark = false }) {
                                       style={{ width: '200px', height: 'auto', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.45)', display: 'block' }} />
                                     <span style={{ fontSize: '2rem', lineHeight: 1, marginTop: '2px', alignSelf: 'center',
                                       color: score?.awayKit ?? '#22c55e',
-                                      textShadow: dark ? '0 0 12px rgba(34,197,94,0.9), 0 0 4px rgba(34,197,94,0.5)' : '0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)' }}>&lt;--</span>
+                                      textShadow: dark ? '0 0 12px rgba(34,197,94,0.9), 0 0 4px rgba(34,197,94,0.5)' : '0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)' }}>←</span>
                                   </div>
                                 )}
                                 <div
