@@ -336,6 +336,7 @@ export default function UpcomingMatches({ dark = false }) {
   const [cardBumps, setCardBumps] = useState(new Map());      // key → { type, iso2 }
   const [cardFlashBumps, setCardFlashBumps] = useState(new Map()); // matchKey → { type }
   const [varOverlay, setVarOverlay] = useState(null);
+  const [varActiveBadges, setVarActiveBadges] = useState(new Map()); // matchKey → expiresAt ms
   const [subOverlay, setSubOverlay] = useState(null);
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
@@ -365,6 +366,8 @@ export default function UpcomingMatches({ dark = false }) {
     let overlayData = null;
     let newVAROverlay = null;
     let newSubOverlay = null;
+    const newVARBadges = new Map();
+    const expiredVARBadges = new Set();
     for (const [key, score] of Object.entries(scores)) {
       const p = prev[key];
       if (!p || score.state !== 'in') continue;
@@ -411,8 +414,6 @@ export default function UpcomingMatches({ dark = false }) {
         if (score.stats.away.corners  !== p.stats.away.corners)  newCornerFoulBumps.add(`${key}-away-corners`);
         if (score.stats.home.fouls    !== p.stats.home.fouls)    newCornerFoulBumps.add(`${key}-home-fouls`);
         if (score.stats.away.fouls    !== p.stats.away.fouls)    newCornerFoulBumps.add(`${key}-away-fouls`);
-        if (score.stats.home.offsides !== p.stats.home.offsides) newCornerFoulBumps.add(`${key}-home-offsides`);
-        if (score.stats.away.offsides !== p.stats.away.offsides) newCornerFoulBumps.add(`${key}-away-offsides`);
       }
       if (score.detail !== p.detail) newMinuteBumps.add(key);
       if (score.cards && p.cards) {
@@ -461,6 +462,7 @@ export default function UpcomingMatches({ dark = false }) {
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
             if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[hc]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'home').at(-1)?.min ?? '', cardInView: isCardInView(key) };
+            newVARBadges.set(key, Date.now() + 5 * 60 * 1000);
           }
         }
         if (sAwayVAR > pAwayVAR) {
@@ -468,7 +470,15 @@ export default function UpcomingMatches({ dark = false }) {
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
             if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[ac]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'away').at(-1)?.min ?? '', cardInView: isCardInView(key) };
+            newVARBadges.set(key, Date.now() + 5 * 60 * 1000);
           }
+        }
+        // Clear badge if a goal or card landed after VAR was called (decision made), or if expired
+        if (varActiveBadges.has(key)) {
+          const expired = Date.now() > varActiveBadges.get(key);
+          const goalAdded = score.goals.length > p.goals.length;
+          const cardAdded = score.cards.length > p.cards.length;
+          if (expired || goalAdded || cardAdded) expiredVARBadges.add(key);
         }
       }
     }
@@ -550,6 +560,14 @@ export default function UpcomingMatches({ dark = false }) {
         setSubOverlay(newSubOverlay);
         setTimeout(() => setSubOverlay(null), 4000);
       }, 300);
+    }
+    if (newVARBadges.size > 0 || expiredVARBadges.size > 0) {
+      setVarActiveBadges(b => {
+        const n = new Map(b);
+        for (const [k, v] of newVARBadges) n.set(k, v);
+        for (const k of expiredVARBadges) n.delete(k);
+        return n;
+      });
     }
   }, [scores]);
 
@@ -725,7 +743,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {isGroup ? (
                             <>
                               {STRENGTH_RANKS[m.home] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.home]}</span>}
-                              <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ring-black/10" />
+                              <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className={`w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ${dark ? 'ring-white/20' : 'ring-black/10'}`} />
                               <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
                             </>
                           ) : (
@@ -755,6 +773,9 @@ export default function UpcomingMatches({ dark = false }) {
                                   ? <span className="animate-goal-toast inline-block font-black">⚽ GOAL!</span>
                                   : <span key={score?.detail} style={minuteBumps.has(matchKey) ? { display: 'inline-block', animation: 'minuteBumpGrow 0.8s ease-out' } : undefined}>{score?.detail || 'LIVE'}</span>}
                               </span>
+                              {!anyGoalAnim && varActiveBadges.has(matchKey) && Date.now() < varActiveBadges.get(matchKey) && (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-black animate-pulse mt-0.5" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#ef4444', fontSize: '9px', letterSpacing: '0.08em' }}>📺 VAR</span>
+                              )}
                             </>
                           ) : isFinal ? (
                             <>
@@ -774,7 +795,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {isGroup ? (
                             <>
                               <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
-                              <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ring-black/10" />
+                              <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className={`w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ${dark ? 'ring-white/20' : 'ring-black/10'}`} />
                               {STRENGTH_RANKS[m.away] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.away]}</span>}
                             </>
                           ) : (
@@ -937,13 +958,11 @@ export default function UpcomingMatches({ dark = false }) {
                             <div className={`flex items-center justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
                               <span>
                                 <span style={cfBump('home-corners')}>{effectiveStats.home.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' ⚠️ · '}
-                                <span style={cfBump('home-offsides')}>{effectiveStats.home.offsides ?? 0}</span>{' 🏁'}
+                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' ⚠️'}
                               </span>
-<span>
+                              <span className="text-right">
                                 <span style={cfBump('away-corners')}>{effectiveStats.away.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' ⚠️ · '}
-                                <span style={cfBump('away-offsides')}>{effectiveStats.away.offsides ?? 0}</span>{' 🏁'}
+                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' ⚠️'}
                               </span>
                             </div>
                             )}
