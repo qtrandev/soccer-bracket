@@ -56,6 +56,9 @@ function parseEvents(events, into) {
       away: { poss: Math.round(sv(away.statistics, 'possessionPct') ?? 0), shots: sv(away.statistics, 'totalShots') ?? 0, sog: sv(away.statistics, 'shotsOnTarget') ?? 0 },
     } : null;
 
+    const homeKit = home.team.color ? `#${home.team.color}` : null;
+    const awayKit = away.team.color ? `#${away.team.color}` : null;
+
     const base = {
       state:      status.state      ?? 'pre',
       completed:  status.completed  ?? false,
@@ -67,11 +70,13 @@ function parseEvents(events, into) {
     };
 
     // Store under both orderings so our home/away assignment never has to match ESPN's
-    into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore };
+    into[`${homeCode}-${awayCode}`] = { ...base, homeScore, awayScore, homeKit, awayKit };
     into[`${awayCode}-${homeCode}`] = {
       ...base,
       homeScore: awayScore,
       awayScore: homeScore,
+      homeKit: awayKit,
+      awayKit: homeKit,
       goals: goals.map(g => ({ ...g, side: g.side === 'home' ? 'away' : 'home' })),
       stats: stats ? { home: stats.away, away: stats.home } : null,
     };
