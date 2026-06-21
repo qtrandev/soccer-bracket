@@ -652,7 +652,7 @@ export default function UpcomingMatches({ dark = false }) {
               animation: 'shotLabelPop 3s ease-out forwards' }}>
             <div className="flex items-center justify-center gap-2 mb-1">
               {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
-              <span style={{ fontSize: '2rem', ...(shotInfo.kitColor ? { color: shotInfo.kitColor, textShadow: `0 0 20px ${shotInfo.kitColor}cc, 0 0 2px #fff, 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff` } : {}) }}>{shotInfo.name}</span>
+              <span style={{ fontSize: '2rem', ...(shotInfo.kitColor ? { color: shotInfo.kitColor, textShadow: `0 0 20px ${shotInfo.kitColor}cc, 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 2px 12px rgba(0,0,0,0.9)` } : { textShadow: '0 2px 12px rgba(0,0,0,0.9)' }) }}>{shotInfo.name}</span>
               {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
             </div>
             <div style={{ fontSize: '1.6rem' }}>Shots: {shotInfo.shots} · on target: {shotInfo.sog}{shotInfo.isOnTarget ? ' 🎯' : ''}</div>
@@ -958,11 +958,11 @@ export default function UpcomingMatches({ dark = false }) {
                             <div className={`flex items-center justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
                               <span>
                                 <span style={cfBump('home-corners')}>{effectiveStats.home.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' 🚩'}
+                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' ⚠️'}
                               </span>
                               <span className="text-right">
                                 <span style={cfBump('away-corners')}>{effectiveStats.away.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' 🚩'}
+                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' ⚠️'}
                               </span>
                             </div>
                             )}
