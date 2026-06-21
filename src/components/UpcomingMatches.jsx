@@ -561,13 +561,13 @@ export default function UpcomingMatches({ dark = false }) {
         setTimeout(() => setCardBumps(b => { const n = new Map(b); for (const k of newCardBumps.keys()) n.delete(k); return n; }), 3200);
       }, 500);
     }
-    if (newVAROverlay && isCardInView(newVAROverlay.matchKey)) {
+    if (newVAROverlay) {
       setTimeout(() => {
         setVarOverlay(newVAROverlay);
         setTimeout(() => setVarOverlay(null), 4500);
       }, 300);
     }
-    if (newSubOverlay && isCardInView(newSubOverlay.matchKey)) {
+    if (newSubOverlay) {
       setTimeout(() => {
         setSubOverlay(newSubOverlay);
         setTimeout(() => setSubOverlay(null), 4000);
