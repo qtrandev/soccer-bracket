@@ -934,7 +934,9 @@ export default function UpcomingMatches({ dark = false }) {
                             <>
                             <div className="flex items-center gap-2">
                               <span className={`flex-1 text-[10px] ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
-                                <span style={bumpStyle('home-shots')}>{effectiveStats.home.shots}</span>{' shots · '}<span style={bumpStyle('home-sog')}>{effectiveStats.home.sog}</span>🎯
+                                <span style={bumpStyle('home-shots')}>{effectiveStats.home.shots}</span>{' shots '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>👟{statBumps.has(`${matchKey}-home-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '20px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>
+                                {'· '}<span style={bumpStyle('home-sog')}>{effectiveStats.home.sog}</span>🎯
                               </span>
                               <div className="flex-shrink-0 w-20" style={{ position: 'relative' }}>
                                 {possStatBumps.has(`${matchKey}-home-poss`) && home?.iso2 && (
@@ -978,22 +980,24 @@ export default function UpcomingMatches({ dark = false }) {
                                 </div>
                               </div>
                               <span className={`flex-1 text-[10px] text-right ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
-                                <span style={bumpStyle('away-shots')}>{effectiveStats.away.shots}</span>{' shots · '}<span style={bumpStyle('away-sog')}>{effectiveStats.away.sog}</span>🎯
+                                <span style={bumpStyle('away-shots')}>{effectiveStats.away.shots}</span>{' shots '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>👟{statBumps.has(`${matchKey}-away-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '20px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>
+                                {'· '}<span style={bumpStyle('away-sog')}>{effectiveStats.away.sog}</span>🎯
                               </span>
                             </div>
                             {(effectiveStats.home.corners != null || effectiveStats.home.fouls != null) && (
                             <div className={`flex items-center justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
                               <span>
                                 <span style={cfBump('home-corners')}>{effectiveStats.home.corners ?? 0}</span>{' '}
-                                <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>{' · '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '18px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>{' · '}
                                 <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' '}
-                                <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '18px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
                               </span>
                               <span className="text-right">
                                 <span style={cfBump('away-corners')}>{effectiveStats.away.corners ?? 0}</span>{' '}
-                                <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>{' · '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '18px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>{' · '}
                                 <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' '}
-                                <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '18px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
                               </span>
                             </div>
                             )}
