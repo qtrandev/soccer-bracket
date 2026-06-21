@@ -326,6 +326,8 @@ export default function UpcomingMatches({ dark = false }) {
   const [goalEvents, setGoalEvents] = useState({});
   const [statBumps, setStatBumps] = useState(new Set());     // shot/sog only → triggers shoe/ball overlay
   const [cornerFoulBumps, setCornerFoulBumps] = useState(new Set()); // corners/fouls → in-card bump only
+  const [foulBumps, setFoulBumps] = useState(new Set());   // fouls → warning pop animation
+  const [cornerBumps, setCornerBumps] = useState(new Set()); // corners → corner flag pop animation
   const [possStatBumps, setPossStatBumps] = useState(new Set()); // poss only → animates the bar in-card
   const [minuteBumps, setMinuteBumps] = useState(new Set()); // minute clock ticks
   const [shotBumpVersion, setShotBumpVersion] = useState(0);
@@ -361,6 +363,8 @@ export default function UpcomingMatches({ dark = false }) {
     const newBumps = new Set();             // shot / sog → shoe+ball overlay
     const newPossBumps = new Set();         // possession → bar animation only
     const newCornerFoulBumps = new Set();   // corners / fouls → in-card bump only
+    const newFoulBumps = new Set();         // fouls → warning pop overlay on card
+    const newCornerBumps = new Set();       // corners → corner flag pop overlay on card
     const newMinuteBumps = new Set();  // minute clock tick
     const newCardBumps = new Map();    // card given → flag+card fly animation
     let overlayData = null;
@@ -410,10 +414,10 @@ export default function UpcomingMatches({ dark = false }) {
         if (score.stats.away.sog     !== p.stats.away.sog)     newBumps.add(`${key}-away-sog`);
         if (score.stats.home.poss    > p.stats.home.poss)    newPossBumps.add(`${key}-home-poss`);
         if (score.stats.away.poss    > p.stats.away.poss)    newPossBumps.add(`${key}-away-poss`);
-        if (score.stats.home.corners  !== p.stats.home.corners)  newCornerFoulBumps.add(`${key}-home-corners`);
-        if (score.stats.away.corners  !== p.stats.away.corners)  newCornerFoulBumps.add(`${key}-away-corners`);
-        if (score.stats.home.fouls    !== p.stats.home.fouls)    newCornerFoulBumps.add(`${key}-home-fouls`);
-        if (score.stats.away.fouls    !== p.stats.away.fouls)    newCornerFoulBumps.add(`${key}-away-fouls`);
+        if (score.stats.home.corners  !== p.stats.home.corners)  { newCornerFoulBumps.add(`${key}-home-corners`); newCornerBumps.add(`${key}-home`); }
+        if (score.stats.away.corners  !== p.stats.away.corners)  { newCornerFoulBumps.add(`${key}-away-corners`); newCornerBumps.add(`${key}-away`); }
+        if (score.stats.home.fouls    !== p.stats.home.fouls)  { newCornerFoulBumps.add(`${key}-home-fouls`); newFoulBumps.add(`${key}-home`); }
+        if (score.stats.away.fouls    !== p.stats.away.fouls)  { newCornerFoulBumps.add(`${key}-away-fouls`); newFoulBumps.add(`${key}-away`); }
       }
       if (score.detail !== p.detail) newMinuteBumps.add(key);
       if (score.cards && p.cards) {
@@ -522,6 +526,14 @@ export default function UpcomingMatches({ dark = false }) {
     if (newCornerFoulBumps.size > 0) {
       setCornerFoulBumps(b => new Set([...b, ...newCornerFoulBumps]));
       setTimeout(() => setCornerFoulBumps(b => { const n = new Set(b); for (const k of newCornerFoulBumps) n.delete(k); return n; }), 1200);
+    }
+    if (newFoulBumps.size > 0) {
+      setFoulBumps(b => new Set([...b, ...newFoulBumps]));
+      setTimeout(() => setFoulBumps(b => { const n = new Set(b); for (const k of newFoulBumps) n.delete(k); return n; }), 2200);
+    }
+    if (newCornerBumps.size > 0) {
+      setCornerBumps(b => new Set([...b, ...newCornerBumps]));
+      setTimeout(() => setCornerBumps(b => { const n = new Set(b); for (const k of newCornerBumps) n.delete(k); return n; }), 2200);
     }
     if (newMinuteBumps.size > 0) {
       setMinuteBumps(b => new Set([...b, ...newMinuteBumps]));
@@ -652,7 +664,7 @@ export default function UpcomingMatches({ dark = false }) {
               animation: 'shotLabelPop 3s ease-out forwards' }}>
             <div className="flex items-center justify-center gap-2 mb-1">
               {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
-              <span style={{ fontSize: '2rem', ...(shotInfo.kitColor ? { color: shotInfo.kitColor, textShadow: `0 0 20px ${shotInfo.kitColor}cc, 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 2px 12px rgba(0,0,0,0.9)` } : { textShadow: '0 2px 12px rgba(0,0,0,0.9)' }) }}>{shotInfo.name}</span>
+              <span style={{ fontSize: '2rem', ...(shotInfo.kitColor ? { color: shotInfo.kitColor, textShadow: dark ? `0 0 20px ${shotInfo.kitColor}cc, 0 0 3px rgba(34,197,94,0.8), 1px 1px 0 rgba(34,197,94,0.6), -1px -1px 0 rgba(34,197,94,0.6), 0 2px 12px rgba(0,0,0,0.9)` : `0 0 20px ${shotInfo.kitColor}cc, 0 0 2px rgba(100,100,100,0.6), 1px 1px 0 rgba(120,120,120,0.5), -1px -1px 0 rgba(120,120,120,0.5), 1px -1px 0 rgba(120,120,120,0.5), -1px 1px 0 rgba(120,120,120,0.5)` } : {}) }}>{shotInfo.name}</span>
               {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
             </div>
             <div style={{ fontSize: '1.6rem' }}>Shots: {shotInfo.shots} · on target: {shotInfo.sog}{shotInfo.isOnTarget ? ' 🎯' : ''}</div>
@@ -957,12 +969,16 @@ export default function UpcomingMatches({ dark = false }) {
                             {(effectiveStats.home.corners != null || effectiveStats.home.fouls != null) && (
                             <div className={`flex items-center justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
                               <span>
-                                <span style={cfBump('home-corners')}>{effectiveStats.home.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' ⚠️'}
+                                <span style={cfBump('home-corners')}>{effectiveStats.home.corners ?? 0}</span>{' '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>{' · '}
+                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
                               </span>
                               <span className="text-right">
-                                <span style={cfBump('away-corners')}>{effectiveStats.away.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' ⚠️'}
+                                <span style={cfBump('away-corners')}>{effectiveStats.away.corners ?? 0}</span>{' '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>{' · '}
+                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' '}
+                                <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
                               </span>
                             </div>
                             )}

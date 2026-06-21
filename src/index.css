@@ -213,6 +213,27 @@
     100% { transform: scaleY(1);    }
   }
 
+  @keyframes warnPopHome {
+    0%   { transform: translate(0, 0)      scale(0);   opacity: 0; }
+    8%   { transform: translate(0, -20px)  scale(2.8); opacity: 1; }
+    22%  { transform: translate(0, 0)      scale(1.6); opacity: 1; }
+    35%  { transform: translate(-8px, -28px) scale(3.2); opacity: 1; }
+    50%  { transform: translate(0, 0)      scale(1.8); opacity: 1; }
+    63%  { transform: translate(6px, -22px)  scale(2.5); opacity: 1; }
+    78%  { transform: translate(0, 0)      scale(1.4); opacity: 0.8; }
+    100% { transform: translate(0, -10px)  scale(0.5); opacity: 0; }
+  }
+  @keyframes warnPopAway {
+    0%   { transform: translate(0, 0)      scale(0);   opacity: 0; }
+    8%   { transform: translate(0, -20px)  scale(2.8); opacity: 1; }
+    22%  { transform: translate(0, 0)      scale(1.6); opacity: 1; }
+    35%  { transform: translate(8px, -28px)  scale(3.2); opacity: 1; }
+    50%  { transform: translate(0, 0)      scale(1.8); opacity: 1; }
+    63%  { transform: translate(-6px, -22px) scale(2.5); opacity: 1; }
+    78%  { transform: translate(0, 0)      scale(1.4); opacity: 0.8; }
+    100% { transform: translate(0, -10px)  scale(0.5); opacity: 0; }
+  }
+
   @keyframes shotLabelPop {
     0%   { opacity: 0; transform: translateY(12px) scale(0.8); }
     18%  { opacity: 1; transform: translateY(0) scale(1.06); }
