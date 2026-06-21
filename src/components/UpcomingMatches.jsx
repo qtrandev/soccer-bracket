@@ -201,34 +201,34 @@ function VAROverlay({ iso2, min, matchKey, cardInView, onDismiss }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none overflow-hidden"
-      style={{ background: 'rgba(0,4,20,0.96)', backdropFilter: 'blur(6px)', animation: 'varOverlayLifecycle 5.5s ease-out forwards' }}
+      style={{ background: 'rgba(0,4,20,0.96)', backdropFilter: 'blur(6px)', animation: 'varOverlayLifecycle 4.5s ease-out forwards' }}
       onClick={handleTap}
     >
       <div className="absolute pointer-events-none" style={{
         left: 0, right: 0, height: '3px', top: 0,
         background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.7), rgba(147,197,253,1), rgba(59,130,246,0.7), transparent)',
         boxShadow: '0 0 28px rgba(59,130,246,0.9), 0 0 60px rgba(59,130,246,0.4)',
-        animation: 'varScanLine 5.5s linear forwards',
+        animation: 'varScanLine 4.5s linear forwards',
       }} />
       <div className="absolute inset-0 pointer-events-none" style={{
         backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(59,130,246,0.025) 3px, rgba(59,130,246,0.025) 4px)',
       }} />
       <div className="relative text-center px-6">
-        <div style={{ fontSize: '4.5rem', lineHeight: 1, marginBottom: '0.75rem', animation: 'varOverlayLifecycle 5.5s ease-out forwards' }}>📺</div>
+        <div style={{ fontSize: '4.5rem', lineHeight: 1, marginBottom: '0.75rem', animation: 'varOverlayLifecycle 4.5s ease-out forwards' }}>📺</div>
         <div style={{
           fontSize: '7rem', fontWeight: 900, color: '#fff',
           fontFamily: 'monospace',
-          animation: 'varTextIn 5.5s ease-out forwards',
+          animation: 'varTextIn 4.5s ease-out forwards',
           textShadow: '0 0 40px rgba(59,130,246,1), 0 0 80px rgba(59,130,246,0.6), 0 0 160px rgba(59,130,246,0.25)',
         }}>VAR</div>
         <div style={{
           fontSize: '1rem', letterSpacing: '0.5rem', fontWeight: 700,
           color: 'rgba(147,197,253,0.9)', fontFamily: 'monospace',
           marginTop: '-0.25rem',
-          animation: 'varOverlayLifecycle 5.5s ease-out forwards',
+          animation: 'varOverlayLifecycle 4.5s ease-out forwards',
         }}>VIDEO REVIEW{min ? <span style={{ letterSpacing: '0.1rem', opacity: 0.7, marginLeft: '0.5rem' }}>— {min}</span> : ''}</div>
         {iso2 && (
-          <div style={{ marginTop: '1.5rem', animation: 'varFlagIn 5.5s ease-out forwards' }}>
+          <div style={{ marginTop: '1.5rem', animation: 'varFlagIn 4.5s ease-out forwards' }}>
             <img
               src={`https://flagcdn.com/w80/${iso2}.png`} alt=""
               style={{ borderRadius: '6px', height: '48px', width: 'auto', boxShadow: '0 0 30px rgba(59,130,246,0.7), 0 2px 12px rgba(0,0,0,0.6)' }}
@@ -462,7 +462,7 @@ export default function UpcomingMatches({ dark = false }) {
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
             if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[hc]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'home').at(-1)?.min ?? '', cardInView: isCardInView(key) };
-            newVARBadges.set(key, Date.now() + 5 * 60 * 1000);
+            newVARBadges.set(key, Date.now() + 3 * 60 * 1000);
           }
         }
         if (sAwayVAR > pAwayVAR) {
@@ -470,7 +470,7 @@ export default function UpcomingMatches({ dark = false }) {
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
             if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[ac]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'away').at(-1)?.min ?? '', cardInView: isCardInView(key) };
-            newVARBadges.set(key, Date.now() + 5 * 60 * 1000);
+            newVARBadges.set(key, Date.now() + 3 * 60 * 1000);
           }
         }
         // Clear badge if a goal or card landed after VAR was called (decision made), or if expired
@@ -552,7 +552,7 @@ export default function UpcomingMatches({ dark = false }) {
     if (newVAROverlay && isCardInView(newVAROverlay.matchKey)) {
       setTimeout(() => {
         setVarOverlay(newVAROverlay);
-        setTimeout(() => setVarOverlay(null), 5500);
+        setTimeout(() => setVarOverlay(null), 4500);
       }, 300);
     }
     if (newSubOverlay && isCardInView(newSubOverlay.matchKey)) {
@@ -958,11 +958,11 @@ export default function UpcomingMatches({ dark = false }) {
                             <div className={`flex items-center justify-between text-[9px] mt-0.5 ${dark ? 'text-emerald-800' : 'text-neutral-400'}`}>
                               <span>
                                 <span style={cfBump('home-corners')}>{effectiveStats.home.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' ⚠️'}
+                                <span style={cfBump('home-fouls')}>{effectiveStats.home.fouls ?? 0}</span>{' 🚩'}
                               </span>
                               <span className="text-right">
                                 <span style={cfBump('away-corners')}>{effectiveStats.away.corners ?? 0}</span>{' ⛳ · '}
-                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' ⚠️'}
+                                <span style={cfBump('away-fouls')}>{effectiveStats.away.fouls ?? 0}</span>{' 🚩'}
                               </span>
                             </div>
                             )}
