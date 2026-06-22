@@ -326,6 +326,7 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView, onD
 
 function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkProp, onClose,
   goalEvents, varActiveBadges, statBumps, cornerFoulBumps, cornerBumps, foulBumps,
+  possStatBumps, shotIconBumps, cardBumps, cardFlashBumps,
   goalOverlay, onDismissGoal, varOverlay, onDismissVar, subOverlay, onDismissSub,
   shotBumpVersion, shotInfo, shotMatchKey }) {
   const overlayRef = useRef(null);
@@ -405,11 +406,6 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
               <CardIcons yellows={yellows} reds={reds} compact scale={p ? 1 : 2} />
             </div>
           )}
-          {goals.length > 0 && (
-            <div className={`text-center leading-relaxed ${p ? 'mt-1' : 'mt-4'}`} style={{ color: subClr, fontSize: p ? '0.85rem' : '1.4rem' }}>
-              {goals.map(fmtGoal).join(' · ')}
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -463,22 +459,56 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
                 📺 VAR
               </span>
             )}
+            {(homeGoals.length > 0 || awayGoals.length > 0) && (
+              <div className="flex gap-4 justify-center" style={{ fontSize: p ? '0.85rem' : '1.3rem', color: subClr }}>
+                <div className="text-right space-y-0.5">
+                  {homeGoals.map((g, i) => <div key={i}>⚽ {fmtGoal(g)}</div>)}
+                </div>
+                {homeGoals.length > 0 && awayGoals.length > 0 && (
+                  <div style={{ borderLeft: `1px solid ${borderClr}` }} />
+                )}
+                <div className="text-left space-y-0.5">
+                  {awayGoals.map((g, i) => <div key={i}>{fmtGoal(g)} ⚽</div>)}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Stats */}
           {st && (
             <div style={{ width: p ? 'clamp(220px, 88vw, 340px)' : 'clamp(300px, 36vw, 520px)' }} className={p ? 'space-y-2' : 'space-y-4'}>
               <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
-                <span><span style={bumpStyle('home-shots')}>{st.home.shots}</span> 👟 <span style={bumpStyle('home-sog')}>{st.home.sog}</span>🎯</span>
+                <span>
+                  <span style={bumpStyle('home-shots')}>{st.home.shots}</span>{' '}
+                  <span style={{ position: 'relative', display: 'inline-block' }}>👟{shotIconBumps?.has(`${matchKey}-home-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: p ? '1.5rem' : '3rem', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>{' '}
+                  <span style={bumpStyle('home-sog')}>{st.home.sog}</span>🎯
+                </span>
                 <span className="opacity-40 self-center" style={{ fontSize: p ? '0.8rem' : '1.4rem' }}>shots</span>
-                <span><span style={bumpStyle('away-shots')}>{st.away.shots}</span> 👟 <span style={bumpStyle('away-sog')}>{st.away.sog}</span>🎯</span>
+                <span>
+                  <span style={bumpStyle('away-shots')}>{st.away.shots}</span>{' '}
+                  <span style={{ position: 'relative', display: 'inline-block' }}>👟{shotIconBumps?.has(`${matchKey}-away-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: p ? '1.5rem' : '3rem', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>{' '}
+                  <span style={bumpStyle('away-sog')}>{st.away.sog}</span>🎯
+                </span>
               </div>
-              <div>
-                <div className="rounded-full overflow-hidden" style={{ height: p ? '10px' : '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
+              <div className="relative">
+                {possStatBumps?.has(`${matchKey}-home-poss`) && home?.iso2 && (
+                  <span className="absolute pointer-events-none" style={{ left: 0, bottom: 0, zIndex: 30, animation: 'possHomeFlagFly 2.8s ease-out forwards' }}>
+                    <img src={`https://flagcdn.com/w40/${home.iso2}.png`} alt="" className="rounded" style={{ height: p ? '3rem' : '6rem', width: 'auto' }} />
+                  </span>
+                )}
+                {possStatBumps?.has(`${matchKey}-away-poss`) && away?.iso2 && (
+                  <span className="absolute pointer-events-none" style={{ right: 0, bottom: 0, zIndex: 30, animation: 'possAwayFlagFly 2.8s ease-out forwards' }}>
+                    <img src={`https://flagcdn.com/w40/${away.iso2}.png`} alt="" className="rounded" style={{ height: p ? '3rem' : '6rem', width: 'auto' }} />
+                  </span>
+                )}
+                <div className={`rounded-full ${possStatBumps?.has(`${matchKey}-home-poss`) || possStatBumps?.has(`${matchKey}-away-poss`) ? '' : 'overflow-hidden'}`}
+                  style={{ height: p ? '10px' : '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
                   <div className="h-full rounded-l-full" style={{ width: `${st.home.poss}%`, transition: 'width 1.2s ease-out', background: score?.homeKit ?? (dark ? 'rgba(74,222,128,0.6)' : 'rgba(34,197,94,0.6)') }} />
                 </div>
                 <div className="flex justify-between mt-1" style={{ color: subClr, fontSize: p ? '1rem' : '2rem' }}>
-                  <span>{st.home.poss}%</span><span>poss</span><span>{st.away.poss}%</span>
+                  <span style={possStatBumps?.has(`${matchKey}-home-poss`) ? { display: 'inline-block', animation: 'statBumpGlow 0.9s ease-out' } : undefined}>{st.home.poss}%</span>
+                  <span>poss</span>
+                  <span style={possStatBumps?.has(`${matchKey}-away-poss`) ? { display: 'inline-block', animation: 'statBumpGlow 0.9s ease-out' } : undefined}>{st.away.poss}%</span>
                 </div>
               </div>
               {(st.home.corners != null || st.home.fouls != null) && (
@@ -532,6 +562,26 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
           )}
         </div>
       )}
+      {/* Card flash background */}
+      {cardFlashBumps?.has(matchKey) && (
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 6, animation: `cardFlash${cardFlashBumps.get(matchKey).type === 'red' ? 'Red' : 'Yellow'} 2.5s ease-out forwards` }} />
+      )}
+      {/* Flying card + flag animation */}
+      {['home', 'away'].map(side => {
+        const info = cardBumps?.get(`${matchKey}-${side}`);
+        if (!info) return null;
+        const cardColor = info.type === 'red' ? CARD_R : CARD_Y;
+        const sc = p ? 4 : 8;
+        return (
+          <div key={side} className="absolute pointer-events-none flex flex-col items-center gap-2"
+            style={{ bottom: '20%', left: '50%', transform: 'translateX(-50%)', zIndex: 50, animation: `${side === 'home' ? 'cardBumpFlyHome' : 'cardBumpFlyAway'} 3.2s ease-out forwards` }}>
+            <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: `${10 * sc}px`, height: `${14 * sc}px`, background: cardColor, borderRadius: `${1.5 * sc}px`, overflow: 'hidden', paddingTop: `${sc}px` }}>
+              <span style={{ fontSize: `${3.5 * sc}px`, fontWeight: 800, color: 'rgba(0,0,0,0.45)', lineHeight: 1, display: 'block', width: '100%', textAlign: 'center', transform: 'scaleX(1.3)', transformOrigin: 'center', padding: `0 ${sc}px`, boxSizing: 'border-box' }}>FIFA</span>
+            </span>
+            {info.iso2 && <img src={`https://flagcdn.com/w40/${info.iso2}.png`} alt="" style={{ width: `${7 * sc}px`, height: 'auto', borderRadius: `${Math.round(sc * 0.4)}px`, boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }} />}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -898,6 +948,10 @@ export default function UpcomingMatches({ dark = false }) {
         cornerFoulBumps={cornerFoulBumps}
         cornerBumps={cornerBumps}
         foulBumps={foulBumps}
+        possStatBumps={possStatBumps}
+        shotIconBumps={shotIconBumps}
+        cardBumps={cardBumps}
+        cardFlashBumps={cardFlashBumps}
         goalOverlay={goalOverlay}
         onDismissGoal={() => setGoalOverlay(null)}
         varOverlay={varOverlay}
