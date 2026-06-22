@@ -326,11 +326,14 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   const overlayRef = useRef(null);
   const [dark, setDark] = useState(darkProp);
   const [portrait, setPortrait] = useState(() => typeof window !== 'undefined' && window.innerHeight > window.innerWidth);
+  const [screenH, setScreenH] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
   useEffect(() => {
     const mq = window.matchMedia('(orientation: portrait)');
     const handler = e => setPortrait(e.matches);
     mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    const onResize = () => setScreenH(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => { mq.removeEventListener('change', handler); window.removeEventListener('resize', onResize); };
   }, []);
   const home = TEAMS[homeCode];
   const away = TEAMS[awayCode];
@@ -373,7 +376,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   const subClr     = dark ? '#6b7280' : '#9ca3af';
   const borderClr  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
 
-  const p = portrait; // shorthand
+  const p = portrait || screenH < 520; // compact = portrait OR short landscape (phones)
   const teamBlock = (team, code, kit, altKit, goals, yellows, reds, side) => (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
       <div className={`flex-1 flex flex-col items-center justify-center ${p ? 'gap-2 px-4 py-2' : 'gap-6 px-6 py-4'}`}>
@@ -434,24 +437,24 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
         {teamBlock(home, homeCode, score?.homeKit, score?.homeAltKit, homeGoals, homeYellows, homeReds, 'home')}
 
         {/* Score + stats center column */}
-        <div className="flex flex-col items-center justify-center gap-6 portrait:py-4 landscape:py-8 px-8 flex-shrink-0"
+        <div className={`flex flex-col items-center justify-center flex-shrink-0 ${p ? 'gap-3 py-3 px-4' : 'gap-4 py-4 px-8'}`}
           style={{ borderLeft: `1px solid ${borderClr}`, borderRight: `1px solid ${borderClr}` }}>
           {/* Score */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex items-center gap-8">
+          <div className="flex flex-col items-center gap-2">
+            <div className={`flex items-center ${p ? 'gap-4' : 'gap-6'}`}>
               <span key={goalEvents[`${matchKey}-home`] || 'fsh'} className="font-black tabular-nums"
-                style={{ color: liveClr, fontSize: 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(homeGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
+                style={{ color: liveClr, fontSize: p ? 'clamp(3.5rem, 15vw, 6rem)' : 'clamp(4rem, min(18vw, 20vh), 13rem)', lineHeight: 1, ...(homeGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
                 {displayHomeScore}
               </span>
-              <span className="font-thin opacity-20" style={{ color: textClr, fontSize: 'clamp(4rem, 10vw, 9rem)' }}>—</span>
+              <span className="font-thin opacity-20" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 8vw, 4rem)' : 'clamp(2rem, min(10vw, 10vh), 9rem)' }}>—</span>
               <span key={goalEvents[`${matchKey}-away`] || 'fsa'} className="font-black tabular-nums"
-                style={{ color: liveClr, fontSize: 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(awayGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
+                style={{ color: liveClr, fontSize: p ? 'clamp(3.5rem, 15vw, 6rem)' : 'clamp(4rem, min(18vw, 20vh), 13rem)', lineHeight: 1, ...(awayGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
                 {displayAwayScore}
               </span>
             </div>
             {varActiveBadges.has(matchKey) && Date.now() < varActiveBadges.get(matchKey) && (
-              <span className="inline-flex items-center gap-1 px-4 py-2 rounded font-black animate-pulse"
-                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#ef4444', fontSize: '1.1rem', letterSpacing: '0.08em' }}>
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded font-black animate-pulse"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#ef4444', fontSize: p ? '0.85rem' : '1.1rem', letterSpacing: '0.08em' }}>
                 📺 VAR
               </span>
             )}
@@ -459,22 +462,22 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
 
           {/* Stats */}
           {st && (
-            <div style={{ width: 'clamp(300px, 36vw, 520px)' }} className="space-y-6">
-              <div className="flex justify-between" style={{ color: subClr, fontSize: '2.2rem' }}>
+            <div style={{ width: p ? 'clamp(220px, 88vw, 340px)' : 'clamp(300px, 36vw, 520px)' }} className={p ? 'space-y-2' : 'space-y-4'}>
+              <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
                 <span><span style={bumpStyle('home-shots')}>{st.home.shots}</span> 👟 <span style={bumpStyle('home-sog')}>{st.home.sog}</span>🎯</span>
-                <span className="opacity-40 self-center" style={{ fontSize: '1.4rem' }}>shots</span>
+                <span className="opacity-40 self-center" style={{ fontSize: p ? '0.8rem' : '1.4rem' }}>shots</span>
                 <span><span style={bumpStyle('away-shots')}>{st.away.shots}</span> 👟 <span style={bumpStyle('away-sog')}>{st.away.sog}</span>🎯</span>
               </div>
               <div>
-                <div className="rounded-full overflow-hidden" style={{ height: '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
+                <div className="rounded-full overflow-hidden" style={{ height: p ? '10px' : '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
                   <div className="h-full rounded-l-full" style={{ width: `${st.home.poss}%`, transition: 'width 1.2s ease-out', background: score?.homeKit ?? (dark ? 'rgba(74,222,128,0.6)' : 'rgba(34,197,94,0.6)') }} />
                 </div>
-                <div className="flex justify-between mt-3" style={{ color: subClr, fontSize: '2rem' }}>
+                <div className="flex justify-between mt-1" style={{ color: subClr, fontSize: p ? '1rem' : '2rem' }}>
                   <span>{st.home.poss}%</span><span>poss</span><span>{st.away.poss}%</span>
                 </div>
               </div>
               {(st.home.corners != null || st.home.fouls != null) && (
-                <div className="flex justify-between" style={{ color: subClr, fontSize: '2.2rem' }}>
+                <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
                   <span>
                     <span style={cfBump('home-corners')}>{st.home.corners ?? 0}</span>{' '}
                     <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '24px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>
