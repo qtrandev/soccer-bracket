@@ -89,10 +89,15 @@ const cardShape = (color, key, sc = 1) => (
 
 function CardIcons({ yellows, reds, compact, scale = 1 }) {
   if (yellows === 0 && reds === 0) return null;
+  const cardGroup = (color, prefix, count) => {
+    if (count <= 0) return null;
+    if (count <= 5) return Array.from({ length: count }, (_, i) => cardShape(color, `${prefix}${i}`, scale));
+    return <>{cardShape(color, prefix, scale)}<span style={{ fontSize: `${8 * scale}px` }}>×{count}</span></>;
+  };
   if (compact) return (
     <span className="inline-flex items-center gap-0.5">
-      {yellows > 0 && <>{cardShape(CARD_Y, 'y', scale)}<span style={{ fontSize: `${8 * scale}px` }}>×{yellows}</span></>}
-      {reds > 0 && <>{cardShape(CARD_R, 'r', scale)}<span style={{ fontSize: `${8 * scale}px` }}>×{reds}</span></>}
+      {cardGroup(CARD_Y, 'y', yellows)}
+      {cardGroup(CARD_R, 'r', reds)}
     </span>
   );
   return (
@@ -383,16 +388,16 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
         {team?.iso2 && (
           <img src={`https://flagcdn.com/w160/${team.iso2}.png`} alt={team?.name}
             className="w-auto rounded-2xl shadow-xl object-cover"
-            style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(120px, 30vh, 280px)', maxWidth: '86%' }} />
+            style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(80px, min(22vh, 14vw), 200px)', maxWidth: '86%' }} />
         )}
         <div className="text-center">
-          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(2.5rem, 5vw, 7rem)' }}>{team?.name}</div>
+          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(1.5rem, min(5vw, 7vh), 7rem)' }}>{team?.name}</div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
-            {side === 'home' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
+            {side === 'home' && <JerseyIcon color={kit ?? (dark ? '#374151' : '#d1d5db')} dark={dark} size={p ? 24 : 52} />}
             <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, ...(kit ? { background: altKit ?? kit } : {}) }}>
               {code}
             </span>
-            {side === 'away' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
+            {side === 'away' && <JerseyIcon color={kit ?? (dark ? '#374151' : '#d1d5db')} dark={dark} size={p ? 24 : 52} />}
           </div>
           <StrengthStars strength={STRENGTHS[code] ?? 50} className={p ? 'mt-1' : 'mt-3'} style={{ fontSize: p ? '1.1rem' : '3rem' }} />
           {(yellows > 0 || reds > 0) && (
@@ -417,7 +422,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
         <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-3xl font-thin" style={{ color: subClr }}>×</button>
         <div className="flex flex-col items-center">
           <span className="text-sm font-black uppercase tracking-widest animate-pulse" style={{ color: liveClr }}>● LIVE</span>
-          <span className="text-base font-semibold" style={{ color: subClr }}>
+          <span className="font-black" style={{ color: liveClr, fontSize: p ? '1.1rem' : '1.5rem' }}>
             {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
           </span>
         </div>
