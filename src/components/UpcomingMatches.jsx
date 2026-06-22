@@ -326,12 +326,17 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   const overlayRef = useRef(null);
   const [dark, setDark] = useState(darkProp);
   const [portrait, setPortrait] = useState(() => typeof window !== 'undefined' && window.innerHeight > window.innerWidth);
+  const [screenH, setScreenH] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
   useEffect(() => {
     const mq = window.matchMedia('(orientation: portrait)');
     const handler = e => setPortrait(e.matches);
     mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    const onResize = () => setScreenH(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => { mq.removeEventListener('change', handler); window.removeEventListener('resize', onResize); };
   }, []);
+  // compact = portrait phone OR landscape phone (short screen)
+  const p = portrait || screenH < 520;
   const home = TEAMS[homeCode];
   const away = TEAMS[awayCode];
 
@@ -373,7 +378,6 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   const subClr     = dark ? '#6b7280' : '#9ca3af';
   const borderClr  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
 
-  const p = portrait; // shorthand
   const teamBlock = (team, code, kit, altKit, goals, yellows, reds, side) => (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
       <div className={`flex-1 flex flex-col items-center justify-center ${p ? 'gap-2 px-4 py-2' : 'gap-6 px-6 py-4'}`}>
@@ -383,7 +387,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
             style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(120px, 30vh, 280px)', maxWidth: '86%' }} />
         )}
         <div className="text-center">
-          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(4rem, 8vw, 11rem)' }}>{team?.name}</div>
+          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(2.5rem, 5vw, 7rem)', whiteSpace: p ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{team?.name}</div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
             {side === 'home' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
             <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', ...(kit ? { background: altKit ?? kit, boxShadow: '0 0 0 2px rgba(128,128,128,0.4)' } : {}) }}>
