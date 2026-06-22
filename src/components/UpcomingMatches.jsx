@@ -319,6 +319,215 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView, onD
   );
 }
 
+function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkProp, onClose,
+  goalEvents, varActiveBadges, statBumps, cornerFoulBumps, cornerBumps, foulBumps,
+  goalOverlay, onDismissGoal, varOverlay, onDismissVar, subOverlay, onDismissSub,
+  shotBumpVersion, shotInfo, shotMatchKey }) {
+  const overlayRef = useRef(null);
+  const [dark, setDark] = useState(darkProp);
+  const [portrait, setPortrait] = useState(() => typeof window !== 'undefined' && window.innerHeight > window.innerWidth);
+  useEffect(() => {
+    const mq = window.matchMedia('(orientation: portrait)');
+    const handler = e => setPortrait(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  const home = TEAMS[homeCode];
+  const away = TEAMS[awayCode];
+
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; });
+
+  useEffect(() => {
+    const el = overlayRef.current;
+    el?.requestFullscreen?.().catch(() => {});
+    const onFsChange = () => { if (!document.fullscreenElement) onCloseRef.current(); };
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const homeGoals  = score?.goals?.filter(g => g.side === 'home') ?? [];
+  const awayGoals  = score?.goals?.filter(g => g.side === 'away') ?? [];
+  const homeCards  = score?.cards?.filter(c => c.side === 'home') ?? [];
+  const awayCards  = score?.cards?.filter(c => c.side === 'away') ?? [];
+  const homeYellows = homeCards.filter(c => c.type === 'yellow').length;
+  const homeReds    = homeCards.filter(c => c.type === 'red').length;
+  const awayYellows = awayCards.filter(c => c.type === 'yellow').length;
+  const awayReds    = awayCards.filter(c => c.type === 'red').length;
+  const displayHomeScore = Math.max(score?.homeScore ?? 0, homeGoals.length);
+  const displayAwayScore = Math.max(score?.awayScore ?? 0, awayGoals.length);
+  const homeGoalAnim = !!goalEvents[`${matchKey}-home`];
+  const awayGoalAnim = !!goalEvents[`${matchKey}-away`];
+  const anyGoalAnim  = homeGoalAnim || awayGoalAnim;
+  const fmtGoal = g => `${g.name} ${g.min}${g.og ? ' (OG)' : g.pk ? ' (P)' : ''}`;
+  const st = score?.stats;
+  const bumpStyle = key => statBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
+  const cfBump    = key => cornerFoulBumps.has(`${matchKey}-${key}`) ? { display: 'inline-block', animation: 'statBumpGlow 0.65s ease-out' } : undefined;
+
+  const bg         = dark ? '#030712' : '#f9fafb';
+  const liveClr    = dark ? '#4ade80' : '#16a34a';
+  const textClr    = dark ? '#f9fafb' : '#111827';
+  const subClr     = dark ? '#6b7280' : '#9ca3af';
+  const borderClr  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+  const p = portrait; // shorthand
+  const teamBlock = (team, code, kit, altKit, goals, yellows, reds, side) => (
+    <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className={`flex-1 flex flex-col items-center justify-center ${p ? 'gap-2 px-4 py-2' : 'gap-6 px-6 py-4'}`}>
+        {team?.iso2 && (
+          <img src={`https://flagcdn.com/w160/${team.iso2}.png`} alt={team?.name}
+            className="w-auto rounded-2xl shadow-xl object-cover"
+            style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(120px, 30vh, 280px)', maxWidth: '86%' }} />
+        )}
+        <div className="text-center">
+          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(4rem, 8vw, 11rem)' }}>{team?.name}</div>
+          <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
+            {side === 'home' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
+            <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', ...(kit ? { background: altKit ?? kit, boxShadow: '0 0 0 2px rgba(128,128,128,0.4)' } : {}) }}>
+              {code}
+            </span>
+            {side === 'away' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
+          </div>
+          <StrengthStars strength={STRENGTHS[code] ?? 50} className={p ? 'mt-1' : 'mt-3'} style={{ fontSize: p ? '1.1rem' : '3rem' }} />
+          {(yellows > 0 || reds > 0) && (
+            <div className={`flex justify-center ${p ? 'mt-1' : 'mt-4'}`} style={{ fontSize: p ? '1rem' : '2.2rem' }}>
+              <CardIcons yellows={yellows} reds={reds} compact />
+            </div>
+          )}
+        </div>
+      </div>
+      {goals.length > 0 && (
+        <div className="flex-shrink-0 pb-3 px-4 text-center leading-relaxed" style={{ color: subClr, fontSize: p ? '0.85rem' : '1.8rem' }}>
+          {goals.map(fmtGoal).join(' · ')}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div ref={overlayRef} className="fixed inset-0 z-40 flex flex-col overflow-hidden" style={{ background: bg }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${borderClr}` }}>
+        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-3xl font-thin" style={{ color: subClr }}>×</button>
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-black uppercase tracking-widest animate-pulse" style={{ color: liveClr }}>● LIVE</span>
+          <span className="text-base font-semibold" style={{ color: subClr }}>
+            {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm" style={{ color: subClr }}>{score?.broadcast?.slice(0, 2).join(' · ') || ''}</span>
+          <button
+            onClick={() => setDark(d => !d)}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-xl transition-colors"
+            style={{ background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', color: dark ? '#fbbf24' : '#6b7280' }}
+            title="Toggle dark mode"
+          >{dark ? '☀️' : '🌙'}</button>
+        </div>
+      </div>
+
+      {/* Main: portrait = column, landscape = row */}
+      <div className="flex-1 flex portrait:flex-col landscape:flex-row overflow-hidden min-h-0">
+        {teamBlock(home, homeCode, score?.homeKit, score?.homeAltKit, homeGoals, homeYellows, homeReds, 'home')}
+
+        {/* Score + stats center column */}
+        <div className={`flex flex-col items-center justify-center flex-shrink-0 ${p ? 'gap-3 py-3 px-4' : 'gap-6 py-8 px-8'}`}
+          style={{ borderLeft: `1px solid ${borderClr}`, borderRight: `1px solid ${borderClr}` }}>
+          {/* Score */}
+          <div className="flex flex-col items-center gap-2">
+            <div className={`flex items-center ${p ? 'gap-4' : 'gap-8'}`}>
+              <span key={goalEvents[`${matchKey}-home`] || 'fsh'} className="font-black tabular-nums"
+                style={{ color: liveClr, fontSize: p ? 'clamp(3.5rem, 15vw, 6rem)' : 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(homeGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
+                {displayHomeScore}
+              </span>
+              <span className="font-thin opacity-20" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 8vw, 4rem)' : 'clamp(4rem, 10vw, 9rem)' }}>—</span>
+              <span key={goalEvents[`${matchKey}-away`] || 'fsa'} className="font-black tabular-nums"
+                style={{ color: liveClr, fontSize: p ? 'clamp(3.5rem, 15vw, 6rem)' : 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(awayGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
+                {displayAwayScore}
+              </span>
+            </div>
+            {varActiveBadges.has(matchKey) && Date.now() < varActiveBadges.get(matchKey) && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded font-black animate-pulse"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#ef4444', fontSize: p ? '0.85rem' : '1.1rem', letterSpacing: '0.08em' }}>
+                📺 VAR
+              </span>
+            )}
+          </div>
+
+          {/* Stats */}
+          {st && (
+            <div style={{ width: p ? 'clamp(220px, 88vw, 340px)' : 'clamp(300px, 36vw, 520px)' }} className={p ? 'space-y-2' : 'space-y-6'}>
+              <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
+                <span><span style={bumpStyle('home-shots')}>{st.home.shots}</span> 👟 <span style={bumpStyle('home-sog')}>{st.home.sog}</span>🎯</span>
+                <span className="opacity-40 self-center" style={{ fontSize: p ? '0.8rem' : '1.4rem' }}>shots</span>
+                <span><span style={bumpStyle('away-shots')}>{st.away.shots}</span> 👟 <span style={bumpStyle('away-sog')}>{st.away.sog}</span>🎯</span>
+              </div>
+              <div>
+                <div className="rounded-full overflow-hidden" style={{ height: p ? '10px' : '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
+                  <div className="h-full rounded-l-full" style={{ width: `${st.home.poss}%`, transition: 'width 1.2s ease-out', background: score?.homeKit ?? (dark ? 'rgba(74,222,128,0.6)' : 'rgba(34,197,94,0.6)') }} />
+                </div>
+                <div className="flex justify-between mt-1" style={{ color: subClr, fontSize: p ? '1rem' : '2rem' }}>
+                  <span>{st.home.poss}%</span><span>poss</span><span>{st.away.poss}%</span>
+                </div>
+              </div>
+              {(st.home.corners != null || st.home.fouls != null) && (
+                <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
+                  <span>
+                    <span style={cfBump('home-corners')}>{st.home.corners ?? 0}</span>{' '}
+                    <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '24px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>
+                    {' · '}
+                    <span style={cfBump('home-fouls')}>{st.home.fouls ?? 0}</span>{' '}
+                    <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '24px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
+                  </span>
+                  <span className="text-right">
+                    <span style={cfBump('away-corners')}>{st.away.corners ?? 0}</span>{' '}
+                    <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '24px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>
+                    {' · '}
+                    <span style={cfBump('away-fouls')}>{st.away.fouls ?? 0}</span>{' '}
+                    <span style={{ position: 'relative', display: 'inline-block' }}>⚠️{foulBumps.has(`${matchKey}-away`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '24px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⚠️</span>}</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {teamBlock(away, awayCode, score?.awayKit, score?.awayAltKit, awayGoals, awayYellows, awayReds, 'away')}
+      </div>
+
+      {/* Overlays rendered inside fullscreen element so they're visible in native fullscreen */}
+      {subOverlay && <SubOverlay {...subOverlay} onDismiss={onDismissSub} />}
+      {varOverlay && <VAROverlay {...varOverlay} onDismiss={onDismissVar} />}
+      {goalOverlay && <GoalOverlay {...goalOverlay} onDismiss={onDismissGoal} />}
+      {statBumps.size > 0 && (
+        <div key={shotBumpVersion} className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 10 }}>
+          {shotInfo?.isOnTarget && (
+            <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedTargetScreenMoveRTL' : 'kickedTargetScreenMoveLTR'} 3s ease-out forwards` }}>🎯</span>
+          )}
+          <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '7rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'shotKickScreenRTL' : 'shotKickScreen'} 3s ease-out forwards` }}>👟</span>
+          <span className="absolute pointer-events-none" style={{ top: '50%', left: 0, fontSize: '9rem', lineHeight: 1, animation: `${shotInfo?.side === 'away' ? 'kickedBallScreenMoveRTL' : 'kickedBallScreenMove'} 3s ease-out forwards` }}>
+            <span style={{ display: 'inline-block', animation: `${shotInfo?.side === 'away' ? 'ballSpinRTL' : 'ballSpinLTR'} 3s ease-out forwards` }}>⚽</span>
+          </span>
+          {shotInfo && (
+            <div className="absolute left-0 right-0 text-center font-black text-white pointer-events-none"
+              style={{ top: 'calc(50% + 6rem)', lineHeight: 1.4, textShadow: '0 0 24px rgba(34,197,94,0.9), 0 2px 8px rgba(0,0,0,0.8)', animation: 'shotLabelPop 3s ease-out forwards' }}>
+              <div className="flex items-center justify-center gap-2 mb-1">
+                {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
+                <span style={{ fontSize: '2rem' }}>{shotInfo.name}</span>
+                {shotInfo.iso2 && <img src={`https://flagcdn.com/w40/${shotInfo.iso2}.png`} alt="" className="h-6 w-auto rounded" />}
+              </div>
+              <div style={{ fontSize: '1.6rem' }}>Shots: {shotInfo.shots} · on target: {shotInfo.sog}{shotInfo.isOnTarget ? ' 🎯' : ''}</div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function UpcomingMatches({ dark = false }) {
   const scores = useScores();
   const standings = useStandings();
@@ -341,6 +550,7 @@ export default function UpcomingMatches({ dark = false }) {
   const [varOverlay, setVarOverlay] = useState(null);
   const [varActiveBadges, setVarActiveBadges] = useState(new Map()); // matchKey → expiresAt ms
   const [subOverlay, setSubOverlay] = useState(null);
+  const [fullscreenMatch, setFullscreenMatch] = useState(null); // null or { matchKey, homeCode, awayCode }
   const prevScoresRef = useRef(null);
   const didAutoScrollRef = useRef(false);
   const firedGoalAnimsRef = useRef(new Set());
@@ -666,6 +876,31 @@ export default function UpcomingMatches({ dark = false }) {
 
   return (
     <>
+    {fullscreenMatch && (
+      <FullscreenMatchView
+        matchKey={fullscreenMatch.matchKey}
+        homeCode={fullscreenMatch.homeCode}
+        awayCode={fullscreenMatch.awayCode}
+        score={scores[fullscreenMatch.matchKey]}
+        dark={dark}
+        onClose={() => setFullscreenMatch(null)}
+        goalEvents={goalEvents}
+        varActiveBadges={varActiveBadges}
+        statBumps={statBumps}
+        cornerFoulBumps={cornerFoulBumps}
+        cornerBumps={cornerBumps}
+        foulBumps={foulBumps}
+        goalOverlay={goalOverlay}
+        onDismissGoal={() => setGoalOverlay(null)}
+        varOverlay={varOverlay}
+        onDismissVar={() => setVarOverlay(null)}
+        subOverlay={subOverlay}
+        onDismissSub={() => setSubOverlay(null)}
+        shotBumpVersion={shotBumpVersion}
+        shotInfo={shotInfo}
+        shotMatchKey={shotMatchKey}
+      />
+    )}
     {subOverlay && <SubOverlay {...subOverlay} onDismiss={() => setSubOverlay(null)} />}
     {varOverlay && <VAROverlay {...varOverlay} onDismiss={() => setVarOverlay(null)} />}
     {goalOverlay && <GoalOverlay {...goalOverlay} onDismiss={() => setGoalOverlay(null)} />}
@@ -1046,17 +1281,33 @@ export default function UpcomingMatches({ dark = false }) {
                     ...(isLiveActive        ? { 'data-live-game':     'true' } : {}),
                     ...(isNextUp            ? { 'data-next-upcoming': 'true' } : {}),
                   };
+                  const expandBtn = isLiveActive ? (
+                    <button
+                      className="absolute top-1 right-1 z-10 p-1 opacity-40 hover:opacity-90 transition-opacity"
+                      style={{ color: dark ? '#4ade80' : '#16a34a' }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); setFullscreenMatch({ matchKey, homeCode: m.home, awayCode: m.away }); }}
+                      title="Full screen"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9,3 3,3 3,9"/><line x1="3" y1="3" x2="10" y2="10"/>
+                        <polyline points="15,3 21,3 21,9"/><line x1="21" y1="3" x2="14" y2="10"/>
+                        <polyline points="9,21 3,21 3,15"/><line x1="3" y1="21" x2="10" y2="14"/>
+                        <polyline points="15,21 21,21 21,15"/><line x1="21" y1="21" x2="14" y2="14"/>
+                      </svg>
+                    </button>
+                  ) : null;
+                  const livePadCls = isLiveActive ? 'pt-4' : '';
                   return searchUrl ? (
                     <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
-                      {!cardFlashInfo && liveOverlay}{cardFlash}
-                      <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
+                      {!cardFlashInfo && liveOverlay}{cardFlash}{expandBtn}
+                      <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} ${livePadCls} group/row`}>
                         {inner}
                       </a>
                     </div>
                   ) : (
                     <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
-                      {!cardFlashInfo && liveOverlay}{cardFlash}
-                      <div className={cls}>
+                      {!cardFlashInfo && liveOverlay}{cardFlash}{expandBtn}
+                      <div className={`${cls} ${livePadCls}`}>
                         {inner}
                       </div>
                     </div>
