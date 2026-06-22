@@ -81,24 +81,24 @@ function localDateLabel(dt) {
 
 const CARD_Y = '#fde047';
 const CARD_R = '#ef4444';
-const cardShape = (color, key) => (
-  <span key={key} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: '10px', height: '14px', background: color, borderRadius: '1.5px', verticalAlign: 'middle', margin: '0 0.5px', flexShrink: 0, overflow: 'hidden', paddingTop: '1px' }}>
-    <span style={{ fontSize: '3.5px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', lineHeight: 1, letterSpacing: '0px', display: 'block', width: '100%', textAlign: 'center', transform: 'scaleX(1.3)', transformOrigin: 'center', padding: '0 1px', boxSizing: 'border-box' }}>FIFA</span>
+const cardShape = (color, key, sc = 1) => (
+  <span key={key} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: `${10 * sc}px`, height: `${14 * sc}px`, background: color, borderRadius: `${1.5 * sc}px`, verticalAlign: 'middle', margin: `0 ${0.5 * sc}px`, flexShrink: 0, overflow: 'hidden', paddingTop: `${sc}px` }}>
+    <span style={{ fontSize: `${3.5 * sc}px`, fontWeight: 800, color: 'rgba(0,0,0,0.45)', lineHeight: 1, display: 'block', width: '100%', textAlign: 'center', transform: 'scaleX(1.3)', transformOrigin: 'center', padding: `0 ${sc}px`, boxSizing: 'border-box' }}>FIFA</span>
   </span>
 );
 
-function CardIcons({ yellows, reds, compact }) {
+function CardIcons({ yellows, reds, compact, scale = 1 }) {
   if (yellows === 0 && reds === 0) return null;
   if (compact) return (
     <span className="inline-flex items-center gap-0.5">
-      {yellows > 0 && <>{cardShape(CARD_Y, 'y')}<span style={{ fontSize: '8px' }}>×{yellows}</span></>}
-      {reds > 0 && <>{cardShape(CARD_R, 'r')}<span style={{ fontSize: '8px' }}>×{reds}</span></>}
+      {yellows > 0 && <>{cardShape(CARD_Y, 'y', scale)}<span style={{ fontSize: `${8 * scale}px` }}>×{yellows}</span></>}
+      {reds > 0 && <>{cardShape(CARD_R, 'r', scale)}<span style={{ fontSize: `${8 * scale}px` }}>×{reds}</span></>}
     </span>
   );
   return (
     <span className="inline-flex items-center">
-      {Array.from({ length: yellows }, (_, i) => cardShape(CARD_Y, `y${i}`))}
-      {Array.from({ length: reds },    (_, i) => cardShape(CARD_R, `r${i}`))}
+      {Array.from({ length: yellows }, (_, i) => cardShape(CARD_Y, `y${i}`, scale))}
+      {Array.from({ length: reds },    (_, i) => cardShape(CARD_R, `r${i}`, scale))}
     </span>
   );
 }
@@ -326,17 +326,12 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   const overlayRef = useRef(null);
   const [dark, setDark] = useState(darkProp);
   const [portrait, setPortrait] = useState(() => typeof window !== 'undefined' && window.innerHeight > window.innerWidth);
-  const [screenH, setScreenH] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
   useEffect(() => {
     const mq = window.matchMedia('(orientation: portrait)');
     const handler = e => setPortrait(e.matches);
     mq.addEventListener('change', handler);
-    const onResize = () => setScreenH(window.innerHeight);
-    window.addEventListener('resize', onResize);
-    return () => { mq.removeEventListener('change', handler); window.removeEventListener('resize', onResize); };
+    return () => mq.removeEventListener('change', handler);
   }, []);
-  // compact = portrait phone OR landscape phone (short screen)
-  const p = portrait || screenH < 520;
   const home = TEAMS[homeCode];
   const away = TEAMS[awayCode];
 
@@ -378,6 +373,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   const subClr     = dark ? '#6b7280' : '#9ca3af';
   const borderClr  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
 
+  const p = portrait; // shorthand
   const teamBlock = (team, code, kit, altKit, goals, yellows, reds, side) => (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
       <div className={`flex-1 flex flex-col items-center justify-center ${p ? 'gap-2 px-4 py-2' : 'gap-6 px-6 py-4'}`}>
@@ -387,27 +383,27 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
             style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(120px, 30vh, 280px)', maxWidth: '86%' }} />
         )}
         <div className="text-center">
-          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(2.5rem, 5vw, 7rem)', whiteSpace: p ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{team?.name}</div>
+          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(2.5rem, 5vw, 7rem)' }}>{team?.name}</div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
             {side === 'home' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
-            <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', ...(kit ? { background: altKit ?? kit, boxShadow: '0 0 0 2px rgba(128,128,128,0.4)' } : {}) }}>
+            <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, ...(kit ? { background: altKit ?? kit } : {}) }}>
               {code}
             </span>
             {side === 'away' && kit && <JerseyIcon color={kit} dark={dark} size={p ? 24 : 52} />}
           </div>
           <StrengthStars strength={STRENGTHS[code] ?? 50} className={p ? 'mt-1' : 'mt-3'} style={{ fontSize: p ? '1.1rem' : '3rem' }} />
           {(yellows > 0 || reds > 0) && (
-            <div className={`flex justify-center ${p ? 'mt-1' : 'mt-4'}`} style={{ fontSize: p ? '1rem' : '2.2rem' }}>
-              <CardIcons yellows={yellows} reds={reds} compact />
+            <div className={`flex justify-center ${p ? 'mt-1' : 'mt-4'}`}>
+              <CardIcons yellows={yellows} reds={reds} compact scale={p ? 1 : 2} />
+            </div>
+          )}
+          {goals.length > 0 && (
+            <div className={`text-center leading-relaxed ${p ? 'mt-1' : 'mt-4'}`} style={{ color: subClr, fontSize: p ? '0.85rem' : '1.4rem' }}>
+              {goals.map(fmtGoal).join(' · ')}
             </div>
           )}
         </div>
       </div>
-      {goals.length > 0 && (
-        <div className="flex-shrink-0 pb-3 px-4 text-center leading-relaxed" style={{ color: subClr, fontSize: p ? '0.85rem' : '1.8rem' }}>
-          {goals.map(fmtGoal).join(' · ')}
-        </div>
-      )}
     </div>
   );
 
@@ -438,24 +434,24 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
         {teamBlock(home, homeCode, score?.homeKit, score?.homeAltKit, homeGoals, homeYellows, homeReds, 'home')}
 
         {/* Score + stats center column */}
-        <div className={`flex flex-col items-center justify-center flex-shrink-0 ${p ? 'gap-3 py-3 px-4' : 'gap-6 py-8 px-8'}`}
+        <div className="flex flex-col items-center justify-center gap-6 portrait:py-4 landscape:py-8 px-8 flex-shrink-0"
           style={{ borderLeft: `1px solid ${borderClr}`, borderRight: `1px solid ${borderClr}` }}>
           {/* Score */}
-          <div className="flex flex-col items-center gap-2">
-            <div className={`flex items-center ${p ? 'gap-4' : 'gap-8'}`}>
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-8">
               <span key={goalEvents[`${matchKey}-home`] || 'fsh'} className="font-black tabular-nums"
-                style={{ color: liveClr, fontSize: p ? 'clamp(3.5rem, 15vw, 6rem)' : 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(homeGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
+                style={{ color: liveClr, fontSize: 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(homeGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
                 {displayHomeScore}
               </span>
-              <span className="font-thin opacity-20" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 8vw, 4rem)' : 'clamp(4rem, 10vw, 9rem)' }}>—</span>
+              <span className="font-thin opacity-20" style={{ color: textClr, fontSize: 'clamp(4rem, 10vw, 9rem)' }}>—</span>
               <span key={goalEvents[`${matchKey}-away`] || 'fsa'} className="font-black tabular-nums"
-                style={{ color: liveClr, fontSize: p ? 'clamp(3.5rem, 15vw, 6rem)' : 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(awayGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
+                style={{ color: liveClr, fontSize: 'clamp(6rem, 18vw, 15rem)', lineHeight: 1, ...(awayGoalAnim ? { animation: 'scorePop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards' } : {}) }}>
                 {displayAwayScore}
               </span>
             </div>
             {varActiveBadges.has(matchKey) && Date.now() < varActiveBadges.get(matchKey) && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded font-black animate-pulse"
-                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#ef4444', fontSize: p ? '0.85rem' : '1.1rem', letterSpacing: '0.08em' }}>
+              <span className="inline-flex items-center gap-1 px-4 py-2 rounded font-black animate-pulse"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#ef4444', fontSize: '1.1rem', letterSpacing: '0.08em' }}>
                 📺 VAR
               </span>
             )}
@@ -463,22 +459,22 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
 
           {/* Stats */}
           {st && (
-            <div style={{ width: p ? 'clamp(220px, 88vw, 340px)' : 'clamp(300px, 36vw, 520px)' }} className={p ? 'space-y-2' : 'space-y-6'}>
-              <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
+            <div style={{ width: 'clamp(300px, 36vw, 520px)' }} className="space-y-6">
+              <div className="flex justify-between" style={{ color: subClr, fontSize: '2.2rem' }}>
                 <span><span style={bumpStyle('home-shots')}>{st.home.shots}</span> 👟 <span style={bumpStyle('home-sog')}>{st.home.sog}</span>🎯</span>
-                <span className="opacity-40 self-center" style={{ fontSize: p ? '0.8rem' : '1.4rem' }}>shots</span>
+                <span className="opacity-40 self-center" style={{ fontSize: '1.4rem' }}>shots</span>
                 <span><span style={bumpStyle('away-shots')}>{st.away.shots}</span> 👟 <span style={bumpStyle('away-sog')}>{st.away.sog}</span>🎯</span>
               </div>
               <div>
-                <div className="rounded-full overflow-hidden" style={{ height: p ? '10px' : '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
+                <div className="rounded-full overflow-hidden" style={{ height: '24px', background: score?.awayKit ?? (dark ? 'rgba(6,78,59,0.5)' : '#e5e7eb') }}>
                   <div className="h-full rounded-l-full" style={{ width: `${st.home.poss}%`, transition: 'width 1.2s ease-out', background: score?.homeKit ?? (dark ? 'rgba(74,222,128,0.6)' : 'rgba(34,197,94,0.6)') }} />
                 </div>
-                <div className="flex justify-between mt-1" style={{ color: subClr, fontSize: p ? '1rem' : '2rem' }}>
+                <div className="flex justify-between mt-3" style={{ color: subClr, fontSize: '2rem' }}>
                   <span>{st.home.poss}%</span><span>poss</span><span>{st.away.poss}%</span>
                 </div>
               </div>
               {(st.home.corners != null || st.home.fouls != null) && (
-                <div className="flex justify-between" style={{ color: subClr, fontSize: p ? '1.1rem' : '2.2rem' }}>
+                <div className="flex justify-between" style={{ color: subClr, fontSize: '2.2rem' }}>
                   <span>
                     <span style={cfBump('home-corners')}>{st.home.corners ?? 0}</span>{' '}
                     <span style={{ position: 'relative', display: 'inline-block' }}>⛳{cornerBumps.has(`${matchKey}-home`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '24px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>⛳</span>}</span>
