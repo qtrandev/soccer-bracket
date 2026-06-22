@@ -384,21 +384,21 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
 
   const p = portrait || screenH < 520; // compact = portrait OR short landscape (phones)
   const teamBlock = (team, code, kit, altKit, goals, yellows, reds, side) => (
-    <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+    <div className="flex-1 flex flex-col overflow-hidden min-w-0" style={{ containerType: 'inline-size' }}>
       <div className={`flex-1 flex flex-col items-center justify-center ${p ? 'gap-2 px-4 py-2' : 'gap-6 px-6 py-4'}`}>
         {team?.iso2 && (
           <img src={`https://flagcdn.com/w160/${team.iso2}.png`} alt={team?.name}
             className="w-auto rounded-2xl shadow-xl object-cover"
             style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(80px, min(22vh, 14vw), 200px)', maxWidth: '86%' }} />
         )}
-        <div className="text-center">
-          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(2rem, 7vw, 4rem)' : 'clamp(1.5rem, min(5vw, 7vh), 7rem)' }}>{team?.name}</div>
+        <div className="text-center" style={{ maxWidth: '100%' }}>
+          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: p ? 'normal' : 'nowrap', overflow: 'hidden' }}>{team?.name}</div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
-            {side === 'home' && <JerseyIcon color={kit ?? (dark ? '#374151' : '#d1d5db')} dark={dark} size={p ? 24 : 52} />}
-            <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, ...(kit ? { background: altKit ?? kit } : {}) }}>
+            {side === 'home' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
+            <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, background: altKit ?? kit ?? '#ffffff' }}>
               {code}
             </span>
-            {side === 'away' && <JerseyIcon color={kit ?? (dark ? '#374151' : '#d1d5db')} dark={dark} size={p ? 24 : 52} />}
+            {side === 'away' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
           </div>
           <StrengthStars strength={STRENGTHS[code] ?? 50} className={p ? 'mt-1' : 'mt-3'} style={{ fontSize: p ? '1.1rem' : '3rem' }} />
           {(yellows > 0 || reds > 0) && (
@@ -1140,15 +1140,15 @@ export default function UpcomingMatches({ dark = false }) {
                         {isGroup ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {score?.homeKit && <JerseyIcon color={score.homeKit} dark={dark} />}
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.homeKit ? { background: score.homeAltKit ?? score.homeKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.home}</span>
+                              <JerseyIcon color={score?.homeKit ?? '#ffffff'} dark={dark} />
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.homeAltKit ?? score?.homeKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.home}</span>
                               <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px]" />
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={score?.awayKit ? { background: score.awayAltKit ?? score.awayKit, boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' } : undefined}>{m.away}</span>
-                              {score?.awayKit && <JerseyIcon color={score.awayKit} dark={dark} />}
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.away}</span>
+                              <JerseyIcon color={score?.awayKit ?? '#ffffff'} dark={dark} />
                             </div>
                           </>
                         ) : (
@@ -1347,7 +1347,7 @@ export default function UpcomingMatches({ dark = false }) {
                     <button
                       className="absolute top-1 right-1 z-10 p-1 opacity-40 hover:opacity-90 transition-opacity"
                       style={{ color: dark ? '#4ade80' : '#16a34a' }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); setFullscreenMatch({ matchKey, homeCode: m.home, awayCode: m.away }); }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode: m.home, awayCode: m.away }); }}
                       title="Full screen"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
