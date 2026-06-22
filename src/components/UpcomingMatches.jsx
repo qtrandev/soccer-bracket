@@ -324,7 +324,8 @@ export default function UpcomingMatches({ dark = false }) {
   const standings = useStandings();
 
   const [goalEvents, setGoalEvents] = useState({});
-  const [statBumps, setStatBumps] = useState(new Set());     // shot/sog only → triggers shoe/ball overlay
+  const [statBumps, setStatBumps] = useState(new Set());     // shot/sog only → triggers full-screen kick overlay
+  const [shotIconBumps, setShotIconBumps] = useState(new Set()); // shot only → in-card shoe bounce (fires first)
   const [cornerFoulBumps, setCornerFoulBumps] = useState(new Set()); // corners/fouls → in-card bump only
   const [foulBumps, setFoulBumps] = useState(new Set());   // fouls → warning pop animation
   const [cornerBumps, setCornerBumps] = useState(new Set()); // corners → corner flag pop animation
@@ -526,12 +527,18 @@ export default function UpcomingMatches({ dark = false }) {
         if (info) break;
       }
       if (bumpMatchKey) {
-        if (info) setShotInfo(info);
-        setShotMatchKey(bumpMatchKey);
-        setShotCardVisible(isCardInView(bumpMatchKey));
-        setShotBumpVersion(v => v + 1);
-        setStatBumps(b => new Set([...b, ...newBumps]));
-        setTimeout(() => { setStatBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }); setShotInfo(null); setShotMatchKey(''); setShotCardVisible(false); }, 3000);
+        // Step 1: in-card shoe bounce immediately
+        setShotIconBumps(b => new Set([...b, ...newBumps]));
+        setTimeout(() => setShotIconBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }), 2200);
+        // Step 2: full-screen kick animation after shoe bounce finishes
+        setTimeout(() => {
+          if (info) setShotInfo(info);
+          setShotMatchKey(bumpMatchKey);
+          setShotCardVisible(isCardInView(bumpMatchKey));
+          setShotBumpVersion(v => v + 1);
+          setStatBumps(b => new Set([...b, ...newBumps]));
+          setTimeout(() => { setStatBumps(b => { const n = new Set(b); for (const k of newBumps) n.delete(k); return n; }); setShotInfo(null); setShotMatchKey(''); setShotCardVisible(false); }, 3000);
+        }, 2200);
       }
     }
     if (newPossBumps.size > 0) {
@@ -935,7 +942,7 @@ export default function UpcomingMatches({ dark = false }) {
                             <div className="flex items-center gap-2">
                               <span className={`flex-1 text-[10px] ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
                                 <span style={bumpStyle('home-shots')}>{effectiveStats.home.shots}</span>{' shots '}
-                                <span style={{ position: 'relative', display: 'inline-block' }}>👟{statBumps.has(`${matchKey}-home-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '20px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>
+                                <span style={{ position: 'relative', display: 'inline-block' }}>👟{shotIconBumps.has(`${matchKey}-home-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '20px', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>
                                 {'· '}<span style={bumpStyle('home-sog')}>{effectiveStats.home.sog}</span>🎯
                               </span>
                               <div className="flex-shrink-0 w-20" style={{ position: 'relative' }}>
@@ -981,7 +988,7 @@ export default function UpcomingMatches({ dark = false }) {
                               </div>
                               <span className={`flex-1 text-[10px] text-right ${dark ? 'text-emerald-600' : 'text-neutral-500'}`}>
                                 <span style={bumpStyle('away-shots')}>{effectiveStats.away.shots}</span>{' shots '}
-                                <span style={{ position: 'relative', display: 'inline-block' }}>👟{statBumps.has(`${matchKey}-away-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '20px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>
+                                <span style={{ position: 'relative', display: 'inline-block' }}>👟{shotIconBumps.has(`${matchKey}-away-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: '20px', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>
                                 {'· '}<span style={bumpStyle('away-sog')}>{effectiveStats.away.sog}</span>🎯
                               </span>
                             </div>
@@ -1041,14 +1048,14 @@ export default function UpcomingMatches({ dark = false }) {
                   };
                   return searchUrl ? (
                     <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
-                      {liveOverlay}{cardFlash}
+                      {!cardFlashInfo && liveOverlay}{cardFlash}
                       <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`${cls} group/row`}>
                         {inner}
                       </a>
                     </div>
                   ) : (
                     <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
-                      {liveOverlay}{cardFlash}
+                      {!cardFlashInfo && liveOverlay}{cardFlash}
                       <div className={cls}>
                         {inner}
                       </div>
