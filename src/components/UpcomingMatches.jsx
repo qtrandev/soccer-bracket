@@ -408,7 +408,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
         {team?.iso2 && (
           <img src={`https://flagcdn.com/w160/${team.iso2}.png`} alt={team?.name}
             className="w-auto rounded-2xl shadow-xl object-cover"
-            style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(80px, min(22vh, 14vw), 200px)', maxWidth: '86%' }} />
+            style={{ height: p ? 'clamp(40px, 12vh, 100px)' : 'clamp(80px, min(22vh, 14vw), 200px)', maxWidth: '86%', flexShrink: 1, minHeight: 0 }} />
         )}
         <div className="text-center" style={{ maxWidth: '100%' }}>
           <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
