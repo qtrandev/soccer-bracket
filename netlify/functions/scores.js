@@ -1,6 +1,6 @@
 // Proxies ESPN's unofficial FIFA World Cup scoreboard API.
 // Returns a map keyed by "HOME-AWAY" team codes (e.g. "MEX-RSA").
-// Cached 30 s on the CDN so live matches stay fresh without hammering ESPN.
+// CDN cache: 5 s when games are live, 30 s otherwise.
 
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 
@@ -134,17 +134,19 @@ export default async () => {
   try {
     const dates = datesFrom();
     const scores = {};
-    // sequential fetch — avoids holding multiple large ESPN responses in memory at once
-    for (const d of dates) {
-      const data = await fetch(`${ESPN}?dates=${d}`)
-        .then(r => r.ok ? r.json() : null)
-        .catch(() => null);
+    const results = await Promise.all(
+      dates.map(d => fetch(`${ESPN}?dates=${d}`).then(r => r.ok ? r.json() : null).catch(() => null))
+    );
+    for (const data of results) {
       if (data?.events) parseEvents(data.events, scores);
     }
 
-    return json(scores, 200, {
-      'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30',
-    });
+    const hasLive = Object.values(scores).some(s => s.state === 'in');
+    const cache = hasLive
+      ? 'public, s-maxage=5, stale-while-revalidate=5'
+      : 'public, s-maxage=30, stale-while-revalidate=60';
+
+    return json(scores, 200, { 'Cache-Control': cache });
   } catch (err) {
     console.error('scores error:', err?.message ?? err);
     return json({ error: 'server_error' }, 500);
