@@ -467,7 +467,11 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
             return (
               <span className="text-xs" style={{ color: subClr }}>
                 {groupLabel && <strong>{groupLabel}</strong>}{groupLabel && parsedOdds ? ' ' : ''}
-                {parsedOdds && <>⚖️ {parsedOdds.team} {parsedOdds.pct}%</>}
+                {parsedOdds && (() => {
+                  const isHome = parsedOdds.team === homeCode;
+                  const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
+                  return <>⚖️ <span className="font-bold rounded" style={{ fontSize: '0.7rem', padding: '1px 5px', background: pillBg, color: dark ? '#10b981' : '#16a34a' }}>{parsedOdds.team}</span> {parsedOdds.pct}%</>;
+                })()}
               </span>
             );
           })()}
@@ -1222,7 +1226,11 @@ export default function UpcomingMatches({ dark = false }) {
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           <span className={`text-[10px] font-bold flex-shrink-0 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
                           {parsedOdds && (
-                            <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {parsedOdds.team} {parsedOdds.pct}%</span>
+                            <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
+                              const isHome = parsedOdds.team === homeCode;
+                              const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
+                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '1px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a' }}>{parsedOdds.team}</span>;
+                            })()} {parsedOdds.pct}%</span>
                           )}
                         </div>
                         <span className={`text-[10px] text-center flex-shrink-0 ${t.venueName}`}>
