@@ -444,7 +444,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-3xl font-thin" style={{ color: subClr }}>×</button>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-sm font-black uppercase tracking-widest animate-pulse" style={{ color: liveClr }}>● LIVE</span>
+          <span className="text-sm font-black uppercase tracking-widest" style={{ color: liveClr }}>● LIVE</span>
           <span className={`font-black${anyGoalAnim ? '' : ' animate-pulse'}`} style={{ color: liveClr, fontSize: p ? '1.1rem' : '1.5rem' }}>
             {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
           </span>
@@ -1414,7 +1414,7 @@ export default function UpcomingMatches({ dark = false }) {
                       title="Full screen"
                     >
                       <span className="flex items-center gap-1">
-                        {isLiveActive && <span className="text-[10px] font-black uppercase tracking-wide animate-pulse" style={{ color: dark ? '#4ade80' : '#16a34a' }}>LIVE</span>}
+                        {isLiveActive && <span className="text-[10px] font-black uppercase tracking-wide" style={{ color: dark ? '#4ade80' : '#16a34a' }}>LIVE</span>}
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="9,3 3,3 3,9"/><line x1="3" y1="3" x2="10" y2="10"/>
                           <polyline points="15,3 21,3 21,9"/><line x1="21" y1="3" x2="14" y2="10"/>
