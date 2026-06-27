@@ -444,22 +444,22 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-3xl font-thin" style={{ color: subClr }}>×</button>
         </div>
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-black uppercase tracking-widest animate-pulse" style={{ color: liveClr }}>● LIVE</span>
-            {score?.broadcast?.length > 0 && <span className="text-xs" style={{ color: subClr }}>{score.broadcast.slice(0, 2).join(' · ')}</span>}
-          </div>
+          <span className="text-sm font-black uppercase tracking-widest animate-pulse" style={{ color: liveClr }}>● LIVE</span>
           <span className="font-black" style={{ color: liveClr, fontSize: p ? '1.1rem' : '1.5rem' }}>
             {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
           </span>
           {venueCity && <span className="text-xs mt-0.5" style={{ color: subClr }}>📍 {venueCity}</span>}
         </div>
         <div className="flex-1 flex flex-col items-end gap-1">
-          <button
-            onClick={() => setDark(d => !d)}
-            className="w-9 h-9 flex items-center justify-center rounded-full text-xl transition-colors"
-            style={{ background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', color: dark ? '#fbbf24' : '#6b7280' }}
-            title="Toggle dark mode"
-          >{dark ? '☀️' : '🌙'}</button>
+          <div className="flex items-center gap-3">
+            <span className="text-sm" style={{ color: subClr }}>{score?.broadcast?.slice(0, 2).join(' · ') || ''}</span>
+            <button
+              onClick={() => setDark(d => !d)}
+              className="w-9 h-9 flex items-center justify-center rounded-full text-xl transition-colors"
+              style={{ background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', color: dark ? '#fbbf24' : '#6b7280' }}
+              title="Toggle dark mode"
+            >{dark ? '☀️' : '🌙'}</button>
+          </div>
           {(() => {
             const parsedOdds = parseOdds(score?.oddsDetail);
             const groupLabel = badge ? (matchType === 'group' ? `GROUP ${badge}` : badge) : null;
