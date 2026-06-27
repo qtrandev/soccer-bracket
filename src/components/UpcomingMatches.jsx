@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { TEAMS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
+import { TEAMS, GROUPS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
 import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
@@ -68,6 +68,25 @@ const PAID_CHANNELS = new Set(['FS1', 'FS2', 'ESPN', 'ESPN2', 'ESPN+']);
 
 const WINDOW_DAYS = 10;
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// Resolve a slot like 'A1' or 'B2' to a team code using live standings.
+// Returns null if the slot is '3RD', the group hasn't finished, or standings are missing.
+function resolveSlotFromStandings(slot, standings) {
+  if (!slot) return null;
+  const m = slot.match(/^([A-L])([12])$/);
+  if (!m) return null;
+  const [, letter, pos] = m;
+  const group = GROUPS[letter];
+  if (!group) return null;
+  if (group.teams.some(t => (standings[t]?.gp ?? 0) < 3)) return null;
+  const sorted = [...group.teams].sort((a, b) => {
+    const sa = standings[a] ?? { pts: 0, gd: 0 };
+    const sb = standings[b] ?? { pts: 0, gd: 0 };
+    if (sb.pts !== sa.pts) return sb.pts - sa.pts;
+    return sb.gd - sa.gd;
+  });
+  return sorted[Number(pos) - 1] ?? null;
+}
 
 function localDateKey(dt) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(dt);
@@ -1022,14 +1041,16 @@ export default function UpcomingMatches({ dark = false }) {
                 {matches.map(({ dt: _dt, ...m }) => {
                   const venue = VENUES[m.venue];
                   const isGroup = m.type === 'group';
-                  const home = isGroup ? TEAMS[m.home] : null;
-                  const away = isGroup ? TEAMS[m.away] : null;
-                  const searchUrl = isGroup
+                  const homeCode = isGroup ? m.home : resolveSlotFromStandings(m.slot1, standings);
+                  const awayCode = isGroup ? m.away : resolveSlotFromStandings(m.slot2, standings);
+                  const home = homeCode ? TEAMS[homeCode] : null;
+                  const away = awayCode ? TEAMS[awayCode] : null;
+                  const searchUrl = (home && away)
                     ? `https://www.google.com/search?q=${encodeURIComponent(`${home.name} vs ${away.name} 2026 FIFA World Cup`)}`
                     : null;
 
-                  const matchKey = `${m.home}-${m.away}`;
-                  const score = isGroup ? scores[matchKey] : null;
+                  const matchKey = isGroup ? `${m.home}-${m.away}` : (homeCode && awayCode ? `${homeCode}-${awayCode}` : m.id);
+                  const score = scores[matchKey] ?? null;
                   const parsedOdds = score ? parseOdds(score.oddsDetail) : null;
                   const isLive = score?.state === 'in';
                   // ESPN sometimes keeps state='in' past the final whistle; treat as done after 130 min
@@ -1055,8 +1076,8 @@ export default function UpcomingMatches({ dark = false }) {
                   const fmtStandings = s => s?.gp > 0
                     ? `${s.w}W ${s.d}D ${s.l}L · ${s.pts}pts · GD${s.gd > 0 ? '+' : ''}${s.gd}`
                     : null;
-                  const homeStandStr = isGroup ? fmtStandings(standings[m.home]) : null;
-                  const awayStandStr = isGroup ? fmtStandings(standings[m.away]) : null;
+                  const homeStandStr = isGroup ? fmtStandings(standings[homeCode]) : null;
+                  const awayStandStr = isGroup ? fmtStandings(standings[awayCode]) : null;
 
                   const homeGoalAnim = !!goalEvents[`${matchKey}-home`];
                   const awayGoalAnim = !!goalEvents[`${matchKey}-away`];
@@ -1071,14 +1092,14 @@ export default function UpcomingMatches({ dark = false }) {
                       {/* Row 1: home team | score/time | away team */}
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          {isGroup ? (
+                          {home ? (
                             <>
-                              {STRENGTH_RANKS[m.home] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.home]}</span>}
+                              {STRENGTH_RANKS[homeCode] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[homeCode]}</span>}
                               <img src={`https://flagcdn.com/${home.iso2}.svg`} alt={home.name} className={`w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ${dark ? 'ring-white/20' : 'ring-black/10'}`} />
                               <span className={`text-sm truncate ${t.teamName} ${homeWon ? 'font-bold' : awayWon ? 'opacity-50' : 'font-medium'}`}>{home.name}</span>
                             </>
                           ) : (
-                            <span className={`text-sm italic ${t.tbd}`}>TBD</span>
+                            <span className={`text-sm italic ${t.tbd}`}>{m.slot1 ?? 'TBD'}</span>
                           )}
                         </div>
 
@@ -1123,14 +1144,14 @@ export default function UpcomingMatches({ dark = false }) {
                         </div>
 
                         <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                          {isGroup ? (
+                          {away ? (
                             <>
                               <span className={`text-sm truncate text-right ${t.teamName} ${awayWon ? 'font-bold' : homeWon ? 'opacity-50' : 'font-medium'}`}>{away.name}</span>
                               <img src={`https://flagcdn.com/${away.iso2}.svg`} alt={away.name} className={`w-5 h-3.5 object-cover rounded-sm flex-shrink-0 ring-1 ${dark ? 'ring-white/20' : 'ring-black/10'}`} />
-                              {STRENGTH_RANKS[m.away] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[m.away]}</span>}
+                              {STRENGTH_RANKS[awayCode] && <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${t.rankPill}`}>#{STRENGTH_RANKS[awayCode]}</span>}
                             </>
                           ) : (
-                            <span className={`text-sm italic ${t.tbd}`}>TBD</span>
+                            <span className={`text-sm italic ${t.tbd}`}>{m.slot2 ?? 'TBD'}</span>
                           )}
                         </div>
                       </div>
@@ -1149,6 +1170,16 @@ export default function UpcomingMatches({ dark = false }) {
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
                               <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.away}</span>
                               <JerseyIcon color={score?.awayKit ?? '#ffffff'} dark={dark} />
+                            </div>
+                          </>
+                        ) : (homeCode || awayCode) ? (
+                          <>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {homeCode && <><span className={`text-[10px] font-bold ${t.badge}`}>{m.slot1}</span><StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" /></>}
+                            </div>
+                            <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
+                            <div className="flex items-center gap-1 flex-shrink-0 justify-end">
+                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold ${t.badge}`}>{m.slot2}</span></>}
                             </div>
                           </>
                         ) : (
@@ -1347,7 +1378,7 @@ export default function UpcomingMatches({ dark = false }) {
                     <button
                       className="absolute top-1 right-1 z-10 p-1 opacity-40 hover:opacity-90 transition-opacity"
                       style={{ color: dark ? '#4ade80' : '#16a34a' }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode: m.home, awayCode: m.away }); }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode, awayCode }); }}
                       title="Full screen"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
