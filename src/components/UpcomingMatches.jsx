@@ -411,7 +411,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
             style={{ height: p ? 'clamp(70px, 16vh, 130px)' : 'clamp(80px, min(22vh, 14vw), 200px)', maxWidth: '86%' }} />
         )}
         <div className="text-center" style={{ maxWidth: '100%' }}>
-          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: p ? 'normal' : 'nowrap', overflow: 'hidden' }}>{team?.name}</div>
+          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
             {side === 'home' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
             <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, background: altKit ?? kit ?? '#ffffff' }}>
@@ -481,13 +481,13 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
             {(homeGoals.length > 0 || awayGoals.length > 0) && (
               <div className="flex gap-4 justify-center" style={{ fontSize: p ? '0.85rem' : '1.3rem', color: subClr }}>
                 <div className="text-right space-y-0.5">
-                  {homeGoals.map((g, i) => <div key={i}>⚽ {fmtGoal(g)}</div>)}
+                  {(p ? homeGoals.slice(-3) : homeGoals).map((g, i) => <div key={i}>⚽ {fmtGoal(g)}</div>)}
                 </div>
                 {homeGoals.length > 0 && awayGoals.length > 0 && (
                   <div style={{ borderLeft: `1px solid ${borderClr}` }} />
                 )}
                 <div className="text-left space-y-0.5">
-                  {awayGoals.map((g, i) => <div key={i}>{fmtGoal(g)} ⚽</div>)}
+                  {(p ? awayGoals.slice(-3) : awayGoals).map((g, i) => <div key={i}>{fmtGoal(g)} ⚽</div>)}
                 </div>
               </div>
             )}
@@ -738,6 +738,13 @@ export default function UpcomingMatches({ dark = false }) {
         const pHomeSubs = p.subs.filter(s => s.side === 'home');
         const sAwaySubs = score.subs.filter(s => s.side === 'away');
         const pAwaySubs = p.subs.filter(s => s.side === 'away');
+        // Sim cycle reset: count dropped means a new cycle started — clear stale keys so next increase re-fires
+        if (sHomeSubs.length < pHomeSubs.length) {
+          for (const k of [...firedSubAnimsRef.current]) { if (k.startsWith(`${key}-home-sub-`)) firedSubAnimsRef.current.delete(k); }
+        }
+        if (sAwaySubs.length < pAwaySubs.length) {
+          for (const k of [...firedSubAnimsRef.current]) { if (k.startsWith(`${key}-away-sub-`)) firedSubAnimsRef.current.delete(k); }
+        }
         if (sHomeSubs.length > pHomeSubs.length) {
           const sk = `${key}-home-sub-${sHomeSubs.length}`;
           if (!firedSubAnimsRef.current.has(sk)) {
@@ -760,23 +767,21 @@ export default function UpcomingMatches({ dark = false }) {
         }
       }
       if (score.varReviews && p.varReviews) {
-        const sHomeVAR = score.varReviews.filter(v => v.side === 'home').length;
-        const pHomeVAR = p.varReviews.filter(v => v.side === 'home').length;
-        const sAwayVAR = score.varReviews.filter(v => v.side === 'away').length;
-        const pAwayVAR = p.varReviews.filter(v => v.side === 'away').length;
-        if (sHomeVAR > pHomeVAR) {
-          const vk = `${key}-home-var-${sHomeVAR}`;
-          if (!firedVARAnimsRef.current.has(vk)) {
-            firedVARAnimsRef.current.add(vk);
-            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[hc]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'home').at(-1)?.min ?? '', cardInView: isCardInView(key) };
-            newVARBadges.set(key, Date.now() + 3 * 60 * 1000);
-          }
+        const totalVAR = score.varReviews.length;
+        const prevTotalVAR = p.varReviews.length;
+        // Sim cycle reset: count dropped means a new cycle started — clear stale keys
+        if (totalVAR < prevTotalVAR) {
+          for (const k of [...firedVARAnimsRef.current]) { if (k.startsWith(`${key}-var-`)) firedVARAnimsRef.current.delete(k); }
         }
-        if (sAwayVAR > pAwayVAR) {
-          const vk = `${key}-away-var-${sAwayVAR}`;
+        // Fire on any total increase. Use last review's side for flag; 'unknown' means ESPN had no team attribution.
+        if (totalVAR > prevTotalVAR) {
+          const vk = `${key}-var-${totalVAR}`;
           if (!firedVARAnimsRef.current.has(vk)) {
             firedVARAnimsRef.current.add(vk);
-            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[ac]?.iso2 ?? '', min: score.varReviews.filter(v => v.side === 'away').at(-1)?.min ?? '', cardInView: isCardInView(key) };
+            const lastReview = score.varReviews.at(-1);
+            const varSide = lastReview?.side;
+            const flagCode = varSide === 'home' ? hc : varSide === 'away' ? ac : '';
+            if (!newVAROverlay) newVAROverlay = { matchKey: key, iso2: TEAMS[flagCode]?.iso2 ?? '', min: lastReview?.min ?? '', cardInView: isCardInView(key) };
             newVARBadges.set(key, Date.now() + 3 * 60 * 1000);
           }
         }
@@ -1055,7 +1060,7 @@ export default function UpcomingMatches({ dark = false }) {
                   const isLive = score?.state === 'in';
                   // ESPN sometimes keeps state='in' past the final whistle; treat as done after 130 min
                   const matchStart = new Date(`${m.date}T${m.time}:00-04:00`);
-                  const isFinal = score?.completed || (isLive && (now - matchStart) > 130 * 60 * 1000);
+                  const isFinal = score?.completed || (!score?.simulated && isLive && (now - matchStart) > 130 * 60 * 1000);
                   const homeWon = isFinal && (score?.homeScore ?? 0) > (score?.awayScore ?? 0);
                   const awayWon = isFinal && (score?.awayScore ?? 0) > (score?.homeScore ?? 0);
                   const homeGoals = score?.goals?.filter(g => g.side === 'home') ?? [];

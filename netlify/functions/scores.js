@@ -2,7 +2,6 @@
 // Returns a map keyed by "HOME-AWAY" team codes (e.g. "MEX-RSA").
 // Cached 30 s on the CDN so live matches stay fresh without hammering ESPN.
 
-
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 
 function dateStr(d) {
@@ -53,23 +52,28 @@ function parseEvents(events, into) {
         type: d.type.text.toLowerCase().includes('red') ? 'red' : 'yellow',
       }));
 
-    // Substitutions
+    // Substitutions — require team attribution; skip if ESPN omits it (broken data)
     const subs = (comp.details ?? [])
-      .filter(d => !d.scoringPlay && d.type?.text?.toLowerCase().includes('substitution'))
+      .filter(d => !d.scoringPlay && d.type?.text?.toLowerCase().includes('substitution') && d.team?.id != null)
       .map(d => ({
-        side: d.team?.id === home.team.id ? 'home' : 'away',
+        side: d.team.id === home.team.id ? 'home' : 'away',
         on:  d.athletesInvolved?.[0]?.shortName ?? '',
         off: d.athletesInvolved?.[1]?.shortName ?? '',
         min: d.clock?.displayValue ?? '',
       }));
 
-    // VAR / video review events
+    // VAR / video review events — include 'review' broadly to catch "Yellow Card Review",
+    // "Goal Review", etc. Don't filter by scoringPlay: VAR can accompany a goal decision.
+    // Use 'unknown' side when ESPN doesn't attribute the event to a team (common for VAR).
     const varReviews = (comp.details ?? [])
-      .filter(d => !d.scoringPlay && (
+      .filter(d => (
         d.type?.text?.toLowerCase().includes('var') ||
-        d.type?.text?.toLowerCase().includes('video review')
+        d.type?.text?.toLowerCase().includes('review')
       ))
-      .map(d => ({ side: d.team?.id === home.team.id ? 'home' : 'away', min: d.clock?.displayValue ?? '' }));
+      .map(d => ({
+        side: d.team?.id != null ? (d.team.id === home.team.id ? 'home' : 'away') : 'unknown',
+        min: d.clock?.displayValue ?? '',
+      }));
 
     // Per-team possession + shot stats (null when not yet available, e.g. pre-game)
     const sv = (arr, name) => {
@@ -114,7 +118,7 @@ function parseEvents(events, into) {
       goals: goals.map(g => ({ ...g, side: g.side === 'home' ? 'away' : 'home' })),
       cards: cards.map(c => ({ ...c, side: c.side === 'home' ? 'away' : 'home' })),
       subs:  subs.map(s  => ({ ...s,  side: s.side  === 'home' ? 'away' : 'home' })),
-      varReviews: varReviews.map(v => ({ ...v, side: v.side === 'home' ? 'away' : 'home' })),
+      varReviews: varReviews.map(v => ({ ...v, side: v.side === 'home' ? 'away' : v.side === 'away' ? 'home' : 'unknown' })),
       stats: stats ? { home: stats.away, away: stats.home } : null,
     };
   }
