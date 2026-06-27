@@ -343,7 +343,7 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView, onD
   );
 }
 
-function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venueProp, dark: darkProp, onClose,
+function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venueProp, badge, matchType, dark: darkProp, onClose,
   goalEvents, varActiveBadges, statBumps, cornerFoulBumps, cornerBumps, foulBumps,
   possStatBumps, shotIconBumps, cardBumps, cardFlashBumps,
   goalOverlay, onDismissGoal, varOverlay, onDismissVar, subOverlay, onDismissSub,
@@ -449,6 +449,17 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
             {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
           </span>
           {venueCity && <span className="text-xs mt-0.5" style={{ color: subClr }}>📍 {venueCity}</span>}
+          {(() => {
+            const parsedOdds = parseOdds(score?.oddsDetail);
+            const groupLabel = badge ? (matchType === 'group' ? `GROUP ${badge}` : badge) : null;
+            if (!groupLabel && !parsedOdds) return null;
+            return (
+              <span className="text-xs mt-0.5" style={{ color: subClr }}>
+                {groupLabel}{groupLabel && parsedOdds ? ' ' : ''}
+                {parsedOdds && <>⚖️ {parsedOdds.team} {parsedOdds.pct}%</>}
+              </span>
+            );
+          })()}
         </div>
         <div className="flex-1 flex flex-col items-end gap-1">
           <div className="flex items-center gap-3">
@@ -460,7 +471,6 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
               title="Toggle dark mode"
             >{dark ? '☀️' : '🌙'}</button>
           </div>
-          {score?.oddsDetail && <span className="text-xs" style={{ color: subClr }}>{score.oddsDetail}</span>}
         </div>
       </div>
 
@@ -977,6 +987,8 @@ export default function UpcomingMatches({ dark = false }) {
         awayCode={fullscreenMatch.awayCode}
         score={scores[fullscreenMatch.matchKey]}
         venue={fullscreenMatch.venue}
+        badge={fullscreenMatch.badge}
+        matchType={fullscreenMatch.matchType}
         dark={dark}
         onClose={() => setFullscreenMatch(null)}
         goalEvents={goalEvents}
@@ -1398,7 +1410,7 @@ export default function UpcomingMatches({ dark = false }) {
                       style={{ color: isLiveActive ? (dark ? '#4ade80' : '#16a34a') : (dark ? '#6b7280' : '#9ca3af'), opacity: isLiveActive ? undefined : 0.5 }}
                       onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
                       onMouseLeave={e => e.currentTarget.style.opacity = isLiveActive ? '' : '0.5'}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode, awayCode, venue: m.venue }); }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode, awayCode, venue: m.venue, badge: m.badge, matchType: m.type }); }}
                       title="Full screen"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
