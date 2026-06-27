@@ -1379,10 +1379,12 @@ export default function UpcomingMatches({ dark = false }) {
                     ...(isLiveActive        ? { 'data-live-game':     'true' } : {}),
                     ...(isNextUp            ? { 'data-next-upcoming': 'true' } : {}),
                   };
-                  const expandBtn = isLiveActive ? (
+                  const expandBtn = isToday ? (
                     <button
-                      className="absolute top-1 right-1 z-10 p-1 opacity-40 hover:opacity-90 transition-opacity"
-                      style={{ color: dark ? '#4ade80' : '#16a34a' }}
+                      className="absolute top-1 right-1 z-10 p-1 transition-opacity"
+                      style={{ color: isLiveActive ? (dark ? '#4ade80' : '#16a34a') : (dark ? '#6b7280' : '#9ca3af'), opacity: isLiveActive ? undefined : 0.5 }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = isLiveActive ? '' : '0.5'}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode, awayCode }); }}
                       title="Full screen"
                     >
