@@ -343,7 +343,7 @@ function GoalOverlay({ iso2, teamCode, scorer, minute, matchKey, cardInView, onD
   );
 }
 
-function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkProp, onClose,
+function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venueProp, dark: darkProp, onClose,
   goalEvents, varActiveBadges, statBumps, cornerFoulBumps, cornerBumps, foulBumps,
   possStatBumps, shotIconBumps, cardBumps, cardFlashBumps,
   goalOverlay, onDismissGoal, varOverlay, onDismissVar, subOverlay, onDismissSub,
@@ -362,6 +362,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
   }, []);
   const home = TEAMS[homeCode];
   const away = TEAMS[awayCode];
+  const venueCity = venueProp ? VENUES[venueProp]?.city : null;
 
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; });
@@ -412,6 +413,11 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
         )}
         <div className="text-center" style={{ maxWidth: '100%' }}>
           <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
+          {STRENGTH_RANKS[code] && (
+            <div className={p ? 'mt-1' : 'mt-2'}>
+              <span className="font-bold rounded px-2 py-0.5" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(22,163,74,0.1)', color: dark ? '#4ade80' : '#16a34a' }}>#{STRENGTH_RANKS[code]}</span>
+            </div>
+          )}
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
             {side === 'home' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
             <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, background: altKit ?? kit ?? '#ffffff' }}>
@@ -440,6 +446,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
           <span className="font-black" style={{ color: liveClr, fontSize: p ? '1.1rem' : '1.5rem' }}>
             {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
           </span>
+          {venueCity && <span className="text-xs mt-0.5" style={{ color: subClr }}>📍 {venueCity}</span>}
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm" style={{ color: subClr }}>{score?.broadcast?.slice(0, 2).join(' · ') || ''}</span>
@@ -502,7 +509,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, dark: darkPr
                   <span style={{ position: 'relative', display: 'inline-block' }}>👟{shotIconBumps?.has(`${matchKey}-home-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: p ? '1.5rem' : '3rem', animation: 'warnPopHome 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>{' '}
                   <span style={bumpStyle('home-sog')}>{st.home.sog}</span>🎯
                 </span>
-                <span className="opacity-40 self-center" style={{ fontSize: p ? '0.8rem' : '1.4rem' }}>shots</span>
+                <span className="self-center" style={{ color: subClr, fontSize: p ? '1rem' : '2rem' }}>shots</span>
                 <span>
                   <span style={bumpStyle('away-shots')}>{st.away.shots}</span>{' '}
                   <span style={{ position: 'relative', display: 'inline-block' }}>👟{shotIconBumps?.has(`${matchKey}-away-shots`) && <span className="absolute pointer-events-none" style={{ top: 0, left: 0, fontSize: p ? '1.5rem' : '3rem', animation: 'warnPopAway 2.2s ease-out forwards', transformOrigin: 'center bottom' }}>👟</span>}</span>{' '}
@@ -964,6 +971,7 @@ export default function UpcomingMatches({ dark = false }) {
         homeCode={fullscreenMatch.homeCode}
         awayCode={fullscreenMatch.awayCode}
         score={scores[fullscreenMatch.matchKey]}
+        venue={fullscreenMatch.venue}
         dark={dark}
         onClose={() => setFullscreenMatch(null)}
         goalEvents={goalEvents}
@@ -1385,7 +1393,7 @@ export default function UpcomingMatches({ dark = false }) {
                       style={{ color: isLiveActive ? (dark ? '#4ade80' : '#16a34a') : (dark ? '#6b7280' : '#9ca3af'), opacity: isLiveActive ? undefined : 0.5 }}
                       onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
                       onMouseLeave={e => e.currentTarget.style.opacity = isLiveActive ? '' : '0.5'}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode, awayCode }); }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); firedSubAnimsRef.current = new Set(); firedVARAnimsRef.current = new Set(); setFullscreenMatch({ matchKey, homeCode, awayCode, venue: m.venue }); }}
                       title="Full screen"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
