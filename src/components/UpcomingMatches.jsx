@@ -412,12 +412,12 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
             style={{ height: p ? 'clamp(40px, 12vh, 100px)' : 'clamp(80px, min(22vh, 14vw), 200px)', maxWidth: '86%', flexShrink: 1, minHeight: 0 }} />
         )}
         <div className="text-center" style={{ maxWidth: '100%' }}>
-          <div className="font-black leading-tight" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
-          {STRENGTH_RANKS[code] && (
-            <div className={p ? 'mt-1' : 'mt-2'}>
-              <span className="font-bold rounded px-2 py-0.5" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(22,163,74,0.1)', color: dark ? '#4ade80' : '#16a34a' }}>#{STRENGTH_RANKS[code]}</span>
-            </div>
-          )}
+          <div className="flex items-center justify-center gap-2" style={{ maxWidth: '100%' }}>
+            <div className="font-black leading-tight min-w-0" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
+            {STRENGTH_RANKS[code] && (
+              <span className="font-bold rounded px-2 py-0.5 flex-shrink-0" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(22,163,74,0.1)', color: dark ? '#4ade80' : '#16a34a' }}>#{STRENGTH_RANKS[code]}</span>
+            )}
+          </div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
             {side === 'home' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
             <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, background: altKit ?? kit ?? '#ffffff' }}>
@@ -1404,7 +1404,7 @@ export default function UpcomingMatches({ dark = false }) {
                       </svg>
                     </button>
                   ) : null;
-                  const livePadCls = isLiveActive ? 'pt-4' : '';
+                  const livePadCls = isToday ? 'pt-4' : '';
                   return searchUrl ? (
                     <div key={m.id} id={`match-${matchKey}`} className="relative" {...cardAttrs}>
                       {!cardFlashInfo && liveOverlay}{cardFlash}{expandBtn}
