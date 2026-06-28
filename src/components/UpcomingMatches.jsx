@@ -1231,7 +1231,7 @@ export default function UpcomingMatches({ dark = false }) {
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
                               const isHome = parsedOdds.team === homeCode;
                               const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
-                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '1px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: '1.5px solid #9ca3af' }}>{parsedOdds.team}</span>;
+                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '2px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: '1.5px solid #9ca3af', display: 'inline-block', lineHeight: 1 }}>{parsedOdds.team}</span>;
                             })()} {parsedOdds.pct}%</span>
                           )}
                         </div>
