@@ -1224,10 +1224,9 @@ export default function UpcomingMatches({ dark = false }) {
                         )}
                       </div>
 
-                      {/* Row 3: group + odds | city, country | broadcast + ↗ */}
+                      {/* Row 3: odds | city + group badge | broadcast + ↗ */}
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          <span className={`text-[10px] font-bold flex-shrink-0 rounded ${t.badge}`} style={{ padding: '1px 3px', border: '1.5px solid #9ca3af', background: 'transparent' }}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
                           {parsedOdds && (
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
                               const isHome = parsedOdds.team === homeCode;
@@ -1236,9 +1235,12 @@ export default function UpcomingMatches({ dark = false }) {
                             })()} {parsedOdds.pct}%</span>
                           )}
                         </div>
-                        <span className={`text-[10px] text-center flex-shrink-0 ${t.venueName}`}>
-                          {venue.city}{venue.country ? `, ${venue.country}` : ''}
-                        </span>
+                        <div className="flex flex-col items-center flex-shrink-0">
+                          <span className={`text-[10px] text-center ${t.venueName}`}>
+                            {venue.city}{venue.country ? `, ${venue.country}` : ''}
+                          </span>
+                          {isGroup && <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: '1.5px solid #9ca3af', background: 'transparent', marginTop: '2px' }}>{`GROUP ${m.badge}`}</span>}
+                        </div>
                         <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
                           {score?.broadcast?.length > 0 && (
                             <span className={`text-[10px] truncate ${t.badge}`}>
