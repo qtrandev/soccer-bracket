@@ -135,6 +135,11 @@ export const R32_MATCHES = [
   { id: 'm87', slot1: 'K1', slot2: '3RD', home: 'COL', away: 'GHA', venue: 'Arrowhead', date: '2026-07-03', time: '21:30' },
 ];
 
+// Derived set of all 32 teams in the Round of 32 (populated once home/away are locked in)
+export const R32_TEAM_CODES = new Set(
+  R32_MATCHES.flatMap(m => [m.home, m.away]).filter(Boolean)
+);
+
 // R16 feeds — sequential display pairing (r16[i] = winners of r32[2i], r32[2i+1])
 export const R16_MATCHES = [
   { id: 'm89', src: ['m74', 'm77'], venue: 'Lincoln',  date: '2026-07-04', time: '17:00' },

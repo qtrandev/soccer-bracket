@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TEAMS, GROUP_MATCHES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
+import { TEAMS, GROUP_MATCHES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH, R32_TEAM_CODES } from '../data/tournamentData.js';
 
 const ALL_MATCH_TIMES = [
   ...Object.values(GROUP_MATCHES).flat(),
@@ -97,6 +97,10 @@ const ALL_TEAMS = Object.keys(TEAMS)
   .sort((a, b) => (STRENGTHS[b] ?? 50) - (STRENGTHS[a] ?? 50))
   .map(code => ({ code, ...TEAMS[code] }));
 
+// Gray out teams once all 32 R32 slots are locked and they're not in the bracket
+const r32IsFull = R32_TEAM_CODES.size === 32;
+const isEliminated = code => r32IsFull && !R32_TEAM_CODES.has(code);
+
 export default function Home() {
   const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
@@ -186,25 +190,28 @@ export default function Home() {
         <p className="text-xs text-neutral-400 uppercase tracking-widest mb-1">48 Teams · All Confederations</p>
         <p className="text-xs text-neutral-400 mb-4">Tap a flag to auto-generate a bracket with that team winning</p>
         <div className="flex flex-wrap gap-2">
-          {visibleTeams.map(t => (
-            <button
-              key={t.code}
-              onClick={() => handleTeamClick(t.code)}
-              title={`Generate bracket: ${t.name} wins`}
-              className="flex flex-col gap-0.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold bg-neutral-200 text-neutral-500 px-1 py-0.5 rounded flex-shrink-0">#{STRENGTH_RANKS[t.code]}</span>
-                <img
-                  src={`https://flagcdn.com/${t.iso2}.svg`}
-                  alt={t.name}
-                  className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
-                />
-                <span className="text-sm text-neutral-600 whitespace-nowrap">{t.name}</span>
-              </div>
-              <StrengthStars strength={STRENGTHS[t.code]} className="text-xs" />
-            </button>
-          ))}
+          {visibleTeams.map(t => {
+            const out = isEliminated(t.code);
+            return (
+              <button
+                key={t.code}
+                onClick={() => handleTeamClick(t.code)}
+                title={out ? `${t.name} — eliminated` : `Generate bracket: ${t.name} wins`}
+                className={`flex flex-col gap-0.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer text-left ${out ? 'opacity-40' : ''}`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold bg-neutral-200 text-neutral-500 px-1 py-0.5 rounded flex-shrink-0">#{STRENGTH_RANKS[t.code]}</span>
+                  <img
+                    src={`https://flagcdn.com/${t.iso2}.svg`}
+                    alt={t.name}
+                    className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0"
+                  />
+                  <span className="text-sm text-neutral-600 whitespace-nowrap">{t.name}</span>
+                </div>
+                <StrengthStars strength={STRENGTHS[t.code]} className="text-xs" />
+              </button>
+            );
+          })}
           {!showAll && (
             <button
               onClick={() => setShowAll(true)}
@@ -300,12 +307,14 @@ export default function Home() {
         </p>
 
         <div className="space-y-1.5">
-          {ALL_TEAMS.map((t, i) => (
+          {ALL_TEAMS.map((t, i) => {
+            const out = isEliminated(t.code);
+            return (
             <button
               key={t.code}
               onClick={() => handleTeamClick(t.code)}
-              title={`Generate bracket: ${t.name} wins`}
-              className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 active:bg-green-100 active:border-green-500 transition-colors cursor-pointer text-left select-none"
+              title={out ? `${t.name} — eliminated` : `Generate bracket: ${t.name} wins`}
+              className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:border-green-400 hover:bg-green-50 active:bg-green-100 active:border-green-500 transition-colors cursor-pointer text-left select-none ${out ? 'opacity-40' : ''}`}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -340,7 +349,8 @@ export default function Home() {
               </div>
               <span className="flex-shrink-0 text-neutral-300 group-hover:text-green-500 transition-colors text-sm">→</span>
             </button>
-          ))}
+          );
+          })}
         </div>
       </section>
 
