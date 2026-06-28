@@ -414,18 +414,18 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
         <div className="text-center" style={{ maxWidth: '100%' }}>
           <div className="flex items-center justify-center gap-2" style={{ maxWidth: '100%' }}>
             <div className="font-black leading-tight min-w-0" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
-            {STRENGTH_RANKS[code] && (
-              <span className="font-bold rounded px-2 py-0.5 flex-shrink-0" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(0,0,0,0.06)', color: dark ? '#4ade80' : '#6b7280' }}>#{STRENGTH_RANKS[code]}</span>
-            )}
           </div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
             {side === 'home' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
             <span className="font-bold rounded" style={{ fontSize: p ? '1.1rem' : '2.6rem', padding: p ? '2px 8px' : '8px 16px', color: dark ? '#10b981' : '#16a34a', boxShadow: `0 0 0 ${p ? 1 : 2}px rgba(128,128,128,0.4)`, background: altKit ?? kit ?? '#ffffff' }}>
               {code}
             </span>
+            {STRENGTH_RANKS[code] && (
+              <span className="font-bold rounded px-2 py-0.5 flex-shrink-0" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(0,0,0,0.06)', color: dark ? '#4ade80' : '#6b7280' }}>#{STRENGTH_RANKS[code]}</span>
+            )}
+            <StrengthStars strength={STRENGTHS[code] ?? 50} style={{ fontSize: p ? '1.1rem' : '2rem' }} />
             {side === 'away' && <JerseyIcon color={kit ?? '#ffffff'} dark={dark} size={p ? 24 : 52} />}
           </div>
-          <StrengthStars strength={STRENGTHS[code] ?? 50} className={p ? 'mt-1' : 'mt-3'} style={{ fontSize: p ? '1.1rem' : '3rem' }} />
           {(yellows > 0 || reds > 0) && (
             <div className={`flex justify-center ${p ? 'mt-1' : 'mt-4'}`}>
               <CardIcons yellows={yellows} reds={reds} compact scale={p ? 1 : 2} />
@@ -1078,8 +1078,8 @@ export default function UpcomingMatches({ dark = false }) {
                 {matches.map(({ dt: _dt, ...m }) => {
                   const venue = VENUES[m.venue];
                   const isGroup = m.type === 'group';
-                  const homeCode = isGroup ? m.home : resolveSlotFromStandings(m.slot1, standings);
-                  const awayCode = isGroup ? m.away : resolveSlotFromStandings(m.slot2, standings);
+                  const homeCode = m.home ?? resolveSlotFromStandings(m.slot1, standings);
+                  const awayCode = m.away ?? resolveSlotFromStandings(m.slot2, standings);
                   const home = homeCode ? TEAMS[homeCode] : null;
                   const away = awayCode ? TEAMS[awayCode] : null;
                   const searchUrl = (home && away)
@@ -1089,9 +1089,10 @@ export default function UpcomingMatches({ dark = false }) {
                   const matchKey = isGroup ? `${m.home}-${m.away}` : (homeCode && awayCode ? `${homeCode}-${awayCode}` : m.id);
                   const score = scores[matchKey] ?? null;
                   const parsedOdds = score ? parseOdds(score.oddsDetail) : null;
-                  const isLive = score?.state === 'in';
                   // ESPN sometimes keeps state='in' past the final whistle; treat as done after 130 min
                   const matchStart = new Date(`${m.date}T${m.time}:00-04:00`);
+                  // ESPN lags ~1-2 min after kickoff before flipping to 'in'; bridge that gap locally
+                  const isLive = score?.state === 'in' || (score != null && score.state === 'pre' && !score.completed && now >= matchStart);
                   const isFinal = score?.completed || (!score?.simulated && isLive && (now - matchStart) > 130 * 60 * 1000);
                   const homeWon = isFinal && (score?.homeScore ?? 0) > (score?.awayScore ?? 0);
                   const awayWon = isFinal && (score?.awayScore ?? 0) > (score?.homeScore ?? 0);
@@ -1212,11 +1213,11 @@ export default function UpcomingMatches({ dark = false }) {
                         ) : (homeCode || awayCode) ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {homeCode && <><span className={`text-[10px] font-bold ${t.badge}`}>{m.slot1}</span><StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" /></>}
+                              {homeCode && <StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" />}
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0 justify-end">
-                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold ${t.badge}`}>{m.slot2}</span></>}
+                              {awayCode && <StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" />}
                             </div>
                           </>
                         ) : (
@@ -1240,6 +1241,11 @@ export default function UpcomingMatches({ dark = false }) {
                             {venue.city}{venue.country ? `, ${venue.country}` : ''}
                           </span>
                           {isGroup && <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined, marginTop: '2px' }}>{`GROUP ${m.badge}`}</span>}
+                          {!isGroup && (m.slot1 || m.slot2) && (
+                            <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined, marginTop: '2px' }}>
+                              {[m.slot1, m.slot2].filter(Boolean).join(' · ')}
+                            </span>
+                          )}
                         </div>
                         <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
                           {score?.broadcast?.length > 0 && (
@@ -1419,7 +1425,7 @@ export default function UpcomingMatches({ dark = false }) {
                   };
                   const expandBtn = isToday ? (
                     <button
-                      className="absolute top-1 right-1 z-10 p-1 transition-opacity"
+                      className={`absolute ${isLiveActive ? 'top-1' : 'top-0'} right-1 z-10 p-1 transition-opacity`}
                       style={{ color: isLiveActive ? (dark ? '#4ade80' : '#16a34a') : (dark ? '#6b7280' : '#9ca3af'), opacity: isLiveActive ? undefined : 0.5 }}
                       onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
                       onMouseLeave={e => e.currentTarget.style.opacity = isLiveActive ? '' : '0.5'}

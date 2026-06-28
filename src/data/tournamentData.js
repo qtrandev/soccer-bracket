@@ -115,23 +115,24 @@ export const VENUES = {
 //   SF: Jul 14 (Dallas/AT&T) & Jul 15 (Atlanta/Mercedes-Benz) · Final: Jul 19 (MetLife)
 export const R32_MATCHES = [
   // ---- Left half ----
-  { id: 'm74', slot1: 'E1', slot2: '3RD', venue: 'Gillette',  date: '2026-06-29', time: '16:30' },
-  { id: 'm77', slot1: 'I1', slot2: '3RD', venue: 'MetLife',   date: '2026-06-30', time: '17:00' },
-  { id: 'm73', slot1: 'A2', slot2: 'B2',  venue: 'SoFi',      date: '2026-06-28', time: '15:00' },
-  { id: 'm75', slot1: 'F1', slot2: 'C2',  venue: 'BBVA',      date: '2026-06-29', time: '21:00' },
-  { id: 'm83', slot1: 'K2', slot2: 'L2',  venue: 'BMO',       date: '2026-07-02', time: '19:00' },
-  { id: 'm84', slot1: 'H1', slot2: 'J2',  venue: 'SoFi',      date: '2026-07-02', time: '15:00' },
-  { id: 'm81', slot1: 'D1', slot2: '3RD', venue: 'Levis',     date: '2026-07-01', time: '20:00' },
-  { id: 'm82', slot1: 'G1', slot2: '3RD', venue: 'Lumen',     date: '2026-07-01', time: '16:00' },
+  // home/away locked in from final group standings + Annex C 3rd-place allocation (BDEFIJKL → EJBDIFLK)
+  { id: 'm74', slot1: 'E1', slot2: '3RD', home: 'GER', away: 'PAR', venue: 'Gillette',  date: '2026-06-29', time: '16:30' },
+  { id: 'm77', slot1: 'I1', slot2: '3RD', home: 'FRA', away: 'SWE', venue: 'MetLife',   date: '2026-06-30', time: '17:00' },
+  { id: 'm73', slot1: 'A2', slot2: 'B2',  home: 'RSA', away: 'CAN', venue: 'SoFi',      date: '2026-06-28', time: '15:00' },
+  { id: 'm75', slot1: 'F1', slot2: 'C2',  home: 'NED', away: 'MAR', venue: 'BBVA',      date: '2026-06-29', time: '21:00' },
+  { id: 'm83', slot1: 'K2', slot2: 'L2',  home: 'POR', away: 'CRO', venue: 'BMO',       date: '2026-07-02', time: '19:00' },
+  { id: 'm84', slot1: 'H1', slot2: 'J2',  home: 'ESP', away: 'AUT', venue: 'SoFi',      date: '2026-07-02', time: '15:00' },
+  { id: 'm81', slot1: 'D1', slot2: '3RD', home: 'USA', away: 'BIH', venue: 'Levis',     date: '2026-07-01', time: '20:00' },
+  { id: 'm82', slot1: 'G1', slot2: '3RD', home: 'BEL', away: 'SEN', venue: 'Lumen',     date: '2026-07-01', time: '16:00' },
   // ---- Right half ----
-  { id: 'm76', slot1: 'C1', slot2: 'F2',  venue: 'NRG',       date: '2026-06-29', time: '13:00' },
-  { id: 'm78', slot1: 'E2', slot2: 'I2',  venue: 'ATT',       date: '2026-06-30', time: '13:00' },
-  { id: 'm79', slot1: 'A1', slot2: '3RD', venue: 'Azteca',    date: '2026-06-30', time: '21:00' },
-  { id: 'm80', slot1: 'L1', slot2: '3RD', venue: 'Mercedes',  date: '2026-07-01', time: '12:00' },
-  { id: 'm86', slot1: 'J1', slot2: 'H2',  venue: 'HardRock',  date: '2026-07-03', time: '18:00' },
-  { id: 'm88', slot1: 'D2', slot2: 'G2',  venue: 'ATT',       date: '2026-07-03', time: '14:00' },
-  { id: 'm85', slot1: 'B1', slot2: '3RD', venue: 'BCPlace',   date: '2026-07-02', time: '23:00' },
-  { id: 'm87', slot1: 'K1', slot2: '3RD', venue: 'Arrowhead', date: '2026-07-03', time: '21:30' },
+  { id: 'm76', slot1: 'C1', slot2: 'F2',  home: 'BRA', away: 'JPN', venue: 'NRG',       date: '2026-06-29', time: '13:00' },
+  { id: 'm78', slot1: 'E2', slot2: 'I2',  home: 'CIV', away: 'NOR', venue: 'ATT',       date: '2026-06-30', time: '13:00' },
+  { id: 'm79', slot1: 'A1', slot2: '3RD', home: 'MEX', away: 'ECU', venue: 'Azteca',    date: '2026-06-30', time: '21:00' },
+  { id: 'm80', slot1: 'L1', slot2: '3RD', home: 'ENG', away: 'COD', venue: 'Mercedes',  date: '2026-07-01', time: '12:00' },
+  { id: 'm86', slot1: 'J1', slot2: 'H2',  home: 'ARG', away: 'CPV', venue: 'HardRock',  date: '2026-07-03', time: '18:00' },
+  { id: 'm88', slot1: 'D2', slot2: 'G2',  home: 'AUS', away: 'EGY', venue: 'ATT',       date: '2026-07-03', time: '14:00' },
+  { id: 'm85', slot1: 'B1', slot2: '3RD', home: 'SUI', away: 'ALG', venue: 'BCPlace',   date: '2026-07-02', time: '23:00' },
+  { id: 'm87', slot1: 'K1', slot2: '3RD', home: 'COL', away: 'GHA', venue: 'Arrowhead', date: '2026-07-03', time: '21:30' },
 ];
 
 // R16 feeds — sequential display pairing (r16[i] = winners of r32[2i], r32[2i+1])
