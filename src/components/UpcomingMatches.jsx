@@ -467,11 +467,9 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           </div>
           {(() => {
             const parsedOdds = parseOdds(score?.oddsDetail);
-            const groupLabel = badge ? (matchType === 'group' ? `GROUP ${badge}` : badge) : null;
-            if (!groupLabel && !parsedOdds) return null;
+            if (!parsedOdds) return null;
             return (
               <span className="text-xs" style={{ color: subClr }}>
-                {groupLabel && <strong className="rounded" style={{ padding: '1px 5px', border: '1.5px solid #9ca3af', background: 'transparent', color: subClr, fontWeight: 700 }}>{groupLabel}</strong>}{groupLabel && parsedOdds ? ' ' : ''}
                 {parsedOdds && (() => {
                   const isHome = parsedOdds.team === homeCode;
                   const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
@@ -1229,7 +1227,7 @@ export default function UpcomingMatches({ dark = false }) {
                       {/* Row 3: group + odds | city, country | broadcast + ↗ */}
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          <span className={`text-[10px] font-bold flex-shrink-0 rounded ${t.badge}`} style={{ padding: '1px 5px', border: '1.5px solid #9ca3af', background: 'transparent' }}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
+                          <span className={`text-[10px] font-bold flex-shrink-0 rounded ${t.badge}`} style={{ padding: '1px 3px', border: '1.5px solid #9ca3af', background: 'transparent' }}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
                           {parsedOdds && (
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
                               const isHome = parsedOdds.team === homeCode;
