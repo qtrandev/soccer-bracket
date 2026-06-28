@@ -415,7 +415,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           <div className="flex items-center justify-center gap-2" style={{ maxWidth: '100%' }}>
             <div className="font-black leading-tight min-w-0" style={{ color: textClr, fontSize: p ? 'clamp(1.5rem, 7vw, 4rem)' : 'clamp(1rem, 10cqw, 7rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team?.name}</div>
             {STRENGTH_RANKS[code] && (
-              <span className="font-bold rounded px-2 py-0.5 flex-shrink-0" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(22,163,74,0.1)', color: dark ? '#4ade80' : '#16a34a' }}>#{STRENGTH_RANKS[code]}</span>
+              <span className="font-bold rounded px-2 py-0.5 flex-shrink-0" style={{ fontSize: p ? '0.75rem' : '1.1rem', background: dark ? 'rgba(74,222,128,0.15)' : 'rgba(0,0,0,0.06)', color: dark ? '#4ade80' : '#6b7280' }}>#{STRENGTH_RANKS[code]}</span>
             )}
           </div>
           <div className={`flex items-center justify-center ${p ? 'gap-2 mt-2' : 'gap-4 mt-5'}`}>
