@@ -448,7 +448,12 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           <span className={`font-black${anyGoalAnim ? '' : ' animate-pulse'}`} style={{ color: liveClr, fontSize: p ? '1.1rem' : '1.5rem' }}>
             {anyGoalAnim ? '⚽ GOAL!' : (score?.detail || '—')}
           </span>
-          {venueCity && <span className="text-xs mt-0.5" style={{ color: subClr }}>📍 {venueCity}</span>}
+          {(venueCity || badge) && (
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {badge && <span className="text-xs font-bold rounded" style={{ padding: '1px 5px', border: '1.5px solid #9ca3af', background: 'transparent', color: subClr }}>{badge ? (matchType === 'group' ? `GROUP ${badge}` : badge) : null}</span>}
+              {venueCity && <span className="text-xs" style={{ color: subClr }}>📍 {venueCity}</span>}
+            </div>
+          )}
         </div>
         <div className="flex-1 flex flex-col items-end gap-1">
           <div className="flex items-center gap-3">
