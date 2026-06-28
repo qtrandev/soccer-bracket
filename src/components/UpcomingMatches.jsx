@@ -450,7 +450,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           </span>
           {(venueCity || badge) && (
             <div className="flex items-center gap-1.5 mt-0.5">
-              {badge && <span className="text-xs font-bold rounded" style={{ padding: '1px 5px', border: '1.5px solid #9ca3af', background: 'transparent', color: subClr }}>{badge ? (matchType === 'group' ? `GROUP ${badge}` : badge) : null}</span>}
+              {badge && <span className="text-xs font-bold rounded" style={{ padding: '1px 5px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : subClr }}>{badge ? (matchType === 'group' ? `GROUP ${badge}` : badge) : null}</span>}
               {venueCity && <span className="text-xs" style={{ color: subClr }}>📍 {venueCity}</span>}
             </div>
           )}
@@ -473,7 +473,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
                 {parsedOdds && (() => {
                   const isHome = parsedOdds.team === homeCode;
                   const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
-                  return <>⚖️ <span className="font-bold rounded" style={{ fontSize: '0.7rem', padding: '1px 5px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: '1.5px solid #9ca3af' }}>{parsedOdds.team}</span> {parsedOdds.pct}%</>;
+                  return <>⚖️ <span className="font-bold rounded" style={{ fontSize: '0.7rem', padding: '1px 5px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: dark ? '1.5px solid rgba(255,255,255,0.2)' : '1.5px solid #9ca3af' }}>{parsedOdds.team}</span> {parsedOdds.pct}%</>;
                 })()}
               </span>
             );
@@ -1231,7 +1231,7 @@ export default function UpcomingMatches({ dark = false }) {
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
                               const isHome = parsedOdds.team === homeCode;
                               const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
-                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '2px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: '1.5px solid #9ca3af', display: 'inline-block', lineHeight: 1 }}>{parsedOdds.team}</span>;
+                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '2px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: dark ? '1.5px solid rgba(255,255,255,0.2)' : '1.5px solid #9ca3af', display: 'inline-block', lineHeight: 1 }}>{parsedOdds.team}</span>;
                             })()} {parsedOdds.pct}%</span>
                           )}
                         </div>
@@ -1239,7 +1239,7 @@ export default function UpcomingMatches({ dark = false }) {
                           <span className={`text-[10px] text-center ${t.venueName}`}>
                             {venue.city}{venue.country ? `, ${venue.country}` : ''}
                           </span>
-                          {isGroup && <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: '1.5px solid #9ca3af', background: 'transparent', marginTop: '2px' }}>{`GROUP ${m.badge}`}</span>}
+                          {isGroup && <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined, marginTop: '2px' }}>{`GROUP ${m.badge}`}</span>}
                         </div>
                         <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
                           {score?.broadcast?.length > 0 && (
