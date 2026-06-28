@@ -466,11 +466,11 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
             if (!groupLabel && !parsedOdds) return null;
             return (
               <span className="text-xs" style={{ color: subClr }}>
-                {groupLabel && <strong>{groupLabel}</strong>}{groupLabel && parsedOdds ? ' ' : ''}
+                {groupLabel && <strong className="rounded" style={{ padding: '1px 5px', border: '1.5px solid #9ca3af', background: dark ? 'rgba(255,255,255,0.06)' : '#ffffff', color: dark ? '#d1d5db' : '#374151', fontWeight: 700 }}>{groupLabel}</strong>}{groupLabel && parsedOdds ? ' ' : ''}
                 {parsedOdds && (() => {
                   const isHome = parsedOdds.team === homeCode;
                   const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
-                  return <>⚖️ <span className="font-bold rounded" style={{ fontSize: '0.7rem', padding: '1px 5px', background: pillBg, color: dark ? '#10b981' : '#16a34a' }}>{parsedOdds.team}</span> {parsedOdds.pct}%</>;
+                  return <>⚖️ <span className="font-bold rounded" style={{ fontSize: '0.7rem', padding: '1px 5px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: '1.5px solid #9ca3af' }}>{parsedOdds.team}</span> {parsedOdds.pct}%</>;
                 })()}
               </span>
             );
@@ -1224,12 +1224,12 @@ export default function UpcomingMatches({ dark = false }) {
                       {/* Row 3: group + odds | city, country | broadcast + ↗ */}
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          <span className={`text-[10px] font-bold flex-shrink-0 ${t.badge}`}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
+                          <span className="text-[10px] font-bold flex-shrink-0 rounded" style={{ padding: '1px 5px', border: '1.5px solid #9ca3af', background: dark ? 'rgba(255,255,255,0.06)' : '#ffffff', color: dark ? '#d1d5db' : '#374151' }}>{isGroup ? `GROUP ${m.badge}` : m.badge}</span>
                           {parsedOdds && (
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
                               const isHome = parsedOdds.team === homeCode;
                               const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
-                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '1px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a' }}>{parsedOdds.team}</span>;
+                              return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '1px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: '1.5px solid #9ca3af' }}>{parsedOdds.team}</span>;
                             })()} {parsedOdds.pct}%</span>
                           )}
                         </div>
