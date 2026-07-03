@@ -94,6 +94,7 @@ export const VENUES = {
   'Lincoln':      { name: 'Lincoln Financial Field',city: 'Philadelphia, PA',tz:'America/New_York',  country: 'USA' },
   'Levis':        { name: "Levi's Stadium",        city: 'San Francisco, CA',tz:'America/Los_Angeles',country:'USA'},
   'Azteca':       { name: 'Estadio Azteca',        city: 'Mexico City',   tz: 'America/Mexico_City', country: 'Mexico' },
+  'Banorte':      { name: 'Estadio Banorte',       city: 'Guadalajara',   tz: 'America/Mexico_City', country: 'Mexico' },
   'Akron':        { name: 'Estadio Akron',         city: 'Guadalajara',   tz: 'America/Mexico_City', country: 'Mexico' },
   'BBVA':         { name: 'Estadio BBVA',          city: 'Monterrey',     tz: 'America/Monterrey',   country: 'Mexico' },
   'BMO':          { name: 'BMO Field',             city: 'Toronto',       tz: 'America/Toronto',     country: 'Canada' },
@@ -142,14 +143,14 @@ export const R32_TEAM_CODES = new Set(
 
 // R16 feeds — sequential display pairing (r16[i] = winners of r32[2i], r32[2i+1])
 export const R16_MATCHES = [
-  { id: 'm89', src: ['m74', 'm77'], venue: 'Lincoln',  date: '2026-07-04', time: '17:00' },
-  { id: 'm90', src: ['m73', 'm75'], venue: 'NRG',      date: '2026-07-04', time: '13:00' },
-  { id: 'm93', src: ['m83', 'm84'], venue: 'ATT',      date: '2026-07-06', time: '15:00' },
-  { id: 'm94', src: ['m81', 'm82'], venue: 'Lumen',    date: '2026-07-06', time: '20:00' },
-  { id: 'm91', src: ['m76', 'm78'], venue: 'MetLife',  date: '2026-07-05', time: '16:00' },
-  { id: 'm92', src: ['m79', 'm80'], venue: 'Azteca',   date: '2026-07-05', time: '20:00' },
-  { id: 'm95', src: ['m86', 'm88'], venue: 'Mercedes', date: '2026-07-07', time: '12:00' },
-  { id: 'm96', src: ['m85', 'm87'], venue: 'BCPlace',  date: '2026-07-07', time: '16:00' },
+  { id: 'm89', src: ['m74', 'm77'], home: 'PAR', away: 'FRA', venue: 'Lincoln',  date: '2026-07-04', time: '17:00' },
+  { id: 'm90', src: ['m73', 'm75'], home: 'CAN', away: 'MAR', venue: 'NRG',      date: '2026-07-04', time: '13:00' },
+  { id: 'm93', src: ['m83', 'm84'], home: 'POR', away: 'ESP', venue: 'ATT',      date: '2026-07-06', time: '15:00' },
+  { id: 'm94', src: ['m81', 'm82'], home: 'USA', away: 'BEL', venue: 'Lumen',    date: '2026-07-06', time: '20:00' },
+  { id: 'm91', src: ['m76', 'm78'], home: 'BRA', away: 'NOR', venue: 'MetLife',  date: '2026-07-05', time: '16:00' },
+  { id: 'm92', src: ['m79', 'm80'], home: 'MEX', away: 'ENG', venue: 'Banorte',  date: '2026-07-05', time: '20:00' },
+  { id: 'm95', src: ['m86', 'm88'],              away: 'EGY', venue: 'Mercedes', date: '2026-07-07', time: '12:00' },
+  { id: 'm96', src: ['m85', 'm87'], home: 'SUI',              venue: 'BCPlace',  date: '2026-07-07', time: '16:00' },
 ];
 
 export const QF_MATCHES = [
