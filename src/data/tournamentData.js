@@ -64,6 +64,71 @@ export const TEAMS = {
   PAN: { name: 'Panama',       iso2: 'pa', conf: 'CONCACAF' },
 };
 
+// Primary (home) and alternate kit colors observed from ESPN during the tournament.
+// Used as static fallbacks when live score/kit data hasn't loaded yet.
+export const TEAM_KITS = {
+  // Group A
+  MEX: { home: '#006847', alt: '#ffffff' },
+  KOR: { home: '#c8102e', alt: '#003087' },
+  CZE: { home: '#d7141a', alt: '#003087' },
+  RSA: { home: '#007a4d', alt: '#003087' },
+  // Group B
+  CAN: { home: '#d80621', alt: '#ffffff' },
+  SUI: { home: '#dc0714', alt: '#ffffff' },
+  BIH: { home: '#003087', alt: '#fcd116' },
+  QAT: { home: '#8d1b3d', alt: '#ffffff' },
+  // Group C
+  BRA: { home: '#009c3b', alt: '#fdd020' },
+  MAR: { home: '#c1272d', alt: '#006233' },
+  SCO: { home: '#003087', alt: '#ffffff' },
+  HAI: { home: '#003087', alt: '#d21034' },
+  // Group D
+  USA: { home: '#002868', alt: '#bf0a30' },
+  TUR: { home: '#e30a17', alt: '#ffffff' },
+  AUS: { home: '#ffd700', alt: '#00843d' },
+  PAR: { home: '#0038a8', alt: '#d52b1e' },
+  // Group E
+  GER: { home: '#ffffff', alt: '#000000' },
+  ECU: { home: '#002868', alt: '#ffd700' },
+  CIV: { home: '#f77f00', alt: '#009a44' },
+  CUW: { home: '#003087', alt: '#f7a800' },
+  // Group F
+  NED: { home: '#ff6600', alt: '#ffffff' },
+  JPN: { home: '#003087', alt: '#bc002d' },
+  SWE: { home: '#006aa7', alt: '#fecc02' },
+  TUN: { home: '#e70013', alt: '#ffffff' },
+  // Group G
+  BEL: { home: '#000000', alt: '#e30613' },
+  IRN: { home: '#239f40', alt: '#ffffff' },
+  EGY: { home: '#c8102e', alt: '#ffffff' },
+  NZL: { home: '#000000', alt: '#ffffff' },
+  // Group H
+  ESP: { home: '#c8102e', alt: '#ffd700' },
+  URU: { home: '#5eb6e4', alt: '#ffffff' },
+  KSA: { home: '#006c35', alt: '#ffffff' },
+  CPV: { home: '#003893', alt: '#cf2027' },
+  // Group I
+  FRA: { home: '#003189', alt: '#ffffff' },
+  SEN: { home: '#00853f', alt: '#fdef42' },
+  NOR: { home: '#ef2b2d', alt: '#003087' },
+  IRQ: { home: '#c8102e', alt: '#007a3d' },
+  // Group J
+  ARG: { home: '#74acdf', alt: '#ffffff' },
+  AUT: { home: '#ed2939', alt: '#ffffff' },
+  ALG: { home: '#006233', alt: '#d21034' },
+  JOR: { home: '#007a3d', alt: '#ffffff' },
+  // Group K
+  POR: { home: '#d81920', alt: '#003380' },
+  COL: { home: '#ffd100', alt: '#003087' },
+  COD: { home: '#003087', alt: '#ce1126' },
+  UZB: { home: '#1eb53a', alt: '#003087' },
+  // Group L
+  ENG: { home: '#ffffff', alt: '#c8102e' },
+  CRO: { home: '#171796', alt: '#ffffff' },
+  GHA: { home: '#006b3f', alt: '#fcd116' },
+  PAN: { home: '#002868', alt: '#d21034' },
+};
+
 export const GROUPS = {
   A: { teams: ['MEX', 'KOR', 'CZE', 'RSA'] },
   B: { teams: ['CAN', 'SUI', 'BIH', 'QAT'] },

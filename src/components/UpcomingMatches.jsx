@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { TEAMS, GROUPS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH } from '../data/tournamentData.js';
+import { TEAMS, GROUPS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH, TEAM_KITS } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
 import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
@@ -1199,25 +1199,25 @@ export default function UpcomingMatches({ dark = false }) {
                         {isGroup ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              <JerseyIcon color={score?.homeKit ?? '#ffffff'} dark={dark} />
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.homeAltKit ?? score?.homeKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.home}</span>
+                              <JerseyIcon color={score?.homeKit ?? TEAM_KITS[m.home]?.home ?? '#ffffff'} dark={dark} />
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.homeAltKit ?? score?.homeKit ?? TEAM_KITS[m.home]?.alt ?? TEAM_KITS[m.home]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.home}</span>
                               <StrengthStars strength={STRENGTHS[m.home] ?? 50} className="text-[10px]" />
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.away}</span>
-                              <JerseyIcon color={score?.awayKit ?? '#ffffff'} dark={dark} />
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[m.away]?.alt ?? TEAM_KITS[m.away]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.away}</span>
+                              <JerseyIcon color={score?.awayKit ?? TEAM_KITS[m.away]?.home ?? '#ffffff'} dark={dark} />
                             </div>
                           </>
                         ) : (homeCode || awayCode) ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {homeCode && <><JerseyIcon color={score?.homeKit ?? '#ffffff'} dark={dark} /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.homeAltKit ?? score?.homeKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{homeCode}</span><StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" /></>}
+                              {homeCode && <><JerseyIcon color={score?.homeKit ?? TEAM_KITS[homeCode]?.home ?? '#ffffff'} dark={dark} /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.homeAltKit ?? score?.homeKit ?? TEAM_KITS[homeCode]?.alt ?? TEAM_KITS[homeCode]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{homeCode}</span><StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" /></>}
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0 justify-end">
-                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{awayCode}</span><JerseyIcon color={score?.awayKit ?? '#ffffff'} dark={dark} /></>}
+                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[awayCode]?.alt ?? TEAM_KITS[awayCode]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{awayCode}</span><JerseyIcon color={score?.awayKit ?? TEAM_KITS[awayCode]?.home ?? '#ffffff'} dark={dark} /></>}
                             </div>
                           </>
                         ) : (
@@ -1231,7 +1231,7 @@ export default function UpcomingMatches({ dark = false }) {
                           {parsedOdds && (
                             <span className={`text-[10px] truncate ${t.badge}`}>⚖️ {(() => {
                               const isHome = parsedOdds.team === homeCode;
-                              const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? '#6b7280');
+                              const pillBg = isHome ? (score?.homeAltKit ?? score?.homeKit ?? TEAM_KITS[homeCode]?.alt ?? TEAM_KITS[homeCode]?.home ?? '#6b7280') : (score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[awayCode]?.alt ?? TEAM_KITS[awayCode]?.home ?? '#6b7280');
                               return <span className="font-bold rounded" style={{ fontSize: '10px', padding: '2px 4px', background: pillBg, color: dark ? '#10b981' : '#16a34a', border: dark ? '1.5px solid rgba(255,255,255,0.2)' : '1.5px solid #9ca3af', display: 'inline-block', lineHeight: 1 }}>{parsedOdds.team}</span>;
                             })()} {parsedOdds.pct}%</span>
                           )}
