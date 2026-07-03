@@ -1265,10 +1265,17 @@ export default function UpcomingMatches({ dark = false }) {
                             {venue.city}{venue.country ? `, ${venue.country}` : ''}
                           </span>
                           {isGroup && <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined, marginTop: '2px' }}>{`GROUP ${m.badge}`}</span>}
-                          {!isGroup && (m.slot1 || m.slot2) && (
-                            <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined, marginTop: '2px' }}>
-                              {[m.slot1, m.slot2].filter(Boolean).join(' · ')}
-                            </span>
+                          {!isGroup && (
+                            <div className="flex items-center gap-1" style={{ marginTop: '2px' }}>
+                              <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined }}>
+                                {m.badge}
+                              </span>
+                              {(m.slot1 || m.slot2) && (
+                                <span className={`text-[10px] font-bold rounded ${t.badge}`} style={{ padding: '1px 3px 0 3px', border: dark ? '1.5px solid rgba(74,222,128,0.4)' : '1.5px solid #9ca3af', background: dark ? 'rgba(74,222,128,0.08)' : 'transparent', color: dark ? '#4ade80' : undefined }}>
+                                  {[m.slot1, m.slot2].filter(Boolean).join(' · ')}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
                         <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
