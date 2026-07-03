@@ -94,7 +94,7 @@ export const VENUES = {
   'Lincoln':      { name: 'Lincoln Financial Field',city: 'Philadelphia, PA',tz:'America/New_York',  country: 'USA' },
   'Levis':        { name: "Levi's Stadium",        city: 'San Francisco, CA',tz:'America/Los_Angeles',country:'USA'},
   'Azteca':       { name: 'Estadio Azteca',        city: 'Mexico City',   tz: 'America/Mexico_City', country: 'Mexico' },
-  'Banorte':      { name: 'Estadio Banorte',       city: 'Guadalajara',   tz: 'America/Mexico_City', country: 'Mexico' },
+  'Banorte':      { name: 'Estadio Banorte',        city: 'Mexico City',   tz: 'America/Mexico_City', country: 'Mexico' },
   'Akron':        { name: 'Estadio Akron',         city: 'Guadalajara',   tz: 'America/Mexico_City', country: 'Mexico' },
   'BBVA':         { name: 'Estadio BBVA',          city: 'Monterrey',     tz: 'America/Monterrey',   country: 'Mexico' },
   'BMO':          { name: 'BMO Field',             city: 'Toronto',       tz: 'America/Toronto',     country: 'Canada' },

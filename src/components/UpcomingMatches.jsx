@@ -1213,11 +1213,11 @@ export default function UpcomingMatches({ dark = false }) {
                         ) : (homeCode || awayCode) ? (
                           <>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {homeCode && <StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" />}
+                              {homeCode && <><JerseyIcon color={score?.homeKit ?? '#ffffff'} dark={dark} /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.homeAltKit ?? score?.homeKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{homeCode}</span><StrengthStars strength={STRENGTHS[homeCode] ?? 50} className="text-[10px]" /></>}
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0 justify-end">
-                              {awayCode && <StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" />}
+                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{awayCode}</span><JerseyIcon color={score?.awayKit ?? '#ffffff'} dark={dark} /></>}
                             </div>
                           </>
                         ) : (
