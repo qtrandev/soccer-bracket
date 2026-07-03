@@ -69,6 +69,26 @@ const PAID_CHANNELS = new Set(['FS1', 'FS2', 'ESPN', 'ESPN2', 'ESPN+']);
 const WINDOW_DAYS = 10;
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+// Flat list of all knockout matches for bracket winner resolution.
+const ALL_KO_MATCHES = [...R32_MATCHES, ...R16_MATCHES, ...QF_MATCHES, ...SF_MATCHES, FINAL_MATCH];
+
+// Recursively resolve the winner of a completed knockout match.
+// Walks src references up the bracket so QF/SF/Final auto-populate from live scores.
+// Returns a team code string, or null if the match isn't complete yet.
+function resolveKnockoutWinner(matchId, scores) {
+  const m = ALL_KO_MATCHES.find(x => x.id === matchId);
+  if (!m) return null;
+  const hCode = m.home ?? resolveKnockoutWinner(m.src?.[0], scores);
+  const aCode = m.away ?? resolveKnockoutWinner(m.src?.[1], scores);
+  if (!hCode || !aCode) return null;
+  const s = scores[`${hCode}-${aCode}`] ?? scores[`${aCode}-${hCode}`];
+  if (!s?.completed) return null;
+  if (s.homeWon != null) return s.homeWon ? hCode : aCode;
+  if ((s.homeScore ?? 0) > (s.awayScore ?? 0)) return hCode;
+  if ((s.awayScore ?? 0) > (s.homeScore ?? 0)) return aCode;
+  return null;
+}
+
 // Resolve a slot like 'A1' or 'B2' to a team code using live standings.
 // Returns null if the slot is '3RD', the group hasn't finished, or standings are missing.
 function resolveSlotFromStandings(slot, standings) {
@@ -483,7 +503,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
 
       {/* Main: portrait = column, landscape = row */}
       <div className="flex-1 flex portrait:flex-col landscape:flex-row overflow-hidden min-h-0">
-        {teamBlock(home, homeCode, score?.homeKit, score?.homeAltKit, homeGoals, homeYellows, homeReds, 'home')}
+        {teamBlock(home, homeCode, score?.homeKit ?? TEAM_KITS[homeCode]?.home, score?.homeAltKit ?? TEAM_KITS[homeCode]?.alt, homeGoals, homeYellows, homeReds, 'home')}
 
         {/* Score + stats center column */}
         <div className={`flex flex-col items-center justify-center flex-shrink-0 ${p ? 'gap-3 py-3 px-4' : 'gap-4 py-4 px-8'}`}
@@ -581,7 +601,7 @@ function FullscreenMatchView({ matchKey, homeCode, awayCode, score, venue: venue
           )}
         </div>
 
-        {teamBlock(away, awayCode, score?.awayKit, score?.awayAltKit, awayGoals, awayYellows, awayReds, 'away')}
+        {teamBlock(away, awayCode, score?.awayAltKit ?? TEAM_KITS[awayCode]?.alt ?? score?.awayKit ?? TEAM_KITS[awayCode]?.home, score?.awayKit ?? TEAM_KITS[awayCode]?.home, awayGoals, awayYellows, awayReds, 'away')}
       </div>
 
       {/* Overlays rendered inside fullscreen element so they're visible in native fullscreen */}
@@ -1078,8 +1098,12 @@ export default function UpcomingMatches({ dark = false }) {
                 {matches.map(({ dt: _dt, ...m }) => {
                   const venue = VENUES[m.venue];
                   const isGroup = m.type === 'group';
-                  const homeCode = m.home ?? resolveSlotFromStandings(m.slot1, standings);
-                  const awayCode = m.away ?? resolveSlotFromStandings(m.slot2, standings);
+                  const homeCode = m.home
+                    ?? (!isGroup && m.src?.[0] ? resolveKnockoutWinner(m.src[0], scores) : null)
+                    ?? resolveSlotFromStandings(m.slot1, standings);
+                  const awayCode = m.away
+                    ?? (!isGroup && m.src?.[1] ? resolveKnockoutWinner(m.src[1], scores) : null)
+                    ?? resolveSlotFromStandings(m.slot2, standings);
                   const home = homeCode ? TEAMS[homeCode] : null;
                   const away = awayCode ? TEAMS[awayCode] : null;
                   const searchUrl = (home && away)
@@ -1206,8 +1230,8 @@ export default function UpcomingMatches({ dark = false }) {
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <StrengthStars strength={STRENGTHS[m.away] ?? 50} className="text-[10px]" />
-                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[m.away]?.alt ?? TEAM_KITS[m.away]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.away}</span>
-                              <JerseyIcon color={score?.awayKit ?? TEAM_KITS[m.away]?.home ?? '#ffffff'} dark={dark} />
+                              <span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayKit ?? TEAM_KITS[m.away]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{m.away}</span>
+                              <JerseyIcon color={score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[m.away]?.alt ?? TEAM_KITS[m.away]?.home ?? '#ffffff'} dark={dark} />
                             </div>
                           </>
                         ) : (homeCode || awayCode) ? (
@@ -1217,7 +1241,7 @@ export default function UpcomingMatches({ dark = false }) {
                             </div>
                             <span className={`text-xs truncate text-center flex-1 min-w-0 ${t.venueName}`}>{venue.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0 justify-end">
-                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[awayCode]?.alt ?? TEAM_KITS[awayCode]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{awayCode}</span><JerseyIcon color={score?.awayKit ?? TEAM_KITS[awayCode]?.home ?? '#ffffff'} dark={dark} /></>}
+                              {awayCode && <><StrengthStars strength={STRENGTHS[awayCode] ?? 50} className="text-[10px]" /><span className={`text-[10px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${dark ? 'text-emerald-500' : 'text-green-600'}`} style={{ background: score?.awayKit ?? TEAM_KITS[awayCode]?.home ?? '#ffffff', boxShadow: '0 0 0 1px rgba(128,128,128,0.4)' }}>{awayCode}</span><JerseyIcon color={score?.awayAltKit ?? score?.awayKit ?? TEAM_KITS[awayCode]?.alt ?? TEAM_KITS[awayCode]?.home ?? '#ffffff'} dark={dark} /></>}
                             </div>
                           </>
                         ) : (
