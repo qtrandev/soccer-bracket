@@ -83,7 +83,7 @@ function resolveKnockoutWinner(matchId, scores) {
   if (!hCode || !aCode) return null;
   const s = scores[`${hCode}-${aCode}`] ?? scores[`${aCode}-${hCode}`];
   if (!s?.completed) return null;
-  if (s.homeWon != null) return s.homeWon ? hCode : aCode;
+  if (s.penaltyWinner) return s.penaltyWinner;
   if ((s.homeScore ?? 0) > (s.awayScore ?? 0)) return hCode;
   if ((s.awayScore ?? 0) > (s.homeScore ?? 0)) return aCode;
   return null;
@@ -1118,8 +1118,8 @@ export default function UpcomingMatches({ dark = false }) {
                   // ESPN lags ~1-2 min after kickoff before flipping to 'in'; bridge that gap locally
                   const isLive = score?.state === 'in' || (score != null && score.state === 'pre' && !score.completed && now >= matchStart);
                   const isFinal = score?.completed || (!score?.simulated && isLive && (now - matchStart) > 130 * 60 * 1000);
-                  const homeWon = isFinal && (score?.homeScore ?? 0) > (score?.awayScore ?? 0);
-                  const awayWon = isFinal && (score?.awayScore ?? 0) > (score?.homeScore ?? 0);
+                  const homeWon = isFinal && ((score?.homeScore ?? 0) > (score?.awayScore ?? 0) || (score?.penaltyWinner != null && score.penaltyWinner === homeCode));
+                  const awayWon = isFinal && ((score?.awayScore ?? 0) > (score?.homeScore ?? 0) || (score?.penaltyWinner != null && score.penaltyWinner === awayCode));
                   const homeGoals = score?.goals?.filter(g => g.side === 'home') ?? [];
                   const awayGoals = score?.goals?.filter(g => g.side === 'away') ?? [];
                   const homeCards = score?.cards?.filter(c => c.side === 'home') ?? [];

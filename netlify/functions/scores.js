@@ -92,13 +92,18 @@ function parseEvents(events, into) {
     const homeAltKit = kit(home.team.alternateColor);
     const awayAltKit = kit(away.team.alternateColor);
 
+    // Team code of the penalty-shootout winner (null for regular/ET wins or unfinished games)
+    const penaltyWinner = (status.completed && homeScore != null && homeScore === awayScore)
+      ? (home.winner ? homeCode : away.winner ? awayCode : null)
+      : null;
+
     const base = {
       state:      status.state      ?? 'pre',
       completed:  status.completed  ?? false,
       detail:     status.detail     ?? '',
       broadcast:  (comp.broadcasts?.[0]?.names ?? []).slice(0, 3),
       oddsDetail: comp.odds?.[0]?.details ?? null,
-      homeWon:    home.winner ?? null,
+      penaltyWinner,
       goals,
       cards,
       subs,
