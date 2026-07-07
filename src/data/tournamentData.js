@@ -214,14 +214,14 @@ export const R16_MATCHES = [
   { id: 'm94', src: ['m81', 'm82'], home: 'USA', away: 'BEL', venue: 'Lumen',    date: '2026-07-06', time: '20:00' },
   { id: 'm91', src: ['m76', 'm78'], home: 'BRA', away: 'NOR', venue: 'MetLife',  date: '2026-07-05', time: '16:00' },
   { id: 'm92', src: ['m79', 'm80'], home: 'MEX', away: 'ENG', venue: 'Banorte',  date: '2026-07-05', time: '20:00' },
-  { id: 'm95', src: ['m86', 'm88'],              away: 'EGY', venue: 'Mercedes', date: '2026-07-07', time: '12:00' },
-  { id: 'm96', src: ['m85', 'm87'], home: 'SUI',              venue: 'BCPlace',  date: '2026-07-07', time: '16:00' },
+  { id: 'm95', src: ['m86', 'm88'], home: 'ARG', away: 'EGY', venue: 'Mercedes', date: '2026-07-07', time: '12:00' },
+  { id: 'm96', src: ['m85', 'm87'], home: 'SUI', away: 'COL', venue: 'BCPlace',  date: '2026-07-07', time: '16:00' },
 ];
 
 export const QF_MATCHES = [
-  { id: 'm97',  src: ['m89', 'm90'], venue: 'Gillette',  date: '2026-07-09', time: '16:00' },
-  { id: 'm98',  src: ['m93', 'm94'], venue: 'SoFi',      date: '2026-07-10', time: '15:00' },
-  { id: 'm99',  src: ['m91', 'm92'], venue: 'HardRock',  date: '2026-07-11', time: '17:00' },
+  { id: 'm97',  src: ['m89', 'm90'], home: 'FRA', away: 'MAR', venue: 'Gillette',  date: '2026-07-09', time: '16:00' },
+  { id: 'm98',  src: ['m93', 'm94'], home: 'ESP', away: 'BEL', venue: 'SoFi',      date: '2026-07-10', time: '15:00' },
+  { id: 'm99',  src: ['m91', 'm92'], home: 'NOR', away: 'ENG', venue: 'HardRock',  date: '2026-07-11', time: '17:00' },
   { id: 'm100', src: ['m95', 'm96'], venue: 'Arrowhead', date: '2026-07-11', time: '21:00' },
 ];
 
