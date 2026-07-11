@@ -222,11 +222,11 @@ export const QF_MATCHES = [
   { id: 'm97',  src: ['m89', 'm90'], home: 'FRA', away: 'MAR', venue: 'Gillette',  date: '2026-07-09', time: '16:00' },
   { id: 'm98',  src: ['m93', 'm94'], home: 'ESP', away: 'BEL', venue: 'SoFi',      date: '2026-07-10', time: '15:00' },
   { id: 'm99',  src: ['m91', 'm92'], home: 'NOR', away: 'ENG', venue: 'HardRock',  date: '2026-07-11', time: '17:00' },
-  { id: 'm100', src: ['m95', 'm96'], venue: 'Arrowhead', date: '2026-07-11', time: '21:00' },
+  { id: 'm100', src: ['m95', 'm96'], home: 'ARG', away: 'SUI', venue: 'Arrowhead', date: '2026-07-11', time: '21:00' },
 ];
 
 export const SF_MATCHES = [
-  { id: 'm101', src: ['m97', 'm98'],  venue: 'ATT',      date: '2026-07-14', time: '15:00' },
+  { id: 'm101', src: ['m97', 'm98'],  home: 'FRA', away: 'ESP', venue: 'ATT',      date: '2026-07-14', time: '15:00' },
   { id: 'm102', src: ['m99', 'm100'], venue: 'Mercedes', date: '2026-07-15', time: '15:00' },
 ];
 
