@@ -949,14 +949,21 @@ export default function UpcomingMatches({ dark = false }) {
   const now = new Date();
   const windowEnd = new Date(now.getTime() + WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const todayStr = localDateKey(now);
-  const yesterdayStr = localDateKey(new Date(now.getTime() - 24 * 60 * 60 * 1000));
 
-  const allRelevant = ALL_MATCHES
-    .map(m => ({ ...m, dt: new Date(`${m.date}T${m.time}:00-04:00`) }))
+  // Collect dates of the 6 most recently completed matches to show as past results
+  const allWithDt = ALL_MATCHES.map(m => ({ ...m, dt: new Date(`${m.date}T${m.time}:00-04:00`) }));
+  const pastDates = new Set(
+    allWithDt
+      .filter(m => m.dt < now && localDateKey(m.dt) !== todayStr)
+      .sort((a, b) => b.dt - a.dt)
+      .slice(0, 6)
+      .map(m => localDateKey(m.dt))
+  );
+
+  const allRelevant = allWithDt
     .filter(m => {
       const dk = localDateKey(m.dt);
-      // always show yesterday and all of today (including already-kicked-off matches)
-      if (dk === yesterdayStr || dk === todayStr) return true;
+      if (pastDates.has(dk) || dk === todayStr) return true;
       return m.dt >= now && m.dt <= windowEnd;
     });
 
@@ -1075,13 +1082,14 @@ export default function UpcomingMatches({ dark = false }) {
     <section id="upcoming-matches" className={`max-w-3xl mx-auto px-4 py-10 border-b ${t.section}`}>
       <h2 className={`text-xl font-bold mb-1 ${t.title}`}>Upcoming Matches</h2>
       <p className={`text-sm mb-6 ${t.subtitle}`}>
-        Next {WINDOW_DAYS} days · Yesterday's results · Times in your local timezone · Tap a match to search on Google
+        Next {WINDOW_DAYS} days · Last 6 results · Times in your local timezone · Tap a match to search on Google
       </p>
 
       <div className="space-y-6">
         {Object.entries(byDate).map(([dateKey, { label, matches }]) => {
           const isToday = dateKey === todayStr;
           const isPast = dateKey < todayStr;
+          const yesterdayStr = localDateKey(new Date(now.getTime() - 24 * 60 * 60 * 1000));
           const dateLabel = dateKey === yesterdayStr
             ? `Yesterday · ${label}`
             : isToday ? `Today · ${label}` : label;

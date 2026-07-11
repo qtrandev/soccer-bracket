@@ -11,8 +11,8 @@ function dateStr(d) {
 function datesFrom() {
   const dates = [];
   const today = new Date();
-  // rolling window: 2 days back → 10 days ahead — extra day catches midnight-boundary games
-  const start = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+  // rolling window: 7 days back → 10 days ahead — matches UI's "last 6 results" display window
+  const start = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
   const end   = new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000);
   for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     dates.push(dateStr(new Date(d)));
