@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { TEAMS, GROUPS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, FINAL_MATCH, TEAM_KITS } from '../data/tournamentData.js';
+import { TEAMS, GROUPS, GROUP_MATCHES, VENUES, R32_MATCHES, R16_MATCHES, QF_MATCHES, SF_MATCHES, THIRD_PLACE_MATCH, FINAL_MATCH, TEAM_KITS } from '../data/tournamentData.js';
 import { formatMatchTime } from '../utils/bracket.js';
 import { STRENGTHS, STRENGTH_RANKS } from '../data/teamStrengths.js';
 import StrengthStars from './StrengthStars.jsx';
@@ -59,6 +59,7 @@ const ALL_MATCHES = [
   ...R16_MATCHES.map(m => ({ ...m, badge: 'R16', type: 'knockout' })),
   ...QF_MATCHES.map(m => ({ ...m, badge: 'QF', type: 'knockout' })),
   ...SF_MATCHES.map(m => ({ ...m, badge: 'SF', type: 'knockout' })),
+  { ...THIRD_PLACE_MATCH, badge: '🥉', type: 'knockout' },
   { ...FINAL_MATCH, badge: '🏆', type: 'knockout' },
 ].sort((a, b) => new Date(`${a.date}T${a.time}:00-04:00`) - new Date(`${b.date}T${b.time}:00-04:00`));
 
@@ -70,7 +71,7 @@ const WINDOW_DAYS = 10;
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 // Flat list of all knockout matches for bracket winner resolution.
-const ALL_KO_MATCHES = [...R32_MATCHES, ...R16_MATCHES, ...QF_MATCHES, ...SF_MATCHES, FINAL_MATCH];
+const ALL_KO_MATCHES = [...R32_MATCHES, ...R16_MATCHES, ...QF_MATCHES, ...SF_MATCHES, THIRD_PLACE_MATCH, FINAL_MATCH];
 
 // Recursively resolve the winner of a completed knockout match.
 // Walks src references up the bracket so QF/SF/Final auto-populate from live scores.

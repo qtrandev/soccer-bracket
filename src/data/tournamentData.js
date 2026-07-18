@@ -227,11 +227,15 @@ export const QF_MATCHES = [
 
 export const SF_MATCHES = [
   { id: 'm101', src: ['m97', 'm98'],  home: 'FRA', away: 'ESP', venue: 'ATT',      date: '2026-07-14', time: '15:00' },
-  { id: 'm102', src: ['m99', 'm100'], venue: 'Mercedes', date: '2026-07-15', time: '15:00' },
+  { id: 'm102', src: ['m99', 'm100'], home: 'ENG', away: 'ARG', venue: 'Mercedes', date: '2026-07-15', time: '15:00' },
 ];
 
+export const THIRD_PLACE_MATCH = {
+  id: 'm103', home: 'FRA', away: 'ENG', venue: 'HardRock', date: '2026-07-18', time: '17:00',
+};
+
 export const FINAL_MATCH = {
-  id: 'm104', src: ['m101', 'm102'], venue: 'MetLife', date: '2026-07-19', time: '15:00',
+  id: 'm104', src: ['m101', 'm102'], home: 'ESP', away: 'ARG', venue: 'MetLife', date: '2026-07-19', time: '15:00',
 };
 
 // All 72 group stage matches. Times stored in EDT (UTC-4).
